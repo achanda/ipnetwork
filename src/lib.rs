@@ -89,13 +89,13 @@ mod test {
     use super::*;
 
     #[test]
-    fn test_create_v4() {
+    fn create_v4() {
         let cidr = Ipv4Network::new(Ipv4Addr::new(77, 88, 21, 11), 24);
         assert_eq!(cidr.prefix(), 24);
     }
 
     #[test]
-    fn test_create_v6() {
+    fn create_v6() {
         let cidr = Ipv6Network::new(Ipv6Addr::new(0, 0, 0, 0, 0, 0, 0, 1), 24);
         assert_eq!(cidr.prefix(), 24);
     }
