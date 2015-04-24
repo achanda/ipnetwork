@@ -32,6 +32,26 @@ impl Ipv4Network {
     fn prefix(&self) -> u8 {
         self.prefix
     }
+
+    fn mask(&self) -> u32 {
+        let prefix = self.prefix;
+        !(0xffffffff >> prefix)
+    }
+
+    fn mask_to_string(&self) -> String {
+        let mask = self.mask();
+        Ipv4Network::int_to_ip(mask).to_string()
+    }
+
+    fn ip_to_int(&self, addr: Ipv4Addr) -> u32 {
+        let ip = addr.octets();
+        (ip[0] as u32) << 24 + (ip[1] as u32) << 16 + (ip[2] as u32) << 8 + (ip[3] as u32)
+    }
+
+    fn int_to_ip(ip: u32) -> Ipv4Addr {
+        Ipv4Addr::new(((ip >> 24) & 0xff) as u8, ((ip >> 16) & 0xff) as u8,
+                     ((ip >> 8) & 0xff) as u8, (ip & 0xff) as u8)
+    }
 }
 
 impl Ipv6Network {
@@ -55,7 +75,7 @@ impl IpNetwork {
             IpAddr::V6(a) => IpNetwork::V6(Ipv6Network::new(a, prefix)),
         }
     }
-    
+
     pub fn ip(&self) -> IpAddr {
         match *self {
             IpNetwork::V4(ref a) => IpAddr::V4(*a.ip()),
@@ -98,5 +118,17 @@ mod test {
     fn create_v6() {
         let cidr = Ipv6Network::new(Ipv6Addr::new(0, 0, 0, 0, 0, 0, 0, 1), 24);
         assert_eq!(cidr.prefix(), 24);
+    }
+
+    #[test]
+    fn mask_v4() {
+        let cidr = Ipv4Network::new(Ipv4Addr::new(74, 125, 227, 0), 29);
+        assert_eq!(cidr.mask(), 4294967288);
+    }
+
+    #[test]
+    fn mask_string_v4() {
+        let cidr = Ipv4Network::new(Ipv4Addr::new(74, 125, 227, 0), 29);
+        assert_eq!(cidr.mask_to_string(), "255.255.255.248");
     }
 }
