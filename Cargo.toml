@@ -4,3 +4,4 @@ version = "0.1.0"
 authors = ["Abhishek Chanda <abhishe.becsk@gmail.com>"]
 description = "A library to work with IP CIDRs in Rust, heavily WIP"
 license = "Apache-2.0"
+repository = "https://github.com/achanda/ipnetwork"
