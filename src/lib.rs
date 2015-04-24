@@ -43,7 +43,7 @@ impl Ipv4Network {
         Ipv4Network::int_to_ip(mask).to_string()
     }
 
-    fn ip_to_int(&self, addr: Ipv4Addr) -> u32 {
+    fn ip_to_int(addr: Ipv4Addr) -> u32 {
         let ip = addr.octets();
         (ip[0] as u32) << 24 + (ip[1] as u32) << 16 + (ip[2] as u32) << 8 + (ip[3] as u32)
     }
