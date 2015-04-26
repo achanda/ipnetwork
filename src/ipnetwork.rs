@@ -31,18 +31,18 @@ impl Ipv4Network {
         self.prefix
     }
 
-    fn mask(&self) -> u32 {
+    fn mask_int(&self) -> u32 {
         let prefix = self.prefix;
         !(0xffffffff >> prefix)
     }
 
-    fn mask_to_string(&self) -> String {
-        let mask = self.mask();
-        Ipv4Network::int_to_ip(mask).to_string()
+    fn mask(&self) -> Ipv4Addr {
+        let mask = self.mask_int();
+        Ipv4Network::int_to_ip(mask)
     }
 
     fn network_int(&self) -> u32 {
-        Ipv4Network::ip_to_int(*(self.ip())) & self.mask()
+        Ipv4Network::ip_to_int(*(self.ip())) & self.mask_int()
     }
 
     fn network(&self) -> Ipv4Addr {
@@ -127,15 +127,15 @@ mod test {
     }
 
     #[test]
-    fn mask_v4() {
+    fn mask_int_v4() {
         let cidr = Ipv4Network::new(Ipv4Addr::new(74, 125, 227, 0), 29);
-        assert_eq!(cidr.mask(), 4294967288);
+        assert_eq!(cidr.mask_int(), 4294967288);
     }
 
     #[test]
-    fn mask_string_v4() {
+    fn mask_v4() {
         let cidr = Ipv4Network::new(Ipv4Addr::new(74, 125, 227, 0), 29);
-        assert_eq!(cidr.mask_to_string(), "255.255.255.248");
+        assert_eq!(cidr.mask(), Ipv4Addr::new(255, 255, 255, 248));
     }
 
     #[test]
