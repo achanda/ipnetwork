@@ -41,9 +41,13 @@ impl Ipv4Network {
         Ipv4Network::int_to_ip(mask).to_string()
     }
 
+    fn network_int(&self) -> u32 {
+        Ipv4Network::ip_to_int(*(self.ip())) & self.mask()
+    }
+
     fn ip_to_int(addr: Ipv4Addr) -> u32 {
         let ip = addr.octets();
-        (ip[0] as u32) << 24 + (ip[1] as u32) << 16 + (ip[2] as u32) << 8 + (ip[3] as u32)
+        ((ip[0] as u32) << 24) + ((ip[1] as u32) << 16) + ((ip[2] as u32) << 8) + (ip[3] as u32)
     }
 
     fn int_to_ip(ip: u32) -> Ipv4Addr {
@@ -128,5 +132,11 @@ mod test {
     fn mask_string_v4() {
         let cidr = Ipv4Network::new(Ipv4Addr::new(74, 125, 227, 0), 29);
         assert_eq!(cidr.mask_to_string(), "255.255.255.248");
+    }
+
+    #[test]
+    fn network_as_int() {
+        let cidr = Ipv4Network::new(Ipv4Addr::new(74, 125, 227, 0), 25);
+        assert_eq!(cidr.network_int(), 1249764096);
     }
 }
