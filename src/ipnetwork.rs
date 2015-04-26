@@ -45,6 +45,10 @@ impl Ipv4Network {
         Ipv4Network::ip_to_int(*(self.ip())) & self.mask()
     }
 
+    fn network(&self) -> Ipv4Addr {
+        Ipv4Network::int_to_ip(self.network_int())
+    }
+
     fn ip_to_int(addr: Ipv4Addr) -> u32 {
         let ip = addr.octets();
         ((ip[0] as u32) << 24) + ((ip[1] as u32) << 16) + ((ip[2] as u32) << 8) + (ip[3] as u32)
@@ -135,8 +139,14 @@ mod test {
     }
 
     #[test]
-    fn network_as_int() {
+    fn network_int_v4() {
         let cidr = Ipv4Network::new(Ipv4Addr::new(74, 125, 227, 0), 25);
         assert_eq!(cidr.network_int(), 1249764096);
+    }
+
+    #[test]
+    fn network_v4() {
+        let cidr = Ipv4Network::new(Ipv4Addr::new(74, 125, 227, 0), 25);
+        assert_eq!(cidr.network(), Ipv4Addr::new(74, 125, 227, 0));
     }
 }
