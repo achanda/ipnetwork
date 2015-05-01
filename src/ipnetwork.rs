@@ -19,33 +19,33 @@ pub struct Ipv6Network {
 }
 
 impl Ipv4Network {
-    fn new(addr: Ipv4Addr, prefix: u8) -> Ipv4Network {
+    pub fn new(addr: Ipv4Addr, prefix: u8) -> Ipv4Network {
         Ipv4Network { addr: addr, prefix: prefix }
     }
 
-    fn ip(&self) -> &Ipv4Addr {
+    pub fn ip(&self) -> &Ipv4Addr {
         &(self.addr)
     }
 
-    fn prefix(&self) -> u8 {
+    pub fn prefix(&self) -> u8 {
         self.prefix
     }
 
-    fn mask_int(&self) -> u32 {
+    pub fn mask_int(&self) -> u32 {
         let prefix = self.prefix;
         !(0xffffffff >> prefix)
     }
 
-    fn mask(&self) -> Ipv4Addr {
+    pub fn mask(&self) -> Ipv4Addr {
         let mask = self.mask_int();
         Ipv4Network::int_to_ip(mask)
     }
 
-    fn network_int(&self) -> u32 {
+    pub fn network_int(&self) -> u32 {
         Ipv4Network::ip_to_int(*(self.ip())) & self.mask_int()
     }
 
-    fn network(&self) -> Ipv4Addr {
+    pub fn network(&self) -> Ipv4Addr {
         Ipv4Network::int_to_ip(self.network_int())
     }
 
@@ -61,15 +61,15 @@ impl Ipv4Network {
 }
 
 impl Ipv6Network {
-    fn new(addr: Ipv6Addr, prefix: u8) -> Ipv6Network {
+    pub fn new(addr: Ipv6Addr, prefix: u8) -> Ipv6Network {
         Ipv6Network { addr: addr, prefix: prefix }
     }
 
-    fn ip(&self) -> &Ipv6Addr {
+    pub fn ip(&self) -> &Ipv6Addr {
         &(self.addr)
     }
 
-    fn prefix(&self) -> u8 {
+    pub fn prefix(&self) -> u8 {
         self.prefix
     }
 }
