@@ -42,7 +42,7 @@ impl Ipv4Network {
 
     pub fn mask(&self) -> Ipv4Addr {
         let mask = self.mask_int();
-        Ipv4Network::int_to_ip(mask)
+        Ipv4Addr::from(mask)
     }
 
     pub fn network_int(&self) -> u32 {
@@ -50,17 +50,12 @@ impl Ipv4Network {
     }
 
     pub fn network(&self) -> Ipv4Addr {
-        Ipv4Network::int_to_ip(self.network_int())
+        Ipv4Addr::from(self.network_int())
     }
 
     fn ip_to_int(addr: Ipv4Addr) -> u32 {
         let ip = addr.octets();
         ((ip[0] as u32) << 24) + ((ip[1] as u32) << 16) + ((ip[2] as u32) << 8) + (ip[3] as u32)
-    }
-
-    fn int_to_ip(ip: u32) -> Ipv4Addr {
-        Ipv4Addr::new(((ip >> 24) & 0xff) as u8, ((ip >> 16) & 0xff) as u8,
-                     ((ip >> 8) & 0xff) as u8, (ip & 0xff) as u8)
     }
 }
 
