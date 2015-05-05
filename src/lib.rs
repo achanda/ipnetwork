@@ -46,16 +46,11 @@ impl Ipv4Network {
     }
 
     pub fn network_int(&self) -> u32 {
-        Ipv4Network::ip_to_int(*(self.ip())) & self.mask_int()
+        u32::from(*(self.ip())) & self.mask_int()
     }
 
     pub fn network(&self) -> Ipv4Addr {
         Ipv4Addr::from(self.network_int())
-    }
-
-    fn ip_to_int(addr: Ipv4Addr) -> u32 {
-        let ip = addr.octets();
-        ((ip[0] as u32) << 24) + ((ip[1] as u32) << 16) + ((ip[2] as u32) << 8) + (ip[3] as u32)
     }
 }
 
