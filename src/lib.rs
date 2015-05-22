@@ -46,11 +46,11 @@ impl Ipv4Network {
     }
 
     pub fn network_int(&self) -> u32 {
-        u32::from(*(self.ip())) & self.mask_int()
+        u32::from(self.addr)
     }
 
     pub fn network(&self) -> Ipv4Addr {
-        Ipv4Addr::from(self.network_int())
+        self.addr
     }
 }
 
