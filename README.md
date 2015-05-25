@@ -1,6 +1,7 @@
 This is supposed to be a library to work with IPv4 and v6 CIDRs in rust
 
 [![Build Status](https://travis-ci.org/achanda/ipnetwork.svg?branch=master)](https://travis-ci.org/achanda/ipnetwork)
+[![Merit Badge](http://meritbadge.herokuapp.com/ipnetwork)](https://crates.io/crates/ipnetwork)
 
 Installation
 =============
