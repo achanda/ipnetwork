@@ -40,17 +40,14 @@ impl Ipv4Network {
         !(0xffffffff >> prefix)
     }
 
-    pub fn mask(&self) -> Ipv4Addr {
-        let mask = self.mask_int();
-        Ipv4Addr::from(mask)
+    pub fn mask(&self) -> (Ipv4Addr, u32) {
+        let prefix = self.prefix;
+        let mask = !(0xffffffff >> prefix);
+        return (Ipv4Addr::from(mask), mask);
     }
 
-    pub fn network_int(&self) -> u32 {
-        u32::from(self.addr)
-    }
-
-    pub fn network(&self) -> Ipv4Addr {
-        self.addr
+    pub fn network(&self) -> (Ipv4Addr, u32) {
+        return (self.addr, u32::from(self.addr));
     }
 }
 
@@ -121,26 +118,18 @@ mod test {
     }
 
     #[test]
-    fn mask_int_v4() {
-        let cidr = Ipv4Network::new(Ipv4Addr::new(74, 125, 227, 0), 29);
-        assert_eq!(cidr.mask_int(), 4294967288);
-    }
-
-    #[test]
     fn mask_v4() {
         let cidr = Ipv4Network::new(Ipv4Addr::new(74, 125, 227, 0), 29);
-        assert_eq!(cidr.mask(), Ipv4Addr::new(255, 255, 255, 248));
-    }
-
-    #[test]
-    fn network_int_v4() {
-        let cidr = Ipv4Network::new(Ipv4Addr::new(74, 125, 227, 0), 25);
-        assert_eq!(cidr.network_int(), 1249764096);
+        let (ip, int) = cidr.mask();
+        assert_eq!(ip, Ipv4Addr::new(255, 255, 255, 248));
+        assert_eq!(int, 4294967288);
     }
 
     #[test]
     fn network_v4() {
         let cidr = Ipv4Network::new(Ipv4Addr::new(74, 125, 227, 0), 25);
-        assert_eq!(cidr.network(), Ipv4Addr::new(74, 125, 227, 0));
+        let (ip, int) = cidr.network();
+        assert_eq!(ip, Ipv4Addr::new(74, 125, 227, 0));
+        assert_eq!(int, 1249764096);
     }
 }
