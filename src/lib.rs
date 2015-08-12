@@ -49,6 +49,11 @@ impl Ipv4Network {
     pub fn network(&self) -> (Ipv4Addr, u32) {
         return (self.addr, u32::from(self.addr));
     }
+
+    pub fn contains(&self, ip: Ipv4Addr) -> bool {
+        let (_, net) = self.network();
+        return ((u32::from(ip) & net) == net)
+    }
 }
 
 impl Ipv6Network {
@@ -131,5 +136,12 @@ mod test {
         let (ip, int) = cidr.network();
         assert_eq!(ip, Ipv4Addr::new(74, 125, 227, 0));
         assert_eq!(int, 1249764096);
+    }
+
+    #[test]
+    fn contains_v4() {
+        let cidr = Ipv4Network::new(Ipv4Addr::new(74, 125, 227, 0), 25);
+        let ip = Ipv4Addr::new(74,125,227,4);
+        assert!(cidr.contains(ip));
     }
 }
