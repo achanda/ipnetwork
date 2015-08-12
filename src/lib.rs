@@ -52,7 +52,7 @@ impl Ipv4Network {
 
     pub fn contains(&self, ip: Ipv4Addr) -> bool {
         let (_, net) = self.network();
-        return ((u32::from(ip) & net) == net)
+        return (u32::from(ip) & net) == net
     }
 }
 
