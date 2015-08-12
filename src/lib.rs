@@ -35,11 +35,6 @@ impl Ipv4Network {
         self.prefix
     }
 
-    pub fn mask_int(&self) -> u32 {
-        let prefix = self.prefix;
-        !(0xffffffff >> prefix)
-    }
-
     pub fn mask(&self) -> (Ipv4Addr, u32) {
         let prefix = self.prefix;
         let mask = !(0xffffffff >> prefix);
