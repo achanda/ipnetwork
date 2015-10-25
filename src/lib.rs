@@ -41,16 +41,16 @@ impl Ipv4Network {
     pub fn mask(&self) -> (Ipv4Addr, u32) {
         let prefix = self.prefix;
         let mask = !(0xffffffff >> prefix);
-        return (Ipv4Addr::from(mask), mask);
+        (Ipv4Addr::from(mask), mask)
     }
 
     pub fn network(&self) -> (Ipv4Addr, u32) {
-        return (self.addr, u32::from(self.addr));
+        (self.addr, u32::from(self.addr))
     }
 
     pub fn contains(&self, ip: Ipv4Addr) -> bool {
         let (_, net) = self.network();
-        return (u32::from(ip) & net) == net
+        (u32::from(ip) & net) == net
     }
 }
 
