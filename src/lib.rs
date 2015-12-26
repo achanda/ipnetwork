@@ -27,7 +27,10 @@ pub struct Ipv6Network {
 
 impl Ipv4Network {
     pub fn new(addr: Ipv4Addr, prefix: u8) -> Ipv4Network {
-        Ipv4Network { addr: addr, prefix: prefix }
+        Ipv4Network {
+            addr: addr,
+            prefix: prefix,
+        }
     }
 
     pub fn ip(&self) -> &Ipv4Addr {
@@ -56,7 +59,10 @@ impl Ipv4Network {
 
 impl Ipv6Network {
     pub fn new(addr: Ipv6Addr, prefix: u8) -> Ipv6Network {
-        Ipv6Network { addr: addr, prefix: prefix }
+        Ipv6Network {
+            addr: addr,
+            prefix: prefix,
+        }
     }
 
     pub fn ip(&self) -> &Ipv6Addr {
@@ -139,7 +145,7 @@ mod test {
     #[test]
     fn contains_v4() {
         let cidr = Ipv4Network::new(Ipv4Addr::new(74, 125, 227, 0), 25);
-        let ip = Ipv4Addr::new(74,125,227,4);
+        let ip = Ipv4Addr::new(74, 125, 227, 4);
         assert!(cidr.contains(ip));
     }
 }
