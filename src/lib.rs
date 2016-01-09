@@ -2,11 +2,14 @@
 #![cfg_attr(feature = "dev", feature(plugin))]
 #![cfg_attr(feature = "dev", plugin(clippy))]
 #![crate_type = "lib"]
-#![feature(ip_addr)]
 #[allow(dead_code)]
 
+extern crate ip;
+
 use std::fmt;
-use std::net::{IpAddr, Ipv4Addr, Ipv6Addr};
+use std::net::{Ipv4Addr, Ipv6Addr};
+
+use ip::IpAddr;
 
 // A network
 #[derive(Debug)]
