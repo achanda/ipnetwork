@@ -7,7 +7,7 @@ license = "Apache-2.0"
 repository = "https://github.com/achanda/ipnetwork"
 
 [dependencies]
-clippy = {version = "0.0.21", optional = true}
+clippy = {version = "0.0.37", optional = true}
 ip = "1.0.0"
 
 [features]
