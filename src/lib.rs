@@ -36,8 +36,8 @@ impl Ipv4Network {
         }
     }
 
-    pub fn ip(&self) -> &Ipv4Addr {
-        &(self.addr)
+    pub fn ip(&self) -> Ipv4Addr {
+        self.addr
     }
 
     pub fn prefix(&self) -> u8 {
@@ -68,8 +68,8 @@ impl Ipv6Network {
         }
     }
 
-    pub fn ip(&self) -> &Ipv6Addr {
-        &(self.addr)
+    pub fn ip(&self) -> Ipv6Addr {
+        self.addr
     }
 
     pub fn prefix(&self) -> u8 {
@@ -87,8 +87,8 @@ impl IpNetwork {
 
     pub fn ip(&self) -> IpAddr {
         match *self {
-            IpNetwork::V4(ref a) => IpAddr::V4(*a.ip()),
-            IpNetwork::V6(ref a) => IpAddr::V6(*a.ip()),
+            IpNetwork::V4(ref a) => IpAddr::V4(a.ip()),
+            IpNetwork::V6(ref a) => IpAddr::V6(a.ip()),
         }
     }
 
