@@ -51,7 +51,9 @@ impl Ipv4Network {
     }
 
     pub fn network(&self) -> (Ipv4Addr, u32) {
-        (self.addr, u32::from(self.addr))
+        let (_, mask) = self.mask();
+        let ip = u32::from(self.addr) & mask;
+        (Ipv4Addr::from(ip), ip)
     }
 
     pub fn contains(&self, ip: Ipv4Addr) -> bool {
@@ -139,10 +141,10 @@ mod test {
 
     #[test]
     fn network_v4() {
-        let cidr = Ipv4Network::new(Ipv4Addr::new(74, 125, 227, 0), 25);
+        let cidr = Ipv4Network::new(Ipv4Addr::new(10, 10, 1, 97), 23);
         let (ip, int) = cidr.network();
-        assert_eq!(ip, Ipv4Addr::new(74, 125, 227, 0));
-        assert_eq!(int, 1249764096);
+        assert_eq!(ip, Ipv4Addr::new(10, 10, 0, 0));
+        assert_eq!(int, 168427520);
     }
 
     #[test]
