@@ -2,7 +2,6 @@
 #![cfg_attr(feature = "dev", feature(plugin))]
 #![cfg_attr(feature = "dev", plugin(clippy))]
 #![crate_type = "lib"]
-#![feature(ip_addr)]
 #[allow(dead_code)]
 
 use std::fmt;
