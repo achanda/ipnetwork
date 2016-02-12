@@ -12,6 +12,9 @@ use std::str::FromStr;
 
 use ip::IpAddr;
 
+const IPV4_BITS: u8 = 32;
+const IPV6_BITS: u8 = 128;
+
 // A network
 #[derive(Debug)]
 pub enum IpNetwork {
@@ -40,8 +43,14 @@ impl Ipv4Network {
     pub fn from_cidr(cidr: &str) -> Result<Ipv4Network, String> {
         let (addr_str, prefix_str) = try!(cidr_parts(cidr));
         let addr = try!(Self::parse_addr(addr_str));
-        let prefix = try!(parse_prefix(prefix_str, 32));
-        Ok(Self::new(addr, prefix))
+        let prefix = try!(parse_prefix(prefix_str, IPV4_BITS));
+        let new = Self::new(addr, prefix);
+        let (net, _) = new.network();
+        if addr != net {
+            Err(format!("IP must have zeroes in host part"))
+        } else {
+            Ok(new)
+        }
     }
 
     pub fn ip(&self) -> Ipv4Addr {
@@ -102,7 +111,7 @@ impl Ipv6Network {
     pub fn from_cidr(cidr: &str) -> Result<Ipv6Network, String> {
         let (addr_str, prefix_str) = try!(cidr_parts(cidr));
         let addr = try!(Self::parse_addr(addr_str));
-        let prefix = try!(parse_prefix(prefix_str, 128));
+        let prefix = try!(parse_prefix(prefix_str, IPV6_BITS));
         Ok(Self::new(addr, prefix))
     }
 
