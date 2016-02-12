@@ -82,6 +82,48 @@ impl Ipv4Network {
         (u32::from(ip) & mask) == net
     }
 
+    /// Returns number of possible host addresses in this `Ipv4Network`.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use std::net::Ipv4Addr;
+    /// use ipnetwork::Ipv4Network;
+    ///
+    /// let net = Ipv4Network::from_cidr("10.1.0.0/16").unwrap();
+    /// assert_eq!(net.size(), 65536);
+    ///
+    /// let tinynet = Ipv4Network::from_cidr("0.0.0.0/32").unwrap();
+    /// assert_eq!(tinynet.size(), 1);
+    /// ```
+    pub fn size(&self) -> u64 {
+        let host_bits = (IPV4_BITS - self.prefix) as u32;
+        (2 as u64).pow(host_bits)
+    }
+
+    /// Returns the `n`:th address within this network.
+    /// `n` must be between 0 and the size of the network.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use std::net::Ipv4Addr;
+    /// use ipnetwork::Ipv4Network;
+    ///
+    /// let net = Ipv4Network::from_cidr("192.168.0.0/24").unwrap();
+    /// assert_eq!(net.nth(0).unwrap(), Ipv4Addr::new(192, 168, 0, 0));
+    /// assert_eq!(net.nth(15).unwrap(), Ipv4Addr::new(192, 168, 0, 15));
+    /// assert!(net.nth(256).is_none());
+    /// ```
+    pub fn nth(&self, n: u32) -> Option<Ipv4Addr> {
+        if n as u64 >= self.size() {
+            None
+        } else {
+            let (_, net) = self.network();
+            Some(Ipv4Addr::from(net + n))
+        }
+    }
+
     fn parse_addr(addr: &str) -> Result<Ipv4Addr, String> {
         let byte_strs = addr.split('.')
                             .map(|b| b.parse::<u8>())
@@ -223,9 +265,47 @@ mod test {
     }
 
     #[test]
+    fn parse_v4_fail_addr4() {
+        let cidr = Ipv4Network::from_cidr("10.1.1.1/8");
+        assert!(cidr.is_err());
+    }
+
+    #[test]
     fn parse_v4_fail_prefix() {
         let cidr = Ipv4Network::from_cidr("0/39");
         assert!(cidr.is_err());
+    }
+
+    #[test]
+    fn size_v4() {
+        let cidr = Ipv4Network::new(Ipv4Addr::new(77, 88, 21, 11), 24);
+        assert_eq!(cidr.size(), 256);
+    }
+
+    #[test]
+    fn size_v4_max() {
+        let cidr = Ipv4Network::new(Ipv4Addr::new(0, 0, 0, 0), 0);
+        assert_eq!(cidr.size(), 4_294_967_296);
+    }
+
+    #[test]
+    fn size_v4_min() {
+        let cidr = Ipv4Network::new(Ipv4Addr::new(0, 0, 0, 0), 32);
+        assert_eq!(cidr.size(), 1);
+    }
+
+    #[test]
+    fn nth_v4() {
+        let cidr = Ipv4Network::new(Ipv4Addr::new(127, 0, 0, 0), 24);
+        assert_eq!(cidr.nth(0).unwrap(), Ipv4Addr::new(127, 0, 0, 0));
+        assert_eq!(cidr.nth(1).unwrap(), Ipv4Addr::new(127, 0, 0, 1));
+        assert_eq!(cidr.nth(255).unwrap(), Ipv4Addr::new(127, 0, 0, 255));
+    }
+
+    #[test]
+    fn nth_v4_fail() {
+        let cidr = Ipv4Network::new(Ipv4Addr::new(10, 0, 0, 0), 32);
+        assert!(cidr.nth(1).is_none());
     }
 
     #[test]
