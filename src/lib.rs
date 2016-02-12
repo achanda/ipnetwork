@@ -4,8 +4,12 @@
 #![crate_type = "lib"]
 #[allow(dead_code)]
 
+extern crate ip;
+
 use std::fmt;
-use std::net::{IpAddr, Ipv4Addr, Ipv6Addr};
+use std::net::{Ipv4Addr, Ipv6Addr};
+
+use ip::IpAddr;
 
 // A network
 #[derive(Debug)]
