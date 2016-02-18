@@ -20,6 +20,6 @@ cargo test
 
 You can also add `ipnetwork` as a dependency to your project's `Cargo.toml`:
 ```
-[dependencies.ipnetwork]
+[dependencies]
 ipnetwork = "*"
 ```
