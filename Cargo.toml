@@ -1,6 +1,6 @@
 [package]
 name = "ipnetwork"
-version = "0.6.0"
+version = "0.6.1"
 authors = ["Abhishek Chanda <abhishe.becsk@gmail.com>"]
 description = "A library to work with IP CIDRs in Rust, heavily WIP"
 license = "Apache-2.0"
@@ -8,7 +8,6 @@ repository = "https://github.com/achanda/ipnetwork"
 
 [dependencies]
 clippy = {version = "0.0.37", optional = true}
-ip = "1.0.0"
 
 [features]
 default = []

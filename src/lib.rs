@@ -4,13 +4,9 @@
 #![crate_type = "lib"]
 #[allow(dead_code)]
 
-extern crate ip;
-
 use std::fmt;
-use std::net::{Ipv4Addr, Ipv6Addr};
+use std::net::{IpAddr, Ipv4Addr, Ipv6Addr};
 use std::str::FromStr;
-
-use ip::IpAddr;
 
 const IPV4_BITS: u8 = 32;
 const IPV6_BITS: u8 = 128;
