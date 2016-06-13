@@ -78,7 +78,8 @@ impl Ipv4Network {
 
     pub fn contains(&self, ip: Ipv4Addr) -> bool {
         let (_, net) = self.network();
-        (u32::from(ip) & net) == net
+        let (_, mask) = self.mask();
+        (u32::from(ip) & mask) == net
     }
 
     fn parse_addr(addr: &str) -> Result<Ipv4Addr, String> {
@@ -288,5 +289,12 @@ mod test {
         let cidr = Ipv4Network::new(Ipv4Addr::new(74, 125, 227, 0), 25);
         let ip = Ipv4Addr::new(74, 125, 227, 4);
         assert!(cidr.contains(ip));
+    }
+
+    #[test]
+    fn not_contains_v4() {
+        let cidr = Ipv4Network::new(Ipv4Addr::new(10, 0, 0, 50), 24);
+        let ip = Ipv4Addr::new(10, 1, 0, 1);
+        assert!(!cidr.contains(ip));
     }
 }
