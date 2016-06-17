@@ -70,7 +70,7 @@ impl Ipv4Network {
 
     pub fn mask(&self) -> (Ipv4Addr, u32) {
         let prefix = self.prefix;
-        let mask = !(0xffffffff >> prefix);
+        let mask = !(0xffffffff as u64 >> prefix) as u32;
         (Ipv4Addr::from(mask), mask)
     }
 
@@ -243,17 +243,24 @@ mod test {
     }
 
     #[test]
-    fn parse_v4() {
+    fn parse_v4_0bit() {
         let cidr = Ipv4Network::from_cidr("0/0").unwrap();
         assert_eq!(cidr.ip(), Ipv4Addr::new(0, 0, 0, 0));
         assert_eq!(cidr.prefix(), 0);
     }
 
     #[test]
-    fn parse_v4_2() {
+    fn parse_v4_24bit() {
         let cidr = Ipv4Network::from_cidr("127.1.0.0/24").unwrap();
         assert_eq!(cidr.ip(), Ipv4Addr::new(127, 1, 0, 0));
         assert_eq!(cidr.prefix(), 24);
+    }
+
+    #[test]
+    fn parse_v4_32bit() {
+        let cidr = Ipv4Network::from_cidr("127.0.0.0/32").unwrap();
+        assert_eq!(cidr.ip(), Ipv4Addr::new(127, 0, 0, 0));
+        assert_eq!(cidr.prefix(), 32);
     }
 
     #[test]
