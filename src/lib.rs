@@ -28,25 +28,32 @@ pub struct Ipv6Network {
     prefix: u8,
 }
 
+#[derive(Debug)]
+pub enum IpNetworkError {
+    InvalidAddr(String),
+    InvalidPrefix,
+    InvalidCidrFormat(String),
+}
+
 impl Ipv4Network {
-    pub fn new(addr: Ipv4Addr, prefix: u8) -> Ipv4Network {
-        Ipv4Network {
-            addr: addr,
-            prefix: prefix,
+    /// Constructs a new `Ipv4Network` from any `Ipv4Addr` and a prefix denoting the network size.
+    /// If the prefix is larger than 32 this will return an `IpNetworkError::InvalidPrefix`.
+    pub fn new(addr: Ipv4Addr, prefix: u8) -> Result<Ipv4Network, IpNetworkError> {
+        if prefix > IPV4_BITS {
+            Err(IpNetworkError::InvalidPrefix)
+        } else {
+            Ok(Ipv4Network {
+                addr: addr,
+                prefix: prefix,
+            })
         }
     }
 
-    pub fn from_cidr(cidr: &str) -> Result<Ipv4Network, String> {
+    pub fn from_cidr(cidr: &str) -> Result<Ipv4Network, IpNetworkError> {
         let (addr_str, prefix_str) = try!(cidr_parts(cidr));
         let addr = try!(Self::parse_addr(addr_str));
         let prefix = try!(parse_prefix(prefix_str, IPV4_BITS));
-        let new = Self::new(addr, prefix);
-        let (net, _) = new.network();
-        if addr != net {
-            Err(format!("IP must have zeroes in host part"))
-        } else {
-            Ok(new)
-        }
+        Self::new(addr, prefix)
     }
 
     pub fn ip(&self) -> Ipv4Addr {
@@ -127,34 +134,42 @@ impl Ipv4Network {
         }
     }
 
-    fn parse_addr(addr: &str) -> Result<Ipv4Addr, String> {
-        let byte_strs = addr.split('.')
-                            .map(|b| b.parse::<u8>())
-                            .map(|b| b.map_err(|_| format!("Invalid IPv4: {}", addr)));
+    fn parse_addr(addr: &str) -> Result<Ipv4Addr, IpNetworkError> {
+        let addr_parts = addr.split('.').map(|b| b.parse::<u8>());
         let mut bytes = [0; 4];
-        for (i, byte) in byte_strs.enumerate() {
+        for (i, byte) in addr_parts.enumerate() {
             if i >= 4 {
-                return Err(format!("Malformed IP: {}", addr));
+                return Err(IpNetworkError::InvalidAddr(format!("More than 4 bytes: {}", addr)));
             }
-            bytes[i] = try!(byte);
+            bytes[i] = try!(byte.map_err(|_| {
+                IpNetworkError::InvalidAddr(format!("All bytes not 0-255: {}", addr))
+            }));
         }
         Ok(Ipv4Addr::new(bytes[0], bytes[1], bytes[2], bytes[3]))
     }
 }
 
 impl Ipv6Network {
-    pub fn new(addr: Ipv6Addr, prefix: u8) -> Ipv6Network {
-        Ipv6Network {
-            addr: addr,
-            prefix: prefix,
+    /// Constructs a new `Ipv6Network` from any `Ipv6Addr` and a prefix denoting the network size.
+    /// If the prefix is larger than 128 this will return an `IpNetworkError::InvalidPrefix`.
+    pub fn new(addr: Ipv6Addr, prefix: u8) -> Result<Ipv6Network, IpNetworkError> {
+        if prefix > IPV6_BITS {
+            Err(IpNetworkError::InvalidPrefix)
+        } else {
+            Ok(Ipv6Network {
+                addr: addr,
+                prefix: prefix,
+            })
         }
     }
 
-    pub fn from_cidr(cidr: &str) -> Result<Ipv6Network, String> {
+    pub fn from_cidr(cidr: &str) -> Result<Ipv6Network, IpNetworkError> {
         let (addr_str, prefix_str) = try!(cidr_parts(cidr));
-        let addr = try!(Self::parse_addr(addr_str));
+        let addr = try!(Ipv6Addr::from_str(addr_str).map_err(|_| {
+            IpNetworkError::InvalidAddr(format!("{}", addr_str))
+        }));
         let prefix = try!(parse_prefix(prefix_str, IPV6_BITS));
-        Ok(Self::new(addr, prefix))
+        Self::new(addr, prefix)
     }
 
     pub fn ip(&self) -> Ipv6Addr {
@@ -164,17 +179,13 @@ impl Ipv6Network {
     pub fn prefix(&self) -> u8 {
         self.prefix
     }
-
-    fn parse_addr(addr: &str) -> Result<Ipv6Addr, String> {
-        Ipv6Addr::from_str(addr).map_err(|e| format!("{}", e))
-    }
 }
 
 impl IpNetwork {
-    pub fn new(ip: IpAddr, prefix: u8) -> IpNetwork {
+    pub fn new(ip: IpAddr, prefix: u8) -> Result<IpNetwork, IpNetworkError> {
         match ip {
-            IpAddr::V4(a) => IpNetwork::V4(Ipv4Network::new(a, prefix)),
-            IpAddr::V6(a) => IpNetwork::V6(Ipv6Network::new(a, prefix)),
+            IpAddr::V4(a) => Ok(IpNetwork::V4(try!(Ipv4Network::new(a, prefix)))),
+            IpAddr::V6(a) => Ok(IpNetwork::V6(try!(Ipv6Network::new(a, prefix)))),
         }
     }
 
@@ -205,19 +216,19 @@ impl fmt::Debug for Ipv6Network {
     }
 }
 
-fn cidr_parts<'a>(cidr: &'a str) -> Result<(&'a str, &'a str), String> {
+fn cidr_parts<'a>(cidr: &'a str) -> Result<(&'a str, &'a str), IpNetworkError> {
     let parts = cidr.split('/').collect::<Vec<&str>>();
     if parts.len() == 2 {
         Ok((parts[0], parts[1]))
     } else {
-        Err(format!("Malformed cidr: {}", cidr))
+        Err(IpNetworkError::InvalidCidrFormat(format!("CIDR must contain '/': {}", cidr)))
     }
 }
 
-fn parse_prefix(prefix: &str, max: u8) -> Result<u8, String> {
-    let mask = try!(prefix.parse::<u8>().map_err(|_| format!("Prefix is NaN")));
+fn parse_prefix(prefix: &str, max: u8) -> Result<u8, IpNetworkError> {
+    let mask = try!(prefix.parse::<u8>().map_err(|_| IpNetworkError::InvalidPrefix));
     if mask > max {
-        Err(format!("Prefix must be <= {}", max))
+        Err(IpNetworkError::InvalidPrefix)
     } else {
         Ok(mask)
     }
@@ -231,8 +242,14 @@ mod test {
 
     #[test]
     fn create_v4() {
-        let cidr = Ipv4Network::new(Ipv4Addr::new(77, 88, 21, 11), 24);
+        let cidr = Ipv4Network::new(Ipv4Addr::new(77, 88, 21, 11), 24).unwrap();
         assert_eq!(cidr.prefix(), 24);
+    }
+
+    #[test]
+    fn create_v4_invalid_prefix() {
+        let net = Ipv4Network::new(Ipv4Addr::new(0, 0, 0, 0), 33);
+        assert!(net.is_err());
     }
 
     #[test]
@@ -275,6 +292,13 @@ mod test {
     }
 
     #[test]
+    fn parse_v4_non_zero_host_bits() {
+        let cidr = Ipv4Network::from_cidr("10.1.1.1/24").unwrap();
+        assert_eq!(cidr.ip(), Ipv4Addr::new(10, 1, 1, 1));
+        assert_eq!(cidr.prefix(), 24);
+    }
+
+    #[test]
     fn parse_v4_fail_prefix() {
         let cidr = Ipv4Network::from_cidr("0/39");
         assert!(cidr.is_err());
@@ -306,23 +330,29 @@ mod test {
 
     #[test]
     fn nth_v4() {
-        let cidr = Ipv4Network::new(Ipv4Addr::new(127, 0, 0, 0), 24);
-        assert_eq!(cidr.nth(0).unwrap(), Ipv4Addr::new(127, 0, 0, 0));
-        assert_eq!(cidr.nth(1).unwrap(), Ipv4Addr::new(127, 0, 0, 1));
-        assert_eq!(cidr.nth(255).unwrap(), Ipv4Addr::new(127, 0, 0, 255));
-        assert!(cidr.nth(256).is_none());
+        let net = Ipv4Network::new(Ipv4Addr::new(127, 0, 0, 0), 24).unwrap();
+        assert_eq!(net.nth(0).unwrap(), Ipv4Addr::new(127, 0, 0, 0));
+        assert_eq!(net.nth(1).unwrap(), Ipv4Addr::new(127, 0, 0, 1));
+        assert_eq!(net.nth(255).unwrap(), Ipv4Addr::new(127, 0, 0, 255));
+        assert!(net.nth(256).is_none());
     }
 
     #[test]
     fn nth_v4_fail() {
-        let cidr = Ipv4Network::new(Ipv4Addr::new(10, 0, 0, 0), 32);
-        assert!(cidr.nth(1).is_none());
+        let net = Ipv4Network::new(Ipv4Addr::new(10, 0, 0, 0), 32).unwrap();
+        assert!(net.nth(1).is_none());
     }
 
     #[test]
     fn create_v6() {
-        let cidr = Ipv6Network::new(Ipv6Addr::new(0, 0, 0, 0, 0, 0, 0, 1), 24);
+        let cidr = Ipv6Network::new(Ipv6Addr::new(0, 0, 0, 0, 0, 0, 0, 1), 24).unwrap();
         assert_eq!(cidr.prefix(), 24);
+    }
+
+    #[test]
+    fn create_v6_invalid_prefix() {
+        let cidr = Ipv6Network::new(Ipv6Addr::new(0, 0, 0, 0, 0, 0, 0, 1), 129);
+        assert!(cidr.is_err());
     }
 
     #[test]
@@ -353,7 +383,7 @@ mod test {
 
     #[test]
     fn mask_v4() {
-        let cidr = Ipv4Network::new(Ipv4Addr::new(74, 125, 227, 0), 29);
+        let cidr = Ipv4Network::new(Ipv4Addr::new(74, 125, 227, 0), 29).unwrap();
         let (ip, int) = cidr.mask();
         assert_eq!(ip, Ipv4Addr::new(255, 255, 255, 248));
         assert_eq!(int, 4294967288);
@@ -361,7 +391,7 @@ mod test {
 
     #[test]
     fn network_v4() {
-        let cidr = Ipv4Network::new(Ipv4Addr::new(10, 10, 1, 97), 23);
+        let cidr = Ipv4Network::new(Ipv4Addr::new(10, 10, 1, 97), 23).unwrap();
         let (ip, int) = cidr.network();
         assert_eq!(ip, Ipv4Addr::new(10, 10, 0, 0));
         assert_eq!(int, 168427520);
@@ -369,7 +399,7 @@ mod test {
 
     #[test]
     fn broadcast_v4() {
-        let cidr = Ipv4Network::new(Ipv4Addr::new(10, 10, 1, 97), 23);
+        let cidr = Ipv4Network::new(Ipv4Addr::new(10, 10, 1, 97), 23).unwrap();
         let (ip, int) = cidr.broadcast();
         assert_eq!(ip, Ipv4Addr::new(10, 10, 1, 255));
         assert_eq!(int, 168428031);
@@ -377,14 +407,14 @@ mod test {
 
     #[test]
     fn contains_v4() {
-        let cidr = Ipv4Network::new(Ipv4Addr::new(74, 125, 227, 0), 25);
+        let cidr = Ipv4Network::new(Ipv4Addr::new(74, 125, 227, 0), 25).unwrap();
         let ip = Ipv4Addr::new(74, 125, 227, 4);
         assert!(cidr.contains(ip));
     }
 
     #[test]
     fn not_contains_v4() {
-        let cidr = Ipv4Network::new(Ipv4Addr::new(10, 0, 0, 50), 24);
+        let cidr = Ipv4Network::new(Ipv4Addr::new(10, 0, 0, 50), 24).unwrap();
         let ip = Ipv4Addr::new(10, 1, 0, 1);
         assert!(!cidr.contains(ip));
     }
