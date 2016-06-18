@@ -94,15 +94,11 @@ impl Ipv4Network {
     /// assert_eq!(net.size(), 65536);
     ///
     /// let tinynet = Ipv4Network::from_cidr("0.0.0.0/32").unwrap();
-    /// assert_eq!(tinynet.size(), 0);
+    /// assert_eq!(tinynet.size(), 1);
     /// ```
     pub fn size(&self) -> u64 {
         let host_bits = (IPV4_BITS - self.prefix) as u32;
-        if host_bits == 0 {
-            0
-        } else {
-            (2 as u64).pow(host_bits)
-        }
+        (2 as u64).pow(host_bits)
     }
 
     /// Returns the `n`:th address within this network.
@@ -305,7 +301,7 @@ mod test {
     #[test]
     fn size_v4_min() {
         let net = Ipv4Network::from_cidr("0/32").unwrap();
-        assert_eq!(net.size(), 0);
+        assert_eq!(net.size(), 1);
     }
 
     #[test]
@@ -320,7 +316,7 @@ mod test {
     #[test]
     fn nth_v4_fail() {
         let cidr = Ipv4Network::new(Ipv4Addr::new(10, 0, 0, 0), 32);
-        assert!(cidr.nth(0).is_none());
+        assert!(cidr.nth(1).is_none());
     }
 
     #[test]
