@@ -298,6 +298,12 @@ mod test {
     }
 
     #[test]
+    fn parse_v4_non_zero_host_bits() {
+        let cidr = Ipv4Network::from_cidr("10.1.1.1/24");
+        assert!(cidr.is_err());
+    }
+
+    #[test]
     fn parse_v4_fail_prefix() {
         let cidr = Ipv4Network::from_cidr("0/39");
         assert!(cidr.is_err());
