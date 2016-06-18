@@ -53,13 +53,7 @@ impl Ipv4Network {
         let (addr_str, prefix_str) = try!(cidr_parts(cidr));
         let addr = try!(Self::parse_addr(addr_str));
         let prefix = try!(parse_prefix(prefix_str, IPV4_BITS));
-        let new = try!(Self::new(addr, prefix));
-        let (net, _) = new.network();
-        if addr != net {
-            Err(IpNetworkError::InvalidCidrFormat(format!("Host bits must be zero")))
-        } else {
-            Ok(new)
-        }
+        Self::new(addr, prefix)
     }
 
     pub fn ip(&self) -> Ipv4Addr {
@@ -299,8 +293,9 @@ mod test {
 
     #[test]
     fn parse_v4_non_zero_host_bits() {
-        let cidr = Ipv4Network::from_cidr("10.1.1.1/24");
-        assert!(cidr.is_err());
+        let cidr = Ipv4Network::from_cidr("10.1.1.1/24").unwrap();
+        assert_eq!(cidr.ip(), Ipv4Addr::new(10, 1, 1, 1));
+        assert_eq!(cidr.prefix(), 24);
     }
 
     #[test]
