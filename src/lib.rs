@@ -12,17 +12,19 @@ const IPV4_BITS: u8 = 32;
 const IPV6_BITS: u8 = 128;
 
 // A network
-#[derive(Debug)]
+#[derive(Debug,Clone)]
 pub enum IpNetwork {
     V4(Ipv4Network),
     V6(Ipv6Network),
 }
 
+#[derive(Clone)]
 pub struct Ipv4Network {
     addr: Ipv4Addr,
     prefix: u8,
 }
 
+#[derive(Clone)]
 pub struct Ipv6Network {
     addr: Ipv6Addr,
     prefix: u8,
