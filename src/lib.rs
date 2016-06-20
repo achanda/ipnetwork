@@ -18,13 +18,13 @@ pub enum IpNetwork {
     V6(Ipv6Network),
 }
 
-#[derive(Clone,Copy,Hash,PartialEq,Eq)]
+#[derive(Debug,Clone,Copy,Hash,PartialEq,Eq)]
 pub struct Ipv4Network {
     addr: Ipv4Addr,
     prefix: u8,
 }
 
-#[derive(Clone,Copy,Hash,PartialEq,Eq)]
+#[derive(Debug,Clone,Copy,Hash,PartialEq,Eq)]
 pub struct Ipv6Network {
     addr: Ipv6Addr,
     prefix: u8,
@@ -205,13 +205,13 @@ impl IpNetwork {
     }
 }
 
-impl fmt::Debug for Ipv4Network {
+impl fmt::Display for Ipv4Network {
     fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
         write!(fmt, "{}/{}", self.ip(), self.prefix())
     }
 }
 
-impl fmt::Debug for Ipv6Network {
+impl fmt::Display for Ipv6Network {
     fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
         write!(fmt, "{}/{}", self.ip(), self.prefix())
     }
