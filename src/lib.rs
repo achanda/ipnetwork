@@ -12,19 +12,19 @@ const IPV4_BITS: u8 = 32;
 const IPV6_BITS: u8 = 128;
 
 // A network
-#[derive(Debug,Clone)]
+#[derive(Debug,Clone,Copy,Hash,PartialEq,Eq)]
 pub enum IpNetwork {
     V4(Ipv4Network),
     V6(Ipv6Network),
 }
 
-#[derive(Clone)]
+#[derive(Clone,Copy,Hash,PartialEq,Eq)]
 pub struct Ipv4Network {
     addr: Ipv4Addr,
     prefix: u8,
 }
 
-#[derive(Clone)]
+#[derive(Clone,Copy,Hash,PartialEq,Eq)]
 pub struct Ipv6Network {
     addr: Ipv6Addr,
     prefix: u8,
@@ -239,6 +239,8 @@ fn parse_prefix(prefix: &str, max: u8) -> Result<u8, IpNetworkError> {
 
 #[cfg(test)]
 mod test {
+    use std::mem;
+    use std::collections::HashMap;
     use std::net::{Ipv4Addr, Ipv6Addr};
     use super::*;
 
@@ -344,6 +346,24 @@ mod test {
         let net = Ipv4Network::new(Ipv4Addr::new(10, 0, 0, 0), 32).unwrap();
         assert!(net.nth(1).is_none());
     }
+
+    #[test]
+    fn hash_eq_compatibility_v4() {
+        let mut map = HashMap::new();
+        let net = Ipv4Network::new(Ipv4Addr::new(127, 0, 0, 1), 16).unwrap();
+        map.insert(net, 137);
+        let out = map.get(&net).unwrap();
+        assert_eq!(137, *out);
+    }
+
+    #[test]
+    fn copy_compatibility_v4() {
+        let net = Ipv4Network::new(Ipv4Addr::new(127, 0, 0, 1), 16).unwrap();
+        mem::drop(net);
+        assert_eq!(16, net.prefix());
+    }
+
+
 
     #[test]
     fn create_v6() {
