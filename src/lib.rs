@@ -30,7 +30,7 @@ pub struct Ipv6Network {
     prefix: u8,
 }
 
-#[derive(Debug)]
+#[derive(Debug,Clone,PartialEq,Eq)]
 pub enum IpNetworkError {
     InvalidAddr(String),
     InvalidPrefix,
