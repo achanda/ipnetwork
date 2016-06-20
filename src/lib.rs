@@ -167,9 +167,8 @@ impl Ipv6Network {
 
     pub fn from_cidr(cidr: &str) -> Result<Ipv6Network, IpNetworkError> {
         let (addr_str, prefix_str) = try!(cidr_parts(cidr));
-        let addr = try!(Ipv6Addr::from_str(addr_str).map_err(|_| {
-            IpNetworkError::InvalidAddr(format!("{}", addr_str))
-        }));
+        let addr = try!(Ipv6Addr::from_str(addr_str)
+                            .map_err(|_| IpNetworkError::InvalidAddr(format!("{}", addr_str))));
         let prefix = try!(parse_prefix(prefix_str, IPV6_BITS));
         Self::new(addr, prefix)
     }
