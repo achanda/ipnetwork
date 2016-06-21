@@ -12,23 +12,25 @@ const IPV4_BITS: u8 = 32;
 const IPV6_BITS: u8 = 128;
 
 // A network
-#[derive(Debug)]
+#[derive(Debug,Clone,Copy,Hash,PartialEq,Eq)]
 pub enum IpNetwork {
     V4(Ipv4Network),
     V6(Ipv6Network),
 }
 
+#[derive(Debug,Clone,Copy,Hash,PartialEq,Eq)]
 pub struct Ipv4Network {
     addr: Ipv4Addr,
     prefix: u8,
 }
 
+#[derive(Debug,Clone,Copy,Hash,PartialEq,Eq)]
 pub struct Ipv6Network {
     addr: Ipv6Addr,
     prefix: u8,
 }
 
-#[derive(Debug)]
+#[derive(Debug,Clone,PartialEq,Eq)]
 pub enum IpNetworkError {
     InvalidAddr(String),
     InvalidPrefix,
@@ -165,9 +167,8 @@ impl Ipv6Network {
 
     pub fn from_cidr(cidr: &str) -> Result<Ipv6Network, IpNetworkError> {
         let (addr_str, prefix_str) = try!(cidr_parts(cidr));
-        let addr = try!(Ipv6Addr::from_str(addr_str).map_err(|_| {
-            IpNetworkError::InvalidAddr(format!("{}", addr_str))
-        }));
+        let addr = try!(Ipv6Addr::from_str(addr_str)
+                            .map_err(|_| IpNetworkError::InvalidAddr(format!("{}", addr_str))));
         let prefix = try!(parse_prefix(prefix_str, IPV6_BITS));
         Self::new(addr, prefix)
     }
@@ -204,13 +205,13 @@ impl IpNetwork {
     }
 }
 
-impl fmt::Debug for Ipv4Network {
+impl fmt::Display for Ipv4Network {
     fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
         write!(fmt, "{}/{}", self.ip(), self.prefix())
     }
 }
 
-impl fmt::Debug for Ipv6Network {
+impl fmt::Display for Ipv6Network {
     fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
         write!(fmt, "{}/{}", self.ip(), self.prefix())
     }
@@ -237,6 +238,8 @@ fn parse_prefix(prefix: &str, max: u8) -> Result<u8, IpNetworkError> {
 
 #[cfg(test)]
 mod test {
+    use std::mem;
+    use std::collections::HashMap;
     use std::net::{Ipv4Addr, Ipv6Addr};
     use super::*;
 
@@ -342,6 +345,24 @@ mod test {
         let net = Ipv4Network::new(Ipv4Addr::new(10, 0, 0, 0), 32).unwrap();
         assert!(net.nth(1).is_none());
     }
+
+    #[test]
+    fn hash_eq_compatibility_v4() {
+        let mut map = HashMap::new();
+        let net = Ipv4Network::new(Ipv4Addr::new(127, 0, 0, 1), 16).unwrap();
+        map.insert(net, 137);
+        let out = map.get(&net).unwrap();
+        assert_eq!(137, *out);
+    }
+
+    #[test]
+    fn copy_compatibility_v4() {
+        let net = Ipv4Network::new(Ipv4Addr::new(127, 0, 0, 1), 16).unwrap();
+        mem::drop(net);
+        assert_eq!(16, net.prefix());
+    }
+
+
 
     #[test]
     fn create_v6() {
