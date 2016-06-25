@@ -37,6 +37,24 @@ pub enum IpNetworkError {
     InvalidCidrFormat(String),
 }
 
+pub struct Ipv4NetworkIterator {
+    network: Ipv4Network,
+    curr: Ipv4Addr,
+}
+
+impl Iterator for Ipv4NetworkIterator {
+    type Item = Ipv4Addr;
+    fn next(&mut self) -> Option<Ipv4Addr> {
+        let new_next = Ipv4Addr::from(u32::from(self.curr) + 1);
+        if self.network.contains(new_next) {
+            self.curr = new_next;
+            Some(new_next)
+        } else {
+            None
+        }
+    }
+}
+
 impl Ipv4Network {
     /// Constructs a new `Ipv4Network` from any `Ipv4Addr` and a prefix denoting the network size.
     /// If the prefix is larger than 32 this will return an `IpNetworkError::InvalidPrefix`.
@@ -48,6 +66,16 @@ impl Ipv4Network {
                 addr: addr,
                 prefix: prefix,
             })
+        }
+    }
+
+    /// Returns an iterator over `Ipv4Network`. Each call to `next` will return the next
+    /// `Ipv4Addr` in the given network. `None` will be returned when there are no more
+    /// addresses.
+    pub fn iter(&self) -> Ipv4NetworkIterator {
+        Ipv4NetworkIterator {
+            network: *self,
+            curr: self.nth(0).unwrap(),
         }
     }
 
@@ -438,5 +466,13 @@ mod test {
         let cidr = Ipv4Network::new(Ipv4Addr::new(10, 0, 0, 50), 24).unwrap();
         let ip = Ipv4Addr::new(10, 1, 0, 1);
         assert!(!cidr.contains(ip));
+    }
+
+    #[test]
+    fn iterator_v4() {
+        let cidr = Ipv4Network::from_cidr("192.168.122.0/29").unwrap();
+        for addr in cidr.iter() {
+            assert!(cidr.contains(addr));
+        }
     }
 }
