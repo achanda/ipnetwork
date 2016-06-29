@@ -37,6 +37,25 @@ pub enum IpNetworkError {
     InvalidCidrFormat(String),
 }
 
+pub struct Ipv4NetworkIterator {
+    next: u64,
+    end: u64,
+}
+
+impl Iterator for Ipv4NetworkIterator {
+    type Item = Ipv4Addr;
+
+    fn next(&mut self) -> Option<Ipv4Addr> {
+        if self.next < self.end {
+            let next = Ipv4Addr::from(self.next as u32);
+            self.next += 1;
+            Some(next)
+        } else {
+            None
+        }
+    }
+}
+
 impl Ipv4Network {
     /// Constructs a new `Ipv4Network` from any `Ipv4Addr` and a prefix denoting the network size.
     /// If the prefix is larger than 32 this will return an `IpNetworkError::InvalidPrefix`.
@@ -48,6 +67,18 @@ impl Ipv4Network {
                 addr: addr,
                 prefix: prefix,
             })
+        }
+    }
+
+    /// Returns an iterator over `Ipv4Network`. Each call to `next` will return the next
+    /// `Ipv4Addr` in the given network. `None` will be returned when there are no more
+    /// addresses.
+    pub fn iter(&self) -> Ipv4NetworkIterator {
+        let (_, start) = self.network();
+        let end = start as u64 + self.size();
+        Ipv4NetworkIterator {
+            next: start as u64,
+            end: end,
         }
     }
 
@@ -438,5 +469,37 @@ mod test {
         let cidr = Ipv4Network::new(Ipv4Addr::new(10, 0, 0, 50), 24).unwrap();
         let ip = Ipv4Addr::new(10, 1, 0, 1);
         assert!(!cidr.contains(ip));
+    }
+
+    #[test]
+    fn iterator_v4() {
+        let cidr = Ipv4Network::from_cidr("192.168.122.0/30").unwrap();
+        let mut iter = cidr.iter();
+        assert_eq!(Ipv4Addr::new(192, 168, 122, 0), iter.next().unwrap());
+        assert_eq!(Ipv4Addr::new(192, 168, 122, 1), iter.next().unwrap());
+        assert_eq!(Ipv4Addr::new(192, 168, 122, 2), iter.next().unwrap());
+        assert_eq!(Ipv4Addr::new(192, 168, 122, 3), iter.next().unwrap());
+        assert_eq!(None, iter.next());
+    }
+
+    #[test]
+    fn iterator_v4_tiny() {
+        let cidr = Ipv4Network::from_cidr("10/32").unwrap();
+        let mut iter = cidr.iter();
+        assert_eq!(Ipv4Addr::new(10, 0, 0, 0), iter.next().unwrap());
+        assert_eq!(None, iter.next());
+    }
+
+    // Tests the entire IPv4 space to see if the iterator will stop at the correct place
+    // and not overflow or wrap around. Ignored since it takes a long time to run.
+    #[test]
+    #[ignore]
+    fn iterator_v4_huge() {
+        let cidr = Ipv4Network::from_cidr("0/0").unwrap();
+        let mut iter = cidr.iter();
+        for i in 0..(u32::max_value() as u64 + 1) {
+            assert_eq!(i as u32, u32::from(iter.next().unwrap()));
+        }
+        assert_eq!(None, iter.next());
     }
 }
