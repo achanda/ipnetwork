@@ -25,6 +25,13 @@ impl Ipv4Network {
         }
     }
 
+    pub fn from_cidr(cidr: &str) -> Result<Ipv4Network, IpNetworkError> {
+        let (addr_str, prefix_str) = try!(cidr_parts(cidr));
+        let addr = try!(Self::parse_addr(addr_str));
+        let prefix = try!(parse_prefix(prefix_str, IPV4_BITS));
+        Self::new(addr, prefix)
+    }
+
     /// Returns an iterator over `Ipv4Network`. Each call to `next` will return the next
     /// `Ipv4Addr` in the given network. `None` will be returned when there are no more
     /// addresses.
@@ -35,13 +42,6 @@ impl Ipv4Network {
             next: start as u64,
             end: end,
         }
-    }
-
-    pub fn from_cidr(cidr: &str) -> Result<Ipv4Network, IpNetworkError> {
-        let (addr_str, prefix_str) = try!(cidr_parts(cidr));
-        let addr = try!(Self::parse_addr(addr_str));
-        let prefix = try!(parse_prefix(prefix_str, IPV4_BITS));
-        Self::new(addr, prefix)
     }
 
     pub fn ip(&self) -> Ipv4Addr {
