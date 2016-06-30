@@ -25,6 +25,19 @@ impl Ipv4Network {
         }
     }
 
+    /// Creates an `Ipv4Network` from parsing a string in CIDR notation.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use std::net::Ipv4Addr;
+    /// use ipnetwork::Ipv4Network;
+    ///
+    /// let new = Ipv4Network::new(Ipv4Addr::new(10, 1, 9, 32), 16).unwrap();
+    /// let from_cidr = Ipv4Network::from_cidr("10.1.9.32/16").unwrap();
+    /// assert_eq!(new.ip(), from_cidr.ip());
+    /// assert_eq!(new.prefix(), from_cidr.prefix());
+    /// ```
     pub fn from_cidr(cidr: &str) -> Result<Ipv4Network, IpNetworkError> {
         let (addr_str, prefix_str) = try!(cidr_parts(cidr));
         let addr = try!(Self::parse_addr(addr_str));
@@ -52,18 +65,60 @@ impl Ipv4Network {
         self.prefix
     }
 
+    /// Returns the mask for this `Ipv4Network`.
+    /// That means the `prefix` most significant bits will be 1 and the rest 0
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use std::net::Ipv4Addr;
+    /// use ipnetwork::Ipv4Network;
+    ///
+    /// let net = Ipv4Network::from_cidr("127.0.0.0/16").unwrap();
+    /// let (mask_ip, mask_u32) = net.mask();
+    /// assert_eq!(mask_ip, Ipv4Addr::new(255, 255, 0, 0));
+    /// assert_eq!(mask_u32, 0xffff0000);
+    /// ```
     pub fn mask(&self) -> (Ipv4Addr, u32) {
         let prefix = self.prefix;
         let mask = !(0xffffffff as u64 >> prefix) as u32;
         (Ipv4Addr::from(mask), mask)
     }
 
+    /// Returns the address of the network denoted by this `Ipv4Network`.
+    /// This means the lowest possible IPv4 address inside of the network.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use std::net::Ipv4Addr;
+    /// use ipnetwork::Ipv4Network;
+    ///
+    /// let net = Ipv4Network::from_cidr("10.1.9.32/16").unwrap();
+    /// let (net_ip, net_u32) = net.network();
+    /// assert_eq!(net_ip, Ipv4Addr::new(10, 1, 0, 0));
+    /// assert_eq!(net_u32, (10 << 24) + (1 << 16));
+    /// ```
     pub fn network(&self) -> (Ipv4Addr, u32) {
         let (_, mask) = self.mask();
         let ip = u32::from(self.addr) & mask;
         (Ipv4Addr::from(ip), ip)
     }
 
+    /// Returns the broadcasting address of this `Ipv4Network`.
+    /// This means the highest possible IPv4 address inside of the network.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use std::net::Ipv4Addr;
+    /// use ipnetwork::Ipv4Network;
+    ///
+    /// let net = Ipv4Network::from_cidr("10.9.0.32/16").unwrap();
+    /// let (bcast_ip, bcast_u32) = net.broadcast();
+    /// assert_eq!(bcast_ip, Ipv4Addr::new(10, 9, 255, 255));
+    /// assert_eq!(bcast_u32, (10 << 24) + (9 << 16) + 0xffff);
+    /// ```
     pub fn broadcast(&self) -> (Ipv4Addr, u32) {
         let (_, network) = self.network();
         let (_, mask) = self.mask();
@@ -71,6 +126,18 @@ impl Ipv4Network {
         (Ipv4Addr::from(broadcast), broadcast)
     }
 
+    /// Checks if a given `Ipv4Addr` is in this `Ipv4Network`
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use std::net::Ipv4Addr;
+    /// use ipnetwork::Ipv4Network;
+    ///
+    /// let net = Ipv4Network::from_cidr("127.0.0.0/24").unwrap();
+    /// assert!(net.contains(Ipv4Addr::new(127, 0, 0, 70)));
+    /// assert!(!net.contains(Ipv4Addr::new(127, 0, 1, 70)));
+    /// ```
     pub fn contains(&self, ip: Ipv4Addr) -> bool {
         let (_, net) = self.network();
         let (_, mask) = self.mask();
