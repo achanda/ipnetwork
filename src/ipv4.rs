@@ -120,9 +120,8 @@ impl Ipv4Network {
     /// assert_eq!(bcast_u32, (10 << 24) + (9 << 16) + 0xffff);
     /// ```
     pub fn broadcast(&self) -> (Ipv4Addr, u32) {
-        let (_, network) = self.network();
         let (_, mask) = self.mask();
-        let broadcast = network | !mask;
+        let broadcast = u32::from(self.addr) | !mask;
         (Ipv4Addr::from(broadcast), broadcast)
     }
 
