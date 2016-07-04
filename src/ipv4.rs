@@ -1,5 +1,5 @@
 use std::fmt;
-use std::net::{Ipv4Addr};
+use std::net::Ipv4Addr;
 
 use common::{IpNetworkError, cidr_parts, parse_prefix};
 
@@ -49,10 +49,10 @@ impl Ipv4Network {
     /// `Ipv4Addr` in the given network. `None` will be returned when there are no more
     /// addresses.
     pub fn iter(&self) -> Ipv4NetworkIterator {
-        let (_, start) = self.network();
-        let end = start as u64 + self.size();
+        let start = u32::from(self.network()) as u64;
+        let end = start + self.size();
         Ipv4NetworkIterator {
-            next: start as u64,
+            next: start,
             end: end,
         }
     }
@@ -75,14 +75,12 @@ impl Ipv4Network {
     /// use ipnetwork::Ipv4Network;
     ///
     /// let net = Ipv4Network::from_cidr("127.0.0.0/16").unwrap();
-    /// let (mask_ip, mask_u32) = net.mask();
-    /// assert_eq!(mask_ip, Ipv4Addr::new(255, 255, 0, 0));
-    /// assert_eq!(mask_u32, 0xffff0000);
+    /// assert_eq!(net.mask(), Ipv4Addr::new(255, 255, 0, 0));
     /// ```
-    pub fn mask(&self) -> (Ipv4Addr, u32) {
+    pub fn mask(&self) -> Ipv4Addr {
         let prefix = self.prefix;
         let mask = !(0xffffffff as u64 >> prefix) as u32;
-        (Ipv4Addr::from(mask), mask)
+        Ipv4Addr::from(mask)
     }
 
     /// Returns the address of the network denoted by this `Ipv4Network`.
@@ -95,14 +93,12 @@ impl Ipv4Network {
     /// use ipnetwork::Ipv4Network;
     ///
     /// let net = Ipv4Network::from_cidr("10.1.9.32/16").unwrap();
-    /// let (net_ip, net_u32) = net.network();
-    /// assert_eq!(net_ip, Ipv4Addr::new(10, 1, 0, 0));
-    /// assert_eq!(net_u32, (10 << 24) + (1 << 16));
+    /// assert_eq!(net.network(), Ipv4Addr::new(10, 1, 0, 0));
     /// ```
-    pub fn network(&self) -> (Ipv4Addr, u32) {
-        let (_, mask) = self.mask();
+    pub fn network(&self) -> Ipv4Addr {
+        let mask = u32::from(self.mask());
         let ip = u32::from(self.addr) & mask;
-        (Ipv4Addr::from(ip), ip)
+        Ipv4Addr::from(ip)
     }
 
     /// Returns the broadcasting address of this `Ipv4Network`.
@@ -115,14 +111,12 @@ impl Ipv4Network {
     /// use ipnetwork::Ipv4Network;
     ///
     /// let net = Ipv4Network::from_cidr("10.9.0.32/16").unwrap();
-    /// let (bcast_ip, bcast_u32) = net.broadcast();
-    /// assert_eq!(bcast_ip, Ipv4Addr::new(10, 9, 255, 255));
-    /// assert_eq!(bcast_u32, (10 << 24) + (9 << 16) + 0xffff);
+    /// assert_eq!(net.broadcast(), Ipv4Addr::new(10, 9, 255, 255));
     /// ```
-    pub fn broadcast(&self) -> (Ipv4Addr, u32) {
-        let (_, mask) = self.mask();
+    pub fn broadcast(&self) -> Ipv4Addr {
+        let mask = u32::from(self.mask());
         let broadcast = u32::from(self.addr) | !mask;
-        (Ipv4Addr::from(broadcast), broadcast)
+        Ipv4Addr::from(broadcast)
     }
 
     /// Checks if a given `Ipv4Addr` is in this `Ipv4Network`
@@ -138,8 +132,8 @@ impl Ipv4Network {
     /// assert!(!net.contains(Ipv4Addr::new(127, 0, 1, 70)));
     /// ```
     pub fn contains(&self, ip: Ipv4Addr) -> bool {
-        let (_, net) = self.network();
-        let (_, mask) = self.mask();
+        let net = u32::from(self.network());
+        let mask = u32::from(self.mask());
         (u32::from(ip) & mask) == net
     }
 
@@ -181,7 +175,7 @@ impl Ipv4Network {
     /// ```
     pub fn nth(&self, n: u32) -> Option<Ipv4Addr> {
         if (n as u64) < self.size() {
-            let (_, net) = self.network();
+            let net = u32::from(self.network());
             Some(Ipv4Addr::from(net + n))
         } else {
             None
@@ -358,25 +352,22 @@ mod test {
     #[test]
     fn mask_v4() {
         let cidr = Ipv4Network::new(Ipv4Addr::new(74, 125, 227, 0), 29).unwrap();
-        let (ip, int) = cidr.mask();
-        assert_eq!(ip, Ipv4Addr::new(255, 255, 255, 248));
-        assert_eq!(int, 4294967288);
+        let mask = cidr.mask();
+        assert_eq!(mask, Ipv4Addr::new(255, 255, 255, 248));
     }
 
     #[test]
     fn network_v4() {
         let cidr = Ipv4Network::new(Ipv4Addr::new(10, 10, 1, 97), 23).unwrap();
-        let (ip, int) = cidr.network();
-        assert_eq!(ip, Ipv4Addr::new(10, 10, 0, 0));
-        assert_eq!(int, 168427520);
+        let net = cidr.network();
+        assert_eq!(net, Ipv4Addr::new(10, 10, 0, 0));
     }
 
     #[test]
     fn broadcast_v4() {
         let cidr = Ipv4Network::new(Ipv4Addr::new(10, 10, 1, 97), 23).unwrap();
-        let (ip, int) = cidr.broadcast();
-        assert_eq!(ip, Ipv4Addr::new(10, 10, 1, 255));
-        assert_eq!(int, 168428031);
+        let bcast = cidr.broadcast();
+        assert_eq!(bcast, Ipv4Addr::new(10, 10, 1, 255));
     }
 
     #[test]
