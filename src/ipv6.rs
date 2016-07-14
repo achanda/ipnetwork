@@ -6,6 +6,7 @@ use std::str::FromStr;
 use common::{IpNetworkError, cidr_parts, parse_prefix};
 
 const IPV6_BITS: u8 = 128;
+const IPV6_SEGMENT_BITS: u8 = 16;
 
 #[derive(Debug,Clone,Copy,Hash,PartialEq,Eq)]
 pub struct Ipv6Network {
@@ -94,6 +95,40 @@ impl fmt::Display for Ipv6Network {
     }
 }
 
+/// Converts a `Ipv6Addr` network mask into a prefix.
+/// If the mask is invalid this will return an `IpNetworkError::InvalidPrefix`.
+pub fn ipv6_mask_to_prefix(mask: Ipv6Addr) -> Result<u8, IpNetworkError> {
+    let mask = mask.segments();
+    let mut mask_iter = mask.into_iter();
+
+    // Count the number of set bits from the start of the address
+    let mut prefix = 0;
+    for &segment in &mut mask_iter {
+        if segment == 0xffff {
+            prefix += IPV6_SEGMENT_BITS;
+        } else if segment == 0 {
+            // Prefix finishes on a segment boundary
+            break;
+        } else {
+            let prefix_bits = (!segment).leading_zeros() as u8;
+            // Check that the remainder of the bits are all unset
+            if segment << prefix_bits != 0 {
+                return Err(IpNetworkError::InvalidPrefix);
+            }
+            prefix += prefix_bits;
+            break;
+        }
+    }
+
+    // Now check all the remaining bits are unset
+    for &segment in mask_iter {
+        if segment != 0 {
+            return Err(IpNetworkError::InvalidPrefix);
+        }
+    }
+
+    Ok(prefix)
+}
 
 #[cfg(test)]
 mod test {
@@ -157,5 +192,19 @@ mod test {
         let cidr = Ipv6Network::new(Ipv6Addr::new(0xff01, 0, 0, 0x17, 0, 0, 0, 0x2), 65).unwrap();
         let ip = Ipv6Addr::new(0xff01, 0, 0, 0x17, 0xffff, 0, 0, 0x2);
         assert!(!cidr.contains(ip));
+    }
+
+    #[test]
+    fn v6_mask_to_prefix() {
+        let mask = Ipv6Addr::new(0xffff, 0xffff, 0xffff, 0, 0, 0, 0, 0);
+        let prefix = ipv6_mask_to_prefix(mask).unwrap();
+        assert_eq!(prefix, 48);
+    }
+
+    #[test]
+    fn invalid_v6_mask_to_prefix() {
+        let mask = Ipv6Addr::new(0, 0, 0xffff, 0xffff, 0, 0, 0, 0);
+        let prefix = ipv6_mask_to_prefix(mask);
+        assert!(prefix.is_err());
     }
 }

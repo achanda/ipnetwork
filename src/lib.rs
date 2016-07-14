@@ -10,8 +10,8 @@ mod ipv4;
 mod ipv6;
 mod common;
 
-pub use ipv4::Ipv4Network;
-pub use ipv6::Ipv6Network;
+pub use ipv4::{Ipv4Network, ipv4_mask_to_prefix};
+pub use ipv6::{Ipv6Network, ipv6_mask_to_prefix};
 pub use common::IpNetworkError;
 
 // A network
@@ -41,5 +41,14 @@ impl IpNetwork {
             IpNetwork::V4(ref a) => a.prefix(),
             IpNetwork::V6(ref a) => a.prefix(),
         }
+    }
+}
+
+/// Converts a `IpAddr` network mask into a prefix.
+/// If the mask is invalid this will return an `IpNetworkError::InvalidPrefix`.
+pub fn ip_mask_to_prefix(mask: IpAddr) -> Result<u8, IpNetworkError> {
+    match mask {
+        IpAddr::V4(mask) => ipv4_mask_to_prefix(mask),
+        IpAddr::V6(mask) => ipv6_mask_to_prefix(mask),
     }
 }

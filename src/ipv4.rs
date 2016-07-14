@@ -222,6 +222,18 @@ impl Iterator for Ipv4NetworkIterator {
     }
 }
 
+/// Converts a `Ipv4Addr` network mask into a prefix.
+/// If the mask is invalid this will return an `IpNetworkError::InvalidPrefix`.
+pub fn ipv4_mask_to_prefix(mask: Ipv4Addr) -> Result<u8, IpNetworkError> {
+    let mask = u32::from(mask);
+
+    let prefix = (!mask).leading_zeros() as u8;
+    if ((mask as u64) << prefix) & 0xffffffff != 0 {
+        Err(IpNetworkError::InvalidPrefix)
+    } else {
+        Ok(prefix)
+    }
+}
 
 #[cfg(test)]
 mod test {
@@ -414,5 +426,19 @@ mod test {
             assert_eq!(i as u32, u32::from(iter.next().unwrap()));
         }
         assert_eq!(None, iter.next());
+    }
+
+    #[test]
+    fn v4_mask_to_prefix() {
+        let mask = Ipv4Addr::new(255, 255, 255, 128);
+        let prefix = ipv4_mask_to_prefix(mask).unwrap();
+        assert_eq!(prefix, 25);
+    }
+
+    #[test]
+    fn invalid_v4_mask_to_prefix() {
+        let mask = Ipv4Addr::new(255, 0, 255, 0);
+        let prefix = ipv4_mask_to_prefix(mask);
+        assert!(prefix.is_err());
     }
 }
