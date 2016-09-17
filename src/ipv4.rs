@@ -1,5 +1,6 @@
 use std::fmt;
 use std::net::Ipv4Addr;
+use std::str::FromStr;
 
 use common::{IpNetworkError, cidr_parts, parse_prefix};
 
@@ -203,6 +204,13 @@ impl fmt::Display for Ipv4Network {
     }
 }
 
+impl FromStr for Ipv4Network {
+    type Err = IpNetworkError;
+    fn from_str(s: &str) -> Result<Ipv4Network, IpNetworkError> {
+        Ipv4Network::from_cidr(s)
+    }
+}
+
 pub struct Ipv4NetworkIterator {
     next: u64,
     end: u64,
@@ -256,77 +264,77 @@ mod test {
 
     #[test]
     fn parse_v4_0bit() {
-        let cidr = Ipv4Network::from_cidr("0/0").unwrap();
+        let cidr: Ipv4Network = "0/0".parse().unwrap();
         assert_eq!(cidr.ip(), Ipv4Addr::new(0, 0, 0, 0));
         assert_eq!(cidr.prefix(), 0);
     }
 
     #[test]
     fn parse_v4_24bit() {
-        let cidr = Ipv4Network::from_cidr("127.1.0.0/24").unwrap();
+        let cidr: Ipv4Network = "127.1.0.0/24".parse().unwrap();
         assert_eq!(cidr.ip(), Ipv4Addr::new(127, 1, 0, 0));
         assert_eq!(cidr.prefix(), 24);
     }
 
     #[test]
     fn parse_v4_32bit() {
-        let cidr = Ipv4Network::from_cidr("127.0.0.0/32").unwrap();
+        let cidr: Ipv4Network = "127.0.0.0/32".parse().unwrap();
         assert_eq!(cidr.ip(), Ipv4Addr::new(127, 0, 0, 0));
         assert_eq!(cidr.prefix(), 32);
     }
 
     #[test]
     fn parse_v4_fail_addr() {
-        let cidr = Ipv4Network::from_cidr("10.a.b/8");
-        assert!(cidr.is_err());
+        let cidr: Option<Ipv4Network> = "10.a.b/8".parse().ok();
+        assert_eq!(None, cidr);
     }
 
     #[test]
     fn parse_v4_fail_addr2() {
-        let cidr = Ipv4Network::from_cidr("10.1.1.1.0/8");
-        assert!(cidr.is_err());
+        let cidr: Option<Ipv4Network> = "10.1.1.1.0/8".parse().ok();
+        assert_eq!(None, cidr);
     }
 
     #[test]
     fn parse_v4_fail_addr3() {
-        let cidr = Ipv4Network::from_cidr("256/8");
-        assert!(cidr.is_err());
+        let cidr: Option<Ipv4Network> = "256/8".parse().ok();
+        assert_eq!(None, cidr);
     }
 
     #[test]
     fn parse_v4_non_zero_host_bits() {
-        let cidr = Ipv4Network::from_cidr("10.1.1.1/24").unwrap();
+        let cidr: Ipv4Network = "10.1.1.1/24".parse().unwrap();
         assert_eq!(cidr.ip(), Ipv4Addr::new(10, 1, 1, 1));
         assert_eq!(cidr.prefix(), 24);
     }
 
     #[test]
     fn parse_v4_fail_prefix() {
-        let cidr = Ipv4Network::from_cidr("0/39");
-        assert!(cidr.is_err());
+        let cidr: Option<Ipv4Network> = "0/39".parse().ok();
+        assert_eq!(None, cidr);
     }
 
     #[test]
     fn size_v4_24bit() {
-        let net = Ipv4Network::from_cidr("0/24").unwrap();
+        let net: Ipv4Network = "0/24".parse().unwrap();
         assert_eq!(net.size(), 256);
     }
 
     #[test]
     fn size_v4_1bit() {
-        let net = Ipv4Network::from_cidr("0/31").unwrap();
+        let net: Ipv4Network = "0/31".parse().unwrap();
         assert_eq!(net.size(), 2);
     }
 
     #[test]
     fn size_v4_max() {
-        let net = Ipv4Network::from_cidr("0/0").unwrap();
+        let net: Ipv4Network = "0/0".parse().unwrap();
         assert_eq!(net.size(), 4_294_967_296);
     }
 
     #[test]
     fn size_v4_min() {
-        let net = Ipv4Network::from_cidr("0/32").unwrap();
+        let net: Ipv4Network = "0/32".parse().unwrap();
         assert_eq!(net.size(), 1);
     }
 
@@ -398,7 +406,7 @@ mod test {
 
     #[test]
     fn iterator_v4() {
-        let cidr = Ipv4Network::from_cidr("192.168.122.0/30").unwrap();
+        let cidr: Ipv4Network = "192.168.122.0/30".parse().unwrap();
         let mut iter = cidr.iter();
         assert_eq!(Ipv4Addr::new(192, 168, 122, 0), iter.next().unwrap());
         assert_eq!(Ipv4Addr::new(192, 168, 122, 1), iter.next().unwrap());
@@ -409,7 +417,7 @@ mod test {
 
     #[test]
     fn iterator_v4_tiny() {
-        let cidr = Ipv4Network::from_cidr("10/32").unwrap();
+        let cidr: Ipv4Network = "10/32".parse().unwrap();
         let mut iter = cidr.iter();
         assert_eq!(Ipv4Addr::new(10, 0, 0, 0), iter.next().unwrap());
         assert_eq!(None, iter.next());
@@ -420,7 +428,7 @@ mod test {
     #[test]
     #[ignore]
     fn iterator_v4_huge() {
-        let cidr = Ipv4Network::from_cidr("0/0").unwrap();
+        let cidr: Ipv4Network = "0/0".parse().unwrap();
         let mut iter = cidr.iter();
         for i in 0..(u32::max_value() as u64 + 1) {
             assert_eq!(i as u32, u32::from(iter.next().unwrap()));
