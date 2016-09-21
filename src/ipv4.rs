@@ -2,7 +2,7 @@ use std::fmt;
 use std::net::Ipv4Addr;
 use std::str::FromStr;
 
-use common::{IpNetworkError, cidr_parts, parse_prefix};
+use common::{IpNetworkError, cidr_parts, parse_prefix, parse_addr};
 
 const IPV4_BITS: u8 = 32;
 
@@ -26,24 +26,9 @@ impl Ipv4Network {
         }
     }
 
-    /// Creates an `Ipv4Network` from parsing a string in CIDR notation.
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// use std::net::Ipv4Addr;
-    /// use ipnetwork::Ipv4Network;
-    ///
-    /// let new = Ipv4Network::new(Ipv4Addr::new(10, 1, 9, 32), 16).unwrap();
-    /// let from_cidr = Ipv4Network::from_cidr("10.1.9.32/16").unwrap();
-    /// assert_eq!(new.ip(), from_cidr.ip());
-    /// assert_eq!(new.prefix(), from_cidr.prefix());
-    /// ```
-    pub fn from_cidr(cidr: &str) -> Result<Ipv4Network, IpNetworkError> {
-        let (addr_str, prefix_str) = try!(cidr_parts(cidr));
-        let addr = try!(Self::parse_addr(addr_str));
-        let prefix = try!(parse_prefix(prefix_str, IPV4_BITS));
-        Self::new(addr, prefix)
+    #[deprecated(since="0.9.1", note="please use `String::parse()` instead")]
+    fn from_cidr(cidr: &str) -> Result<Ipv4Network, IpNetworkError> {
+        cidr.parse()
     }
 
     /// Returns an iterator over `Ipv4Network`. Each call to `next` will return the next
@@ -75,7 +60,7 @@ impl Ipv4Network {
     /// use std::net::Ipv4Addr;
     /// use ipnetwork::Ipv4Network;
     ///
-    /// let net = Ipv4Network::from_cidr("127.0.0.0/16").unwrap();
+    /// let net: Ipv4Network = "127.0.0.0/16".parse().unwrap();
     /// assert_eq!(net.mask(), Ipv4Addr::new(255, 255, 0, 0));
     /// ```
     pub fn mask(&self) -> Ipv4Addr {
@@ -93,7 +78,7 @@ impl Ipv4Network {
     /// use std::net::Ipv4Addr;
     /// use ipnetwork::Ipv4Network;
     ///
-    /// let net = Ipv4Network::from_cidr("10.1.9.32/16").unwrap();
+    /// let net: Ipv4Network = "10.1.9.32/16".parse().unwrap();
     /// assert_eq!(net.network(), Ipv4Addr::new(10, 1, 0, 0));
     /// ```
     pub fn network(&self) -> Ipv4Addr {
@@ -111,7 +96,7 @@ impl Ipv4Network {
     /// use std::net::Ipv4Addr;
     /// use ipnetwork::Ipv4Network;
     ///
-    /// let net = Ipv4Network::from_cidr("10.9.0.32/16").unwrap();
+    /// let net: Ipv4Network = "10.9.0.32/16".parse().unwrap();
     /// assert_eq!(net.broadcast(), Ipv4Addr::new(10, 9, 255, 255));
     /// ```
     pub fn broadcast(&self) -> Ipv4Addr {
@@ -128,7 +113,7 @@ impl Ipv4Network {
     /// use std::net::Ipv4Addr;
     /// use ipnetwork::Ipv4Network;
     ///
-    /// let net = Ipv4Network::from_cidr("127.0.0.0/24").unwrap();
+    /// let net: Ipv4Network = "127.0.0.0/24".parse().unwrap();
     /// assert!(net.contains(Ipv4Addr::new(127, 0, 0, 70)));
     /// assert!(!net.contains(Ipv4Addr::new(127, 0, 1, 70)));
     /// ```
@@ -146,10 +131,10 @@ impl Ipv4Network {
     /// use std::net::Ipv4Addr;
     /// use ipnetwork::Ipv4Network;
     ///
-    /// let net = Ipv4Network::from_cidr("10.1.0.0/16").unwrap();
+    /// let net: Ipv4Network = "10.1.0.0/16".parse().unwrap();
     /// assert_eq!(net.size(), 65536);
     ///
-    /// let tinynet = Ipv4Network::from_cidr("0.0.0.0/32").unwrap();
+    /// let tinynet: Ipv4Network = "0.0.0.0/32".parse().unwrap();
     /// assert_eq!(tinynet.size(), 1);
     /// ```
     pub fn size(&self) -> u64 {
@@ -166,12 +151,12 @@ impl Ipv4Network {
     /// use std::net::Ipv4Addr;
     /// use ipnetwork::Ipv4Network;
     ///
-    /// let net = Ipv4Network::from_cidr("192.168.0.0/24").unwrap();
+    /// let net: Ipv4Network = "192.168.0.0/24".parse().unwrap();
     /// assert_eq!(net.nth(0).unwrap(), Ipv4Addr::new(192, 168, 0, 0));
     /// assert_eq!(net.nth(15).unwrap(), Ipv4Addr::new(192, 168, 0, 15));
     /// assert!(net.nth(256).is_none());
     ///
-    /// let net2 = Ipv4Network::from_cidr("10.0.0.0/16").unwrap();
+    /// let net2: Ipv4Network = "10.0.0.0/16".parse().unwrap();
     /// assert_eq!(net2.nth(256).unwrap(), Ipv4Addr::new(10, 0, 1, 0));
     /// ```
     pub fn nth(&self, n: u32) -> Option<Ipv4Addr> {
@@ -204,10 +189,27 @@ impl fmt::Display for Ipv4Network {
     }
 }
 
+
+/// Creates an `Ipv4Network` from parsing a string in CIDR notation.
+///
+/// # Examples
+///
+/// ```
+/// use std::net::Ipv4Addr;
+/// use ipnetwork::Ipv4Network;
+///
+/// let new = Ipv4Network::new(Ipv4Addr::new(10, 1, 9, 32), 16).unwrap();
+/// let from_cidr: Ipv4Network = "10.1.9.32/16".parse().unwrap();
+/// assert_eq!(new.ip(), from_cidr.ip());
+/// assert_eq!(new.prefix(), from_cidr.prefix());
+/// ```
 impl FromStr for Ipv4Network {
     type Err = IpNetworkError;
     fn from_str(s: &str) -> Result<Ipv4Network, IpNetworkError> {
-        Ipv4Network::from_cidr(s)
+        let (addr_str, prefix_str) = try!(cidr_parts(s));
+        let addr = try!(parse_addr(addr_str));
+        let prefix = try!(parse_prefix(prefix_str, IPV4_BITS));
+        Ipv4Network::new(addr, prefix)
     }
 }
 
