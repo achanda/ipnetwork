@@ -28,12 +28,9 @@ impl Ipv6Network {
         }
     }
 
-    pub fn from_cidr(cidr: &str) -> Result<Ipv6Network, IpNetworkError> {
-        let (addr_str, prefix_str) = try!(cidr_parts(cidr));
-        let addr = try!(Ipv6Addr::from_str(addr_str)
-            .map_err(|_| IpNetworkError::InvalidAddr(format!("{}", addr_str))));
-        let prefix = try!(parse_prefix(prefix_str, IPV6_BITS));
-        Self::new(addr, prefix)
+    #[deprecated(since="0.9.1", note="please use `String::parse()` instead")]
+    fn from_cidr(cidr: &str) -> Result<Ipv6Network, IpNetworkError> {
+        cidr.parse()
     }
 
     pub fn ip(&self) -> Ipv6Addr {
@@ -53,7 +50,7 @@ impl Ipv6Network {
     /// use std::net::Ipv6Addr;
     /// use ipnetwork::Ipv6Network;
     ///
-    /// let net = Ipv6Network::from_cidr("ff01::0/32").unwrap();
+    /// let net: Ipv6Network = "ff01::0/32".parse().unwrap();
     /// assert_eq!(net.mask(), Ipv6Addr::new(0xffff, 0xffff, 0, 0, 0, 0, 0, 0));
     /// ```
     pub fn mask(&self) -> Ipv6Addr {
@@ -75,7 +72,7 @@ impl Ipv6Network {
     /// use std::net::Ipv6Addr;
     /// use ipnetwork::Ipv6Network;
     ///
-    /// let net = Ipv6Network::from_cidr("ff01::0/32").unwrap();
+    /// let net: Ipv6Network = "ff01::0/32".parse().unwrap();
     /// assert!(net.contains(Ipv6Addr::new(0xff01, 0, 0, 0, 0, 0, 0, 0x1)));
     /// assert!(!net.contains(Ipv6Addr::new(0xffff, 0, 0, 0, 0, 0, 0, 0x1)));
     /// ```
@@ -83,9 +80,18 @@ impl Ipv6Network {
         let a = self.addr.segments();
         let b = ip.segments();
         let addrs = Iterator::zip(a.iter(), b.iter());
-        self.mask().segments().iter().zip(addrs).all(|(mask, (a, b))|
-            a & mask == b & mask
-        )
+        self.mask().segments().iter().zip(addrs).all(|(mask, (a, b))| a & mask == b & mask)
+    }
+}
+
+impl FromStr for Ipv6Network {
+    type Err = IpNetworkError;
+    fn from_str(s: &str) -> Result<Ipv6Network, IpNetworkError> {
+        let (addr_str, prefix_str) = try!(cidr_parts(s));
+        let addr = try!(Ipv6Addr::from_str(addr_str)
+            .map_err(|_| IpNetworkError::InvalidAddr(format!("{}", addr_str))));
+        let prefix = try!(parse_prefix(prefix_str, IPV6_BITS));
+        Ipv6Network::new(addr, prefix)
     }
 }
 
@@ -149,28 +155,28 @@ mod test {
 
     #[test]
     fn parse_v6() {
-        let cidr = Ipv6Network::from_cidr("::1/0").unwrap();
+        let cidr: Ipv6Network = "::1/0".parse().unwrap();
         assert_eq!(cidr.ip(), Ipv6Addr::new(0, 0, 0, 0, 0, 0, 0, 1));
         assert_eq!(cidr.prefix(), 0);
     }
 
     #[test]
     fn parse_v6_2() {
-        let cidr = Ipv6Network::from_cidr("FF01:0:0:17:0:0:0:2/64").unwrap();
+        let cidr: Ipv6Network = "FF01:0:0:17:0:0:0:2/64".parse().unwrap();
         assert_eq!(cidr.ip(), Ipv6Addr::new(0xff01, 0, 0, 0x17, 0, 0, 0, 0x2));
         assert_eq!(cidr.prefix(), 64);
     }
 
     #[test]
     fn parse_v6_fail_addr() {
-        let cidr = Ipv6Network::from_cidr("2001::1::/8");
-        assert!(cidr.is_err());
+        let cidr: Option<Ipv6Network> = "2001::1::/8".parse().ok();
+        assert_eq!(None, cidr);
     }
 
     #[test]
     fn parse_v6_fail_prefix() {
-        let cidr = Ipv6Network::from_cidr("::1/129");
-        assert!(cidr.is_err());
+        let cidr: Option<Ipv6Network> = "::1/129".parse().ok();
+        assert_eq!(None, cidr);
     }
 
     #[test]
