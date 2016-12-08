@@ -24,8 +24,8 @@ pub enum IpNetwork {
 impl IpNetwork {
     pub fn new(ip: IpAddr, prefix: u8) -> Result<IpNetwork, IpNetworkError> {
         match ip {
-            IpAddr::V4(a) => Ok(IpNetwork::V4(try!(Ipv4Network::new(a, prefix)))),
-            IpAddr::V6(a) => Ok(IpNetwork::V6(try!(Ipv6Network::new(a, prefix)))),
+            IpAddr::V4(a) => Ok(IpNetwork::V4(Ipv4Network::new(a, prefix)?)),
+            IpAddr::V6(a) => Ok(IpNetwork::V6(Ipv6Network::new(a, prefix)?)),
         }
     }
 

@@ -175,9 +175,9 @@ impl Ipv4Network {
             if i >= 4 {
                 return Err(IpNetworkError::InvalidAddr(format!("More than 4 bytes: {}", addr)));
             }
-            bytes[i] = try!(byte.map_err(|_| {
+            bytes[i] = byte.map_err(|_| {
                 IpNetworkError::InvalidAddr(format!("All bytes not 0-255: {}", addr))
-            }));
+            })?;
         }
         Ok(Ipv4Addr::new(bytes[0], bytes[1], bytes[2], bytes[3]))
     }
@@ -206,9 +206,9 @@ impl fmt::Display for Ipv4Network {
 impl FromStr for Ipv4Network {
     type Err = IpNetworkError;
     fn from_str(s: &str) -> Result<Ipv4Network, IpNetworkError> {
-        let (addr_str, prefix_str) = try!(cidr_parts(s));
-        let addr = try!(parse_addr(addr_str));
-        let prefix = try!(parse_prefix(prefix_str, IPV4_BITS));
+        let (addr_str, prefix_str) = cidr_parts(s)?;
+        let addr = parse_addr(addr_str)?;
+        let prefix = parse_prefix(prefix_str, IPV4_BITS)?;
         Ipv4Network::new(addr, prefix)
     }
 }
