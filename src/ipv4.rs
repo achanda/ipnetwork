@@ -181,6 +181,31 @@ impl Ipv4Network {
         }
         Ok(Ipv4Addr::new(bytes[0], bytes[1], bytes[2], bytes[3]))
     }
+
+	fn from_range(start: Ipv4Addr, end: Ipv4Addr) -> Result<Vec<Ipv4Network>, IpNetworkError> {
+		let ustart = u32::from(start);
+		let uend = u32::from(end);
+        let mut result: Vec<Ipv4Network> = Vec::new();
+        while uend > ustart {
+            let mut maxSize: u8 = 32;
+            while maxSize > 0 {
+                let mask = 2u8.pow(32) - 2u8.pow(32u32 - maxSize as u32);
+                let maskBase = ustart & mask;
+                if maskBase != ustart {
+                    break
+                }
+                maxSize = maxSize - 1;
+            }
+            let x = ((uend - ustart + 1) as f32).log10() / 2.0f32.log10();
+            let maxDiff = 32 - x.floor();
+            if maxSize < maxDiff {
+                maxSize = maxDiff
+            }
+            result.append(Ipv4Network::new(Ipv4Addr::from(ustart), maxSize));
+            ustart = ustart + 2u32.pow(32 - maxSize);
+        }
+        return result
+	}
 }
 
 impl fmt::Display for Ipv4Network {
@@ -451,4 +476,17 @@ mod test {
         let prefix = ipv4_mask_to_prefix(mask);
         assert!(prefix.is_err());
     }
+
+    #[test]
+    fn v4_network_from_range() {
+        let start: Ipv4Addr = "5.39.40.96".parse().unwrap();
+        let end: Ipv4Addr = "5.39.40.127".parse().unwrap();
+        let cidr: Ipv4Network = "5.39.40.96/27".parse().unwrap();
+        assert_eq!(Ipv4Network::from_range(start, end).unwrap(), cidr);
+    }
+
+    //#[test]
+    //fn v4_network_from_range_negative() {
+        
+    //}
 }
