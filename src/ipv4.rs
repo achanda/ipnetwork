@@ -26,11 +26,6 @@ impl Ipv4Network {
         }
     }
 
-    #[deprecated(since="0.9.1", note="please use `String::parse()` instead")]
-    fn from_cidr(cidr: &str) -> Result<Ipv4Network, IpNetworkError> {
-        cidr.parse()
-    }
-
     /// Returns an iterator over `Ipv4Network`. Each call to `next` will return the next
     /// `Ipv4Addr` in the given network. `None` will be returned when there are no more
     /// addresses.
