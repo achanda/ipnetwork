@@ -28,11 +28,6 @@ impl Ipv6Network {
         }
     }
 
-    #[deprecated(since="0.9.1", note="please use `String::parse()` instead")]
-    fn from_cidr(cidr: &str) -> Result<Ipv6Network, IpNetworkError> {
-        cidr.parse()
-    }
-
     pub fn ip(&self) -> Ipv6Addr {
         self.addr
     }
