@@ -8,7 +8,7 @@ use common::{IpNetworkError, cidr_parts, parse_prefix};
 const IPV6_BITS: u8 = 128;
 const IPV6_SEGMENT_BITS: u8 = 16;
 
-#[derive(Debug,Clone,Copy,Hash,PartialEq,Eq)]
+#[derive(Debug, Clone, Copy, Hash, PartialEq, Eq)]
 pub struct Ipv6Network {
     addr: Ipv6Addr,
     prefix: u8,

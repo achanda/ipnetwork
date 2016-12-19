@@ -15,7 +15,7 @@ pub use ipv6::{Ipv6Network, ipv6_mask_to_prefix};
 pub use common::IpNetworkError;
 
 // A network
-#[derive(Debug,Clone,Copy,Hash,PartialEq,Eq)]
+#[derive(Debug, Clone, Copy, Hash, PartialEq, Eq, PartialOrd, Ord)]
 pub enum IpNetwork {
     V4(Ipv4Network),
     V6(Ipv6Network),
