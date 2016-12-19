@@ -22,6 +22,10 @@ pub enum IpNetwork {
 }
 
 impl IpNetwork {
+    /// Constructs a new `IpNetwork` from a given `IpAddr` and a prefix denoting the
+    /// network size. If the prefix is larger than 32 (for IPv4) or 128 (for IPv6), this
+    /// will raise an `IpNetworkError::InvalidPrefix` error. Support for IPv6 is not
+    /// complete yet.
     pub fn new(ip: IpAddr, prefix: u8) -> Result<IpNetwork, IpNetworkError> {
         match ip {
             IpAddr::V4(a) => Ok(IpNetwork::V4(Ipv4Network::new(a, prefix)?)),
@@ -29,6 +33,16 @@ impl IpNetwork {
         }
     }
 
+    /// Returns the IP part of a given `IpNetwork`
+    ///
+    /// # Example
+    /// ```
+    /// use std::net::{Ipv4Addr, Ipv6Addr};
+    /// use ipnetwork::IpNetwork;
+    ///
+    /// assert_eq!(IpNetwork::V4("10.9.0.32/16".parse().unwrap()).ip(), "10.9.0.32".parse().unwrap());
+    /// assert_eq!(IpNetwork::V6("ff01::0/32".parse().unwrap()).ip(), "ff01::0".parse().unwrap());
+    /// ```
     pub fn ip(&self) -> IpAddr {
         match *self {
             IpNetwork::V4(ref a) => IpAddr::V4(a.ip()),
@@ -36,6 +50,15 @@ impl IpNetwork {
         }
     }
 
+    /// Returns the prefix of the given `IpNetwork`
+    ///
+    /// # Example
+    /// ```
+    /// use ipnetwork::IpNetwork;
+    ///
+    /// assert_eq!(IpNetwork::V4("10.9.0.32/16".parse().unwrap()).prefix(), 16u8);
+    /// assert_eq!(IpNetwork::V6("ff01::0/32".parse().unwrap()).prefix(), 32u8);
+    /// ```
     pub fn prefix(&self) -> u8 {
         match *self {
             IpNetwork::V4(ref a) => a.prefix(),
