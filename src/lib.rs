@@ -2,7 +2,6 @@
 #![cfg_attr(feature = "dev", feature(plugin))]
 #![cfg_attr(feature = "dev", plugin(clippy))]
 #![crate_type = "lib"]
-#[allow(dead_code)]
 
 use std::net::IpAddr;
 
@@ -63,6 +62,22 @@ impl IpNetwork {
         match *self {
             IpNetwork::V4(ref a) => a.prefix(),
             IpNetwork::V6(ref a) => a.prefix(),
+        }
+    }
+
+    /// Returns the mask of the given `IpNetwork`
+    ///
+    /// # Example
+    /// ```
+    /// use ipnetwork::IpNetwork;
+    ///
+    /// assert_eq!(IpNetwork::V4("10.9.0.32/16".parse().unwrap()).mask(), 16u8);
+    /// assert_eq!(IpNetwork::V6("ff01::0/32".parse().unwrap()).mask(), 32u8);
+    ///```
+    pub fn mask(&self) -> IpAddr {
+        match *self {
+            IpNetwork::V4(ref a) => IpAddr::V4(a.mask()),
+            IpNetwork::V6(ref a) => IpAddr::V6(a.mask()),
         }
     }
 }
