@@ -1,5 +1,6 @@
 use std::net::Ipv4Addr;
 
+/// Represents a bunch of errors that can occur while working with a `IpNetwork`
 #[derive(Debug,Clone,PartialEq,Eq)]
 pub enum IpNetworkError {
     InvalidAddr(String),

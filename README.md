@@ -1,3 +1,5 @@
+ipnetwork
+===
 This is a library to work with IPv4 and v6 CIDRs in rust
 The IPv4 implementation is stable, IPv6 implementation is not done yet.
 
@@ -9,8 +11,7 @@ Run Clippy by doing
 cargo test --features "dev"
 ```
 
-Installation
-=============
+### Installation
 This crate works with Cargo. Assuming you have Rust and Cargo installed, simply check out the source and run tests:
 ```
 git clone https://github.com/achanda/ipnetwork

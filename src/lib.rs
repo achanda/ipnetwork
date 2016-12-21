@@ -1,3 +1,6 @@
+//! The `ipnetwork` crate provides a set of APIs to work with IP CIDRs in
+//! Rust. Implementation for IPv4 is more or less stable, IPv6 implementation
+//! is still WIP.
 #![cfg_attr(feature = "dev", feature(plugin))]
 #![cfg_attr(feature = "dev", plugin(clippy))]
 #![crate_type = "lib"]
@@ -12,7 +15,8 @@ pub use ipv4::{Ipv4Network, ipv4_mask_to_prefix};
 pub use ipv6::{Ipv6Network, ipv6_mask_to_prefix};
 pub use common::IpNetworkError;
 
-// A network
+/// Represents a generic network range. This type can have two variants:
+/// the v4 and the v6 case.
 #[derive(Debug,Clone,Copy,Hash,PartialEq,Eq)]
 pub enum IpNetwork {
     V4(Ipv4Network),
