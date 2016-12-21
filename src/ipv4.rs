@@ -6,6 +6,7 @@ use common::{IpNetworkError, cidr_parts, parse_prefix, parse_addr};
 
 const IPV4_BITS: u8 = 32;
 
+/// Represents a network range where the IP addresses are of v4
 #[derive(Debug,Clone,Copy,Hash,PartialEq,Eq)]
 pub struct Ipv4Network {
     addr: Ipv4Addr,
