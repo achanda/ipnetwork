@@ -83,8 +83,7 @@ impl FromStr for Ipv6Network {
     type Err = IpNetworkError;
     fn from_str(s: &str) -> Result<Ipv6Network, IpNetworkError> {
         let (addr_str, prefix_str) = cidr_parts(s)?;
-        let addr = Ipv6Addr::from_str(addr_str)
-            .map_err(|_| IpNetworkError::InvalidAddr(format!("{}", addr_str)))?;
+        let addr = Ipv6Addr::from_str(addr_str).map_err(|_| IpNetworkError::InvalidAddr(addr_str.to_string()))?;
         let prefix = parse_prefix(prefix_str, IPV6_BITS)?;
         Ipv6Network::new(addr, prefix)
     }
