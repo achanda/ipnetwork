@@ -7,7 +7,7 @@ pub enum IpNetworkError {
     InvalidCidrFormat(String),
 }
 
-pub fn cidr_parts<'a>(cidr: &'a str) -> Result<(&'a str, &'a str), IpNetworkError> {
+pub fn cidr_parts(cidr: &str) -> Result<(&str, &str), IpNetworkError> {
     let parts = cidr.split('/').collect::<Vec<&str>>();
     if parts.len() == 2 {
         Ok((parts[0], parts[1]))

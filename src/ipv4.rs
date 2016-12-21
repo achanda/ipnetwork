@@ -341,8 +341,7 @@ mod test {
         let mut map = HashMap::new();
         let net = Ipv4Network::new(Ipv4Addr::new(127, 0, 0, 1), 16).unwrap();
         map.insert(net, 137);
-        let out = map.get(&net).unwrap();
-        assert_eq!(137, *out);
+        assert_eq!(137, map[&net]);
     }
 
     #[test]
