@@ -85,6 +85,18 @@ impl IpNetwork {
     }
 }
 
+impl From<Ipv4Network> for IpNetwork {
+    fn from(v4: Ipv4Network) -> IpNetwork {
+        IpNetwork::V4(v4)
+    }
+}
+
+impl From<Ipv6Network> for IpNetwork {
+    fn from(v6: Ipv6Network) -> IpNetwork {
+        IpNetwork::V6(v6)
+    }
+}
+
 /// Converts a `IpAddr` network mask into a prefix.
 /// If the mask is invalid this will return an `IpNetworkError::InvalidPrefix`.
 pub fn ip_mask_to_prefix(mask: IpAddr) -> Result<u8, IpNetworkError> {
