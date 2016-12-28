@@ -83,6 +83,44 @@ impl IpNetwork {
             IpNetwork::V6(ref a) => IpAddr::V6(a.mask()),
         }
     }
+
+    /// Returns true if the IP in this `IpNetwork` is a valid IPv4 address,
+    /// false if it's a valid IPv6 address.
+    ///
+    /// # Example
+    /// 
+    ///```
+    /// use ipnetwork::IpNetwork;
+    /// 
+    /// let v4: IpNetwork = IpNetwork::V4("10.9.0.32/16".parse().unwrap());
+    /// assert_eq!(v4.is_ipv4(), true);
+    /// assert_eq!(v4.is_ipv6(), false);
+    ///```
+    pub fn is_ipv4(&self) -> bool {
+        match *self {
+            IpNetwork::V4(_) => true,
+            IpNetwork::V6(_) => false,
+        }
+    }
+
+    /// Returns true if the IP in this `IpNetwork` is a valid IPv6 address,
+    /// false if it's a valid IPv4 address.
+    ///
+    /// # Example
+    ///
+    ///```
+    /// use ipnetwork::IpNetwork;
+    ///
+    /// let v6: IpNetwork = IpNetwork::V6("ff01::0/32".parse().unwrap());
+    /// assert_eq!(v6.is_ipv6(), true);
+    /// assert_eq!(v6.is_ipv4(), false);
+    ///```
+    pub fn is_ipv6(&self) -> bool {
+        match *self {
+            IpNetwork::V4(_) => false,
+            IpNetwork::V6(_) => true,
+        }
+    }
 }
 
 impl From<Ipv4Network> for IpNetwork {
