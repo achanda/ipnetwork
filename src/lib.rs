@@ -88,10 +88,10 @@ impl IpNetwork {
     /// false if it's a valid IPv6 address.
     ///
     /// # Example
-    /// 
+    ///
     ///```
     /// use ipnetwork::IpNetwork;
-    /// 
+    ///
     /// let v4: IpNetwork = IpNetwork::V4("10.9.0.32/16".parse().unwrap());
     /// assert_eq!(v4.is_ipv4(), true);
     /// assert_eq!(v4.is_ipv6(), false);
