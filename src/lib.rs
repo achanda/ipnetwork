@@ -11,6 +11,8 @@ mod ipv4;
 mod ipv6;
 mod common;
 
+use std::str::FromStr;
+
 pub use ipv4::{Ipv4Network, ipv4_mask_to_prefix};
 pub use ipv6::{Ipv6Network, ipv6_mask_to_prefix};
 pub use common::IpNetworkError;
@@ -119,6 +121,36 @@ impl IpNetwork {
         match *self {
             IpNetwork::V4(_) => false,
             IpNetwork::V6(_) => true,
+        }
+    }
+}
+
+/// Constructs a new `IpNetwork` from a given &str with a prefix denoting the
+/// network size.  If the prefix is larger than 32 (for IPv4) or 128 (for IPv6), this
+/// will raise an `IpNetworkError::InvalidPrefix` error.
+/// # Examples
+///
+/// ```
+/// use std::net::Ipv4Addr;
+/// use ipnetwork::Ipv4Network;
+/// use ipnetwork::IpNetwork;
+///
+/// let expected = IpNetwork::V4(Ipv4Network::new(Ipv4Addr::new(10, 1, 9, 32), 16).unwrap());
+/// let from_cidr: IpNetwork = "10.1.9.32/16".parse().unwrap();
+/// assert_eq!(expected.ip(), from_cidr.ip());
+/// assert_eq!(expected.prefix(), from_cidr.prefix());
+impl FromStr for IpNetwork {
+    type Err = IpNetworkError;
+    fn from_str(s: &str) -> Result<IpNetwork, IpNetworkError> {
+        let v4addr: Result<Ipv4Network, IpNetworkError> = s.parse();
+        let v6addr: Result<Ipv6Network, IpNetworkError> = s.parse();
+
+        if v4addr.is_ok() {
+            Ok(IpNetwork::V4(v4addr.unwrap()))
+        } else if v6addr.is_ok() {
+            Ok(IpNetwork::V6(v6addr.unwrap()))
+        } else {
+            Err(IpNetworkError::InvalidAddr(s.to_string()))
         }
     }
 }
