@@ -1,4 +1,6 @@
 use std::net::Ipv4Addr;
+use std::fmt;
+use std::error::Error;
 
 /// Represents a bunch of errors that can occur while working with a `IpNetwork`
 #[derive(Debug,Clone,PartialEq,Eq)]
@@ -6,6 +8,29 @@ pub enum IpNetworkError {
     InvalidAddr(String),
     InvalidPrefix,
     InvalidCidrFormat(String),
+}
+
+impl fmt::Display for IpNetworkError {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        use IpNetworkError::*;
+        match *self {
+            InvalidAddr(ref s) => write!(f, "invalid address: {}", s),
+            InvalidPrefix => write!(f, "invalid prifex"),
+            InvalidCidrFormat(ref s) => write!(f, "invalid cidr format: {}", s),
+        }
+    }
+}
+
+impl Error for IpNetworkError {
+    fn description(&self) -> &str {
+        use IpNetworkError::*;
+        match *self {
+            InvalidAddr(_) => "address is invalid",
+            InvalidPrefix => "prefix is invalid",
+            InvalidCidrFormat(_) => "cidr is invalid",
+        }
+
+    }
 }
 
 pub fn cidr_parts(cidr: &str) -> Result<(&str, &str), IpNetworkError> {
