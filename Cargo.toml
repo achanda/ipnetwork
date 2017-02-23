@@ -1,6 +1,6 @@
 [package]
 name = "ipnetwork"
-version = "0.12.1"
+version = "0.12.2"
 authors = ["Abhishek Chanda <abhishek.becs@gmail.com>", "Linus Färnstrand <faern@faern.net>"]
 description = "A library to work with IP CIDRs in Rust, heavily WIP"
 license = "Apache-2.0"
