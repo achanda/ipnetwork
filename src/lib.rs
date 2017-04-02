@@ -62,14 +62,18 @@ impl IpNetwork {
         }
     }
 
-    /// Returns the mask of the given `IpNetwork`
+    /// Returns the mask for this `IpNetwork`
+    /// That means the `prefix` most significant bits will be 1 and the rest 0
     ///
     /// # Example
     /// ```
     /// use ipnetwork::IpNetwork;
+    /// use std::net::{Ipv4Addr, Ipv6Addr};
     ///
-    /// assert_eq!(IpNetwork::V4("10.9.0.32/16".parse().unwrap()).mask(), 16u8);
-    /// assert_eq!(IpNetwork::V6("ff01::0/32".parse().unwrap()).mask(), 32u8);
+    /// let v4_net: IpNetwork = "10.9.0.32/16".parse().unwrap();
+    /// assert_eq!(v4_net.mask(), Ipv4Addr::new(255, 255, 0, 0));
+    /// let v6_net: IpNetwork = "ff01::0/32".parse().unwrap();
+    /// assert_eq!(v6_net.mask(), Ipv6Addr::new(0xffff, 0xffff, 0, 0, 0, 0, 0, 0));
     ///```
     pub fn mask(&self) -> IpAddr {
         match *self {
