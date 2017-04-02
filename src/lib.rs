@@ -62,7 +62,7 @@ impl IpNetwork {
         }
     }
 
-    /// Returns the mask for this `IpNetwork`
+    /// Returns the mask for this `IpNetwork`.
     /// That means the `prefix` most significant bits will be 1 and the rest 0
     ///
     /// # Example
