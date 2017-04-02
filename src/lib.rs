@@ -117,30 +117,27 @@ impl IpNetwork {
     }
 }
 
-/// Constructs a new `IpNetwork` from a given &str with a prefix denoting the
-/// network size.  If the prefix is larger than 32 (for IPv4) or 128 (for IPv6), this
-/// will raise an `IpNetworkError::InvalidPrefix` error.
+/// Tries to parse the given string into a `IpNetwork`. Will first try to parse
+/// it as an `Ipv4Network` and if that fails as an `Ipv6Network`. If both
+/// fails it will return an `InvalidAddr` error.
+///
 /// # Examples
 ///
 /// ```
 /// use std::net::Ipv4Addr;
-/// use ipnetwork::Ipv4Network;
-/// use ipnetwork::IpNetwork;
+/// use ipnetwork::{IpNetwork, Ipv4Network};
 ///
 /// let expected = IpNetwork::V4(Ipv4Network::new(Ipv4Addr::new(10, 1, 9, 32), 16).unwrap());
 /// let from_cidr: IpNetwork = "10.1.9.32/16".parse().unwrap();
-/// assert_eq!(expected.ip(), from_cidr.ip());
-/// assert_eq!(expected.prefix(), from_cidr.prefix());
+/// assert_eq!(expected, from_cidr);
+/// ```
 impl FromStr for IpNetwork {
     type Err = IpNetworkError;
     fn from_str(s: &str) -> Result<IpNetwork, IpNetworkError> {
-        let v4addr: Result<Ipv4Network, IpNetworkError> = s.parse();
-        let v6addr: Result<Ipv6Network, IpNetworkError> = s.parse();
-
-        if v4addr.is_ok() {
-            Ok(IpNetwork::V4(v4addr.unwrap()))
-        } else if v6addr.is_ok() {
-            Ok(IpNetwork::V6(v6addr.unwrap()))
+        if let Ok(net) = Ipv4Network::from_str(s) {
+            Ok(IpNetwork::V4(net))
+        } else if let Ok(net) = Ipv6Network::from_str(s) {
+            Ok(IpNetwork::V6(net))
         } else {
             Err(IpNetworkError::InvalidAddr(s.to_string()))
         }
