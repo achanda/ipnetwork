@@ -5,6 +5,7 @@
 #![cfg_attr(feature = "dev", plugin(clippy))]
 #![crate_type = "lib"]
 
+use std::fmt;
 use std::net::IpAddr;
 
 mod ipv4;
@@ -155,6 +156,15 @@ impl From<Ipv4Network> for IpNetwork {
 impl From<Ipv6Network> for IpNetwork {
     fn from(v6: Ipv6Network) -> IpNetwork {
         IpNetwork::V6(v6)
+    }
+}
+
+impl fmt::Display for IpNetwork {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match *self {
+            IpNetwork::V4(net) => net.fmt(f),
+            IpNetwork::V6(net) => net.fmt(f),
+        }
     }
 }
 
