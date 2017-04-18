@@ -11,7 +11,10 @@ documentation = "https://docs.rs/ipnetwork/"
 
 [dependencies]
 clippy = {version = "0.0.104", optional = true}
+serde = {version = "0.9", optional = true}
+serde_derive = {version = "0.9", optional = true}
 
 [features]
 default = []
 dev = ["clippy"]
+with-serde = ["serde", "serde_derive"]

@@ -9,7 +9,8 @@ const IPV6_BITS: u8 = 128;
 const IPV6_SEGMENT_BITS: u8 = 16;
 
 /// Represents a network range where the IP addresses are of v6
-#[derive(Debug,Clone,Copy,Hash,PartialEq,Eq)]
+#[cfg_attr(feature = "with-serde", derive(Serialize, Deserialize))]
+#[derive(Debug, Clone, Copy, Hash, PartialEq, Eq)]
 pub struct Ipv6Network {
     addr: Ipv6Addr,
     prefix: u8,

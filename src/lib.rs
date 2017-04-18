@@ -5,6 +5,12 @@
 #![cfg_attr(feature = "dev", plugin(clippy))]
 #![crate_type = "lib"]
 
+#[cfg(feature = "with-serde")]
+extern crate serde;
+#[cfg(feature = "with-serde")]
+#[macro_use]
+extern crate serde_derive;
+
 use std::fmt;
 use std::net::IpAddr;
 
@@ -20,7 +26,8 @@ pub use common::IpNetworkError;
 
 /// Represents a generic network range. This type can have two variants:
 /// the v4 and the v6 case.
-#[derive(Debug,Clone,Copy,Hash,PartialEq,Eq)]
+#[cfg_attr(feature = "with-serde", derive(Serialize, Deserialize))]
+#[derive(Debug, Clone, Copy, Hash, PartialEq, Eq)]
 pub enum IpNetwork {
     V4(Ipv4Network),
     V6(Ipv6Network),
