@@ -117,7 +117,7 @@ impl Iterator for Ipv6NetworkIterator {
 
     fn next(&mut self) -> Option<Ipv6Addr> {
 
-        if self.current <= self.end {
+        if self.next <= self.end {
 
             let next = Ipv6Addr::from(self.next);
             self.next += 1;

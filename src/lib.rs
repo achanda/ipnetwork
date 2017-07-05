@@ -3,6 +3,7 @@
 //! is still WIP.
 #![cfg_attr(feature = "dev", feature(plugin))]
 #![cfg_attr(feature = "dev", plugin(clippy))]
+#![feature(i128_type)]
 #![crate_type = "lib"]
 
 use std::fmt;
