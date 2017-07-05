@@ -29,6 +29,23 @@ impl Ipv6Network {
         }
     }
 
+    pub fn iter(&self) -> Ipv6NetworkIterator {
+
+        let dec = u128::from(self.addr);
+
+        let mask = u128::max_value() << (IPV6_BITS - self.prefix);
+        let start: u128 = dec & mask;
+
+        let mask = u128::max_value() >> self.prefix;
+        let end: u128 = dec | mask;
+
+        Ipv6NetworkIterator{
+            next: start,
+            end: end,
+        }
+
+    }
+
     pub fn ip(&self) -> Ipv6Addr {
         self.addr
     }
@@ -87,6 +104,31 @@ impl FromStr for Ipv6Network {
         let addr = Ipv6Addr::from_str(addr_str).map_err(|_| IpNetworkError::InvalidAddr(addr_str.to_string()))?;
         let prefix = parse_prefix(prefix_str, IPV6_BITS)?;
         Ipv6Network::new(addr, prefix)
+    }
+}
+
+pub struct Ipv6NetworkIterator {
+    next: u128,
+    end: u128,
+}
+
+impl Iterator for Ipv6NetworkIterator {
+    type Item = Ipv6Addr;
+
+    fn next(&mut self) -> Option<Ipv6Addr> {
+
+        if self.current <= self.end {
+
+            let next = Ipv6Addr::from(self.next);
+            self.next += 1;
+            Some(next)
+
+        } else {
+
+            None
+
+        }
+
     }
 }
 
