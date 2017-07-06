@@ -32,11 +32,13 @@ impl Ipv6Network {
     pub fn iter(&self) -> Ipv6NetworkIterator {
 
         let dec = u128::from(self.addr);
+        let max = u128::max_value();
+        let prefix = self.prefix;
 
-        let mask = u128::max_value() << (IPV6_BITS - self.prefix);
+        let mask = if prefix == 0 { 0 } else { max << (IPV6_BITS - prefix) };
         let start: u128 = dec & mask;
 
-        let mask = u128::max_value() >> self.prefix;
+        let mask = if prefix == IPV6_BITS { 0 } else { max >> prefix };
         let end: u128 = dec | mask;
 
         Ipv6NetworkIterator{
