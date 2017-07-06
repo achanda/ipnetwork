@@ -29,16 +29,19 @@ impl Ipv6Network {
         }
     }
 
+    /// Returns an iterator over `Ipv6Network`. Each call to `next` will return the next
+    /// `Ipv6Addr` in the given network. `None` will be returned when there are no more
+    /// addresses.
     pub fn iter(&self) -> Ipv6NetworkIterator {
 
         let dec = u128::from(self.addr);
         let max = u128::max_value();
         let prefix = self.prefix;
 
-        let mask = if prefix == 0 { 0 } else { max << (IPV6_BITS - prefix) };
+        let mask = max.checked_shl((IPV6_BITS - prefix) as u32).unwrap_or(0);
         let start: u128 = dec & mask;
 
-        let mask = if prefix == IPV6_BITS { 0 } else { max >> prefix };
+        let mask = max.checked_shr(prefix as u32).unwrap_or(0);
         let end: u128 = dec | mask;
 
         Ipv6NetworkIterator{
@@ -252,4 +255,33 @@ mod test {
         let prefix = ipv6_mask_to_prefix(mask);
         assert!(prefix.is_err());
     }
+
+    #[test]
+    fn iterator_v6() {
+        let cidr: Ipv6Network = "2001:db8::/126".parse().unwrap();
+        let mut iter = cidr.iter();
+        assert_eq!(Ipv6Addr::new(0x2001, 0xdb8, 0, 0, 0, 0, 0, 0), iter.next().unwrap());
+        assert_eq!(Ipv6Addr::new(0x2001, 0xdb8, 0, 0, 0, 0, 0, 1), iter.next().unwrap());
+        assert_eq!(Ipv6Addr::new(0x2001, 0xdb8, 0, 0, 0, 0, 0, 2), iter.next().unwrap());
+        assert_eq!(Ipv6Addr::new(0x2001, 0xdb8, 0, 0, 0, 0, 0, 3), iter.next().unwrap());
+        assert_eq!(None, iter.next());
+    }
+
+    #[test]
+    fn iterator_v6_tiny() {
+        let cidr: Ipv6Network = "2001:db8::/128".parse().unwrap();
+        let mut iter = cidr.iter();
+        assert_eq!(Ipv6Addr::new(0x2001, 0xdb8, 0, 0, 0, 0, 0, 0), iter.next().unwrap());
+        assert_eq!(None, iter.next());
+    }
+
+    #[test]
+    fn iterator_v6_huge() {
+        let cidr: Ipv6Network = "2001:db8::/0".parse().unwrap();
+        let mut iter = cidr.iter();
+        assert_eq!(Ipv6Addr::new(0, 0, 0, 0, 0, 0, 0, 0), iter.next().unwrap());
+        assert_eq!(Ipv6Addr::new(0, 0, 0, 0, 0, 0, 0, 1), iter.next().unwrap());
+        assert_eq!(Ipv6Addr::new(0, 0, 0, 0, 0, 0, 0, 2), iter.next().unwrap());
+    }
+
 }
