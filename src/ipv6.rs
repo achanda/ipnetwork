@@ -29,6 +29,29 @@ impl Ipv6Network {
         }
     }
 
+    /// Returns an iterator over `Ipv6Network`. Each call to `next` will return the next
+    /// `Ipv6Addr` in the given network. `None` will be returned when there are no more
+    /// addresses.
+    #[cfg(feature = "ipv6-iterator")]
+    pub fn iter(&self) -> Ipv6NetworkIterator {
+
+        let dec = u128::from(self.addr);
+        let max = u128::max_value();
+        let prefix = self.prefix;
+
+        let mask = max.checked_shl((IPV6_BITS - prefix) as u32).unwrap_or(0);
+        let start: u128 = dec & mask;
+
+        let mask = max.checked_shr(prefix as u32).unwrap_or(0);
+        let end: u128 = dec | mask;
+
+        Ipv6NetworkIterator{
+            next: start,
+            end: end,
+        }
+
+    }
+
     pub fn ip(&self) -> Ipv6Addr {
         self.addr
     }
@@ -87,6 +110,33 @@ impl FromStr for Ipv6Network {
         let addr = Ipv6Addr::from_str(addr_str).map_err(|_| IpNetworkError::InvalidAddr(addr_str.to_string()))?;
         let prefix = parse_prefix(prefix_str, IPV6_BITS)?;
         Ipv6Network::new(addr, prefix)
+    }
+}
+
+#[cfg(feature = "ipv6-iterator")]
+pub struct Ipv6NetworkIterator {
+    next: u128,
+    end: u128,
+}
+
+#[cfg(feature = "ipv6-iterator")]
+impl Iterator for Ipv6NetworkIterator {
+    type Item = Ipv6Addr;
+
+    fn next(&mut self) -> Option<Ipv6Addr> {
+
+        if self.next <= self.end {
+
+            let next = Ipv6Addr::from(self.next);
+            self.next += 1;
+            Some(next)
+
+        } else {
+
+            None
+
+        }
+
     }
 }
 
@@ -208,4 +258,36 @@ mod test {
         let prefix = ipv6_mask_to_prefix(mask);
         assert!(prefix.is_err());
     }
+
+    #[test]
+    #[cfg(feature = "ipv6-iterator")]
+    fn iterator_v6() {
+        let cidr: Ipv6Network = "2001:db8::/126".parse().unwrap();
+        let mut iter = cidr.iter();
+        assert_eq!(Ipv6Addr::new(0x2001, 0xdb8, 0, 0, 0, 0, 0, 0), iter.next().unwrap());
+        assert_eq!(Ipv6Addr::new(0x2001, 0xdb8, 0, 0, 0, 0, 0, 1), iter.next().unwrap());
+        assert_eq!(Ipv6Addr::new(0x2001, 0xdb8, 0, 0, 0, 0, 0, 2), iter.next().unwrap());
+        assert_eq!(Ipv6Addr::new(0x2001, 0xdb8, 0, 0, 0, 0, 0, 3), iter.next().unwrap());
+        assert_eq!(None, iter.next());
+    }
+
+    #[test]
+    #[cfg(feature = "ipv6-iterator")]
+    fn iterator_v6_tiny() {
+        let cidr: Ipv6Network = "2001:db8::/128".parse().unwrap();
+        let mut iter = cidr.iter();
+        assert_eq!(Ipv6Addr::new(0x2001, 0xdb8, 0, 0, 0, 0, 0, 0), iter.next().unwrap());
+        assert_eq!(None, iter.next());
+    }
+
+    #[test]
+    #[cfg(feature = "ipv6-iterator")]
+    fn iterator_v6_huge() {
+        let cidr: Ipv6Network = "2001:db8::/0".parse().unwrap();
+        let mut iter = cidr.iter();
+        assert_eq!(Ipv6Addr::new(0, 0, 0, 0, 0, 0, 0, 0), iter.next().unwrap());
+        assert_eq!(Ipv6Addr::new(0, 0, 0, 0, 0, 0, 0, 1), iter.next().unwrap());
+        assert_eq!(Ipv6Addr::new(0, 0, 0, 0, 0, 0, 0, 2), iter.next().unwrap());
+    }
+
 }
