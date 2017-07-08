@@ -6,12 +6,18 @@ rust:
 env:
   global:
     - secure: gokQ7xIWwmAuEUW3IyS5B/pbZxdFSSDBto5beJ+4ACGcRMDqJ/eCPf1ekSVXME4TWM46uUCjxcdUjYhIhQ6sG4zfWck4u45qRJ5JbIoTvR+ykxhN1j3Zi5x9ptP3ALDbHn2i3v6t9xohORfQpz3dVND5c7thbYDyKP2ZR1sez5c=
+    - FEATURES: default
+
+matrix:
+  include:
+    - rust: nightly
+      env: FEATURES=ipv6-itrator
 
 script:
-  - cargo build --verbose
-  - cargo test --verbose
-  - cargo build --release --verbose
-  - cargo doc --verbose
+  - cargo build --features $FEATURES --verbose
+  - cargo test --features $FEATURES --verbose
+  - cargo build --features $FEATURES --release --verbose
+  - cargo doc --features $FEATURES --verbose
 
 after_script:
   - curl http://www.rust-ci.org/artifacts/put?t=$RUSTCI_TOKEN | sh
