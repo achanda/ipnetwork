@@ -52,6 +52,25 @@ impl Ipv6Network {
 
     }
 
+    /// Returns the address of the network denoted by this `Ipv6Network`.
+    /// This means the lowest possible IPv6 address inside of the network.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use std::net::Ipv6Addr;
+    /// use ipnetwork::Ipv6Network;
+    ///
+    /// let net: Ipv6Network = "2001:db8::/96".parse().unwrap();
+    /// assert_eq!(net.network(), Ipv6Addr::new(0x2001, 0xdb8, 0, 0, 0, 0, 0, 0));
+    /// ```
+    #[cfg(feature = "ipv6-methods")]
+    pub fn network(&self) -> Ipv6Addr {
+        let mask = u128::from(self.mask());
+        let ip = u128::from(self.addr) & mask;
+        Ipv6Addr::from(ip)
+    }
+
     pub fn ip(&self) -> Ipv6Addr {
         self.addr
     }
@@ -290,4 +309,12 @@ mod test {
         assert_eq!(Ipv6Addr::new(0, 0, 0, 0, 0, 0, 0, 2), iter.next().unwrap());
     }
 
+    #[test]
+    #[cfg(feature = "ipv6-methods")]
+    fn network_v6() {
+        let cidr: Ipv6Network = "2001:db8::0/96".parse().unwrap();
+        let net = cidr.network();
+        let expected: Ipv6Addr = "2001:db8::".parse().unwrap();
+        assert_eq!(net, expected);
+    }
 }
