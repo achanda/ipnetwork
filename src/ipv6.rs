@@ -139,6 +139,27 @@ impl Ipv6Network {
         let addrs = Iterator::zip(a.iter(), b.iter());
         self.mask().segments().iter().zip(addrs).all(|(mask, (a, b))| a & mask == b & mask)
     }
+
+
+    /// Returns number of possible host addresses in this `Ipv6Network`.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use std::net::Ipv6Addr;
+    /// use ipnetwork::Ipv6Network;
+    ///
+    /// let net: Ipv6Network = "ff01::0/32".parse().unwrap();
+    /// assert_eq!(net.size(), 79228162514264337593543950336);
+    ///
+    /// let tinynet: Ipv6Network = "ff01::0/128".parse().unwrap();
+    /// assert_eq!(tinynet.size(), 1);
+    /// ```
+    #[cfg(feature = "ipv6-methods")]
+    pub fn size(&self) -> u128 {
+        let host_bits = (IPV6_BITS - self.prefix) as u32;
+        (2 as u128).pow(host_bits)
+    }
 }
 
 impl FromStr for Ipv6Network {
@@ -344,5 +365,12 @@ mod test {
         let net = cidr.broadcast();
         let expected: Ipv6Addr = "2001:db8::ffff:ffff".parse().unwrap();
         assert_eq!(net, expected);
+    }
+
+    #[test]
+    #[cfg(feature = "ipv6-methods")]
+    fn size_v6() {
+        let cidr: Ipv6Network = "2001:db8::0/96".parse().unwrap();
+        assert_eq!(cidr.size(), 4294967296);
     }
 }
