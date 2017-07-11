@@ -11,10 +11,9 @@ env:
 matrix:
   include:
     - rust: nightly
-      env: FEATURES=ipv6-iterator,ipv6-methods
+      env: FEATURES_FLAG="--all-features"
 
 script:
-  - cargo build --features $FEATURES --verbose
-  - cargo test --features $FEATURES --verbose
-  - cargo build --features $FEATURES --release --verbose
-  - cargo doc --features $FEATURES --verbose
+  - cargo build $FEATURES_FLAG --verbose
+  - cargo test $FEATURES_FLAG --verbose
+  - cargo doc $FEATURES_FLAG --verbose
