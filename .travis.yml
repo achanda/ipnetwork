@@ -11,13 +11,10 @@ env:
 matrix:
   include:
     - rust: nightly
-      env: FEATURES=ipv6-iterator
+      env: FEATURES=ipv6-iterator,ipv6-methods
 
 script:
   - cargo build --features $FEATURES --verbose
   - cargo test --features $FEATURES --verbose
   - cargo build --features $FEATURES --release --verbose
   - cargo doc --features $FEATURES --verbose
-
-after_script:
-  - curl http://www.rust-ci.org/artifacts/put?t=$RUSTCI_TOKEN | sh
