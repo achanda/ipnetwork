@@ -17,3 +17,4 @@ clippy = {version = "0.0.104", optional = true}
 default = []
 dev = ["clippy"]
 ipv6-iterator = []
+ipv6-methods = []

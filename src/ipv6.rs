@@ -52,6 +52,44 @@ impl Ipv6Network {
 
     }
 
+    /// Returns the address of the network denoted by this `Ipv6Network`.
+    /// This means the lowest possible IPv6 address inside of the network.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use std::net::Ipv6Addr;
+    /// use ipnetwork::Ipv6Network;
+    ///
+    /// let net: Ipv6Network = "2001:db8::/96".parse().unwrap();
+    /// assert_eq!(net.network(), Ipv6Addr::new(0x2001, 0xdb8, 0, 0, 0, 0, 0, 0));
+    /// ```
+    #[cfg(feature = "ipv6-methods")]
+    pub fn network(&self) -> Ipv6Addr {
+        let mask = u128::from(self.mask());
+        let ip = u128::from(self.addr) & mask;
+        Ipv6Addr::from(ip)
+    }
+
+    /// Returns the broadcast address of this `Ipv6Network`.
+    /// This means the highest possible IPv4 address inside of the network.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use std::net::Ipv6Addr;
+    /// use ipnetwork::Ipv6Network;
+    ///
+    /// let net: Ipv6Network = "2001:db8::/96".parse().unwrap();
+    /// assert_eq!(net.broadcast(), Ipv6Addr::new(0x2001, 0xdb8, 0, 0, 0, 0, 0xffff, 0xffff));
+    /// ```
+    #[cfg(feature = "ipv6-methods")]
+    pub fn broadcast(&self) -> Ipv6Addr {
+        let mask = u128::from(self.mask());
+        let broadcast = u128::from(self.addr) | !mask;
+        Ipv6Addr::from(broadcast)
+    }
+
     pub fn ip(&self) -> Ipv6Addr {
         self.addr
     }
@@ -100,6 +138,27 @@ impl Ipv6Network {
         let b = ip.segments();
         let addrs = Iterator::zip(a.iter(), b.iter());
         self.mask().segments().iter().zip(addrs).all(|(mask, (a, b))| a & mask == b & mask)
+    }
+
+
+    /// Returns number of possible host addresses in this `Ipv6Network`.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use std::net::Ipv6Addr;
+    /// use ipnetwork::Ipv6Network;
+    ///
+    /// let net: Ipv6Network = "ff01::0/32".parse().unwrap();
+    /// assert_eq!(net.size(), 79228162514264337593543950336);
+    ///
+    /// let tinynet: Ipv6Network = "ff01::0/128".parse().unwrap();
+    /// assert_eq!(tinynet.size(), 1);
+    /// ```
+    #[cfg(feature = "ipv6-methods")]
+    pub fn size(&self) -> u128 {
+        let host_bits = (IPV6_BITS - self.prefix) as u32;
+        (2 as u128).pow(host_bits)
     }
 }
 
@@ -290,4 +349,28 @@ mod test {
         assert_eq!(Ipv6Addr::new(0, 0, 0, 0, 0, 0, 0, 2), iter.next().unwrap());
     }
 
+    #[test]
+    #[cfg(feature = "ipv6-methods")]
+    fn network_v6() {
+        let cidr: Ipv6Network = "2001:db8::0/96".parse().unwrap();
+        let net = cidr.network();
+        let expected: Ipv6Addr = "2001:db8::".parse().unwrap();
+        assert_eq!(net, expected);
+    }
+
+    #[test]
+    #[cfg(feature = "ipv6-methods")]
+    fn broadcast_v6() {
+        let cidr: Ipv6Network = "2001:db8::0/96".parse().unwrap();
+        let net = cidr.broadcast();
+        let expected: Ipv6Addr = "2001:db8::ffff:ffff".parse().unwrap();
+        assert_eq!(net, expected);
+    }
+
+    #[test]
+    #[cfg(feature = "ipv6-methods")]
+    fn size_v6() {
+        let cidr: Ipv6Network = "2001:db8::0/96".parse().unwrap();
+        assert_eq!(cidr.size(), 4294967296);
+    }
 }
