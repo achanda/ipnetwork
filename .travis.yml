@@ -18,6 +18,3 @@ script:
   - cargo test --features $FEATURES --verbose
   - cargo build --features $FEATURES --release --verbose
   - cargo doc --features $FEATURES --verbose
-
-after_script:
-  - curl http://www.rust-ci.org/artifacts/put?t=$RUSTCI_TOKEN | sh
