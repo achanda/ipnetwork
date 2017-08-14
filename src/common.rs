@@ -15,7 +15,7 @@ impl fmt::Display for IpNetworkError {
         use IpNetworkError::*;
         match *self {
             InvalidAddr(ref s) => write!(f, "invalid address: {}", s),
-            InvalidPrefix => write!(f, "invalid prifex"),
+            InvalidPrefix => write!(f, "invalid prefix"),
             InvalidCidrFormat(ref s) => write!(f, "invalid cidr format: {}", s),
         }
     }
