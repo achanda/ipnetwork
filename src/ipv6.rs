@@ -172,6 +172,15 @@ impl FromStr for Ipv6Network {
     }
 }
 
+impl From<Ipv6Addr> for Ipv6Network {
+    fn from(a: Ipv6Addr) -> Ipv6Network {
+        Ipv6Network {
+            addr: a,
+            prefix: 128,
+        }
+    }
+}
+
 #[cfg(feature = "ipv6-iterator")]
 pub struct Ipv6NetworkIterator {
     next: u128,
@@ -372,5 +381,12 @@ mod test {
     fn size_v6() {
         let cidr: Ipv6Network = "2001:db8::0/96".parse().unwrap();
         assert_eq!(cidr.size(), 4294967296);
+    }
+
+    #[test]
+    fn ipv6network_from_ipv6addr() {
+        let net = Ipv6Network::from(Ipv6Addr::new(0, 0, 0, 0, 0, 0, 0, 1));
+        let expected = Ipv6Network::new(Ipv6Addr::new(0, 0, 0, 0, 0, 0, 0, 1), 128).unwrap();
+        assert_eq!(net, expected);
     }
 }

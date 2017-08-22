@@ -195,6 +195,16 @@ impl FromStr for Ipv4Network {
     }
 }
 
+
+impl From<Ipv4Addr> for Ipv4Network {
+    fn from(a: Ipv4Addr) -> Ipv4Network {
+        Ipv4Network {
+            addr: a,
+            prefix: 32,
+        }
+    }
+}
+
 pub struct Ipv4NetworkIterator {
     next: u64,
     end: u64,
@@ -431,5 +441,12 @@ mod test {
         let mask = Ipv4Addr::new(255, 0, 255, 0);
         let prefix = ipv4_mask_to_prefix(mask);
         assert!(prefix.is_err());
+    }
+
+    #[test]
+    fn ipv4network_from_ipv4addr() {
+        let net = Ipv4Network::from(Ipv4Addr::new(127, 0, 0, 1));
+        let expected = Ipv4Network::new(Ipv4Addr::new(127, 0, 0, 1), 32).unwrap();
+        assert_eq!(net, expected);
     }
 }
