@@ -163,6 +163,15 @@ impl From<Ipv6Network> for IpNetwork {
     }
 }
 
+impl From<IpAddr> for IpNetwork {
+    fn from(addr: IpAddr) -> IpNetwork {
+        match addr {
+            IpAddr::V4(a) => IpNetwork::V4(Ipv4Network::from(a)),
+            IpAddr::V6(a) => IpNetwork::V6(Ipv6Network::from(a)),
+        }
+    }
+}
+
 impl fmt::Display for IpNetwork {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match *self {
