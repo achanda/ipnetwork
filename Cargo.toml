@@ -13,6 +13,9 @@ categories = ["network-programming", "os"]
 [dependencies]
 clippy = {version = "0.0.104", optional = true}
 
+[badges]
+travis-ci = { repository = "achanda/ipnetwork" }
+
 [features]
 default = []
 dev = ["clippy"]
