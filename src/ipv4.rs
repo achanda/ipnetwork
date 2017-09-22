@@ -449,4 +449,16 @@ mod test {
         let expected = Ipv4Network::new(Ipv4Addr::new(127, 0, 0, 1), 32).unwrap();
         assert_eq!(net, expected);
     }
+
+    #[test]
+    fn test_send() {
+        fn assert_send<T: Send>() {}
+        assert_send::<Ipv4Network>();
+    }
+
+    #[test]
+    fn test_sync() {
+        fn assert_sync<T: Sync>() {}
+        assert_sync::<Ipv4Network>();
+    }
 }
