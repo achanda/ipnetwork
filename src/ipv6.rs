@@ -293,6 +293,12 @@ mod test {
     }
 
     #[test]
+    fn parse_v6_fail_two_slashes() {
+        let cidr: Option<Ipv6Network> = "::1/24/".parse().ok();
+        assert_eq!(None, cidr);
+    }
+
+    #[test]
     fn mask_v6() {
         let cidr = Ipv6Network::new(Ipv6Addr::new(0, 0, 0, 0, 0, 0, 0, 0), 40).unwrap();
         let mask = cidr.mask();

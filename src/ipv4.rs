@@ -309,6 +309,12 @@ mod test {
     }
 
     #[test]
+    fn parse_v4_fail_two_slashes() {
+        let cidr: Option<Ipv4Network> = "10.1.1.1/24/".parse().ok();
+        assert_eq!(None, cidr);
+    }
+
+    #[test]
     fn size_v4_24bit() {
         let net: Ipv4Network = "0/24".parse().unwrap();
         assert_eq!(net.size(), 256);
