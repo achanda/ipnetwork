@@ -31,7 +31,7 @@ impl Ipv4Network {
     /// `Ipv4Addr` in the given network. `None` will be returned when there are no more
     /// addresses.
     pub fn iter(&self) -> Ipv4NetworkIterator {
-        let start = u32::from(self.network()) as u64;
+        let start = u64::from(u32::from(self.network()));
         let end = start + self.size();
         Ipv4NetworkIterator {
             next: start,
@@ -61,7 +61,7 @@ impl Ipv4Network {
     /// ```
     pub fn mask(&self) -> Ipv4Addr {
         let prefix = self.prefix;
-        let mask = !(0xffffffff as u64 >> prefix) as u32;
+        let mask = !(0xffff_ffff as u64 >> prefix) as u32;
         Ipv4Addr::from(mask)
     }
 
@@ -134,7 +134,7 @@ impl Ipv4Network {
     /// assert_eq!(tinynet.size(), 1);
     /// ```
     pub fn size(&self) -> u64 {
-        let host_bits = (IPV4_BITS - self.prefix) as u32;
+        let host_bits = u32::from(IPV4_BITS - self.prefix);
         (2 as u64).pow(host_bits)
     }
 
@@ -156,7 +156,7 @@ impl Ipv4Network {
     /// assert_eq!(net2.nth(256).unwrap(), Ipv4Addr::new(10, 0, 1, 0));
     /// ```
     pub fn nth(&self, n: u32) -> Option<Ipv4Addr> {
-        if (n as u64) < self.size() {
+        if u64::from(n) < self.size() {
             let net = u32::from(self.network());
             Some(Ipv4Addr::from(net + n))
         } else {
@@ -230,7 +230,7 @@ pub fn ipv4_mask_to_prefix(mask: Ipv4Addr) -> Result<u8, IpNetworkError> {
     let mask = u32::from(mask);
 
     let prefix = (!mask).leading_zeros() as u8;
-    if ((mask as u64) << prefix) & 0xffffffff != 0 {
+    if ((mask as u64) << prefix) & 0xffff_ffff != 0 {
         Err(IpNetworkError::InvalidPrefix)
     } else {
         Ok(prefix)
