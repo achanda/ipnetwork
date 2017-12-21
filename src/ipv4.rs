@@ -2,12 +2,12 @@ use std::fmt;
 use std::net::Ipv4Addr;
 use std::str::FromStr;
 
-use common::{IpNetworkError, cidr_parts, parse_prefix, parse_addr};
+use common::{cidr_parts, parse_addr, parse_prefix, IpNetworkError};
 
 const IPV4_BITS: u8 = 32;
 
 /// Represents a network range where the IP addresses are of v4
-#[derive(Debug,Clone,Copy,Hash,PartialEq,Eq,PartialOrd,Ord)]
+#[derive(Debug, Clone, Copy, Hash, PartialEq, Eq, PartialOrd, Ord)]
 pub struct Ipv4Network {
     addr: Ipv4Addr,
     prefix: u8,
@@ -171,7 +171,6 @@ impl fmt::Display for Ipv4Network {
     }
 }
 
-
 /// Creates an `Ipv4Network` from parsing a string in CIDR notation.
 ///
 /// # Examples
@@ -194,7 +193,6 @@ impl FromStr for Ipv4Network {
         Ipv4Network::new(addr, prefix)
     }
 }
-
 
 impl From<Ipv4Addr> for Ipv4Network {
     fn from(a: Ipv4Addr) -> Ipv4Network {

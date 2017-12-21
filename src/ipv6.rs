@@ -3,13 +3,13 @@ use std::fmt;
 use std::net::Ipv6Addr;
 use std::str::FromStr;
 
-use common::{IpNetworkError, cidr_parts, parse_prefix};
+use common::{cidr_parts, parse_prefix, IpNetworkError};
 
 const IPV6_BITS: u8 = 128;
 const IPV6_SEGMENT_BITS: u8 = 16;
 
 /// Represents a network range where the IP addresses are of v6
-#[derive(Debug,Clone,Copy,Hash,PartialEq,Eq,PartialOrd,Ord)]
+#[derive(Debug, Clone, Copy, Hash, PartialEq, Eq, PartialOrd, Ord)]
 pub struct Ipv6Network {
     addr: Ipv6Addr,
     prefix: u8,
@@ -34,7 +34,6 @@ impl Ipv6Network {
     /// addresses.
     #[cfg(feature = "ipv6-iterator")]
     pub fn iter(&self) -> Ipv6NetworkIterator {
-
         let dec = u128::from(self.addr);
         let max = u128::max_value();
         let prefix = self.prefix;
@@ -45,11 +44,10 @@ impl Ipv6Network {
         let mask = max.checked_shr(prefix as u32).unwrap_or(0);
         let end: u128 = dec | mask;
 
-        Ipv6NetworkIterator{
+        Ipv6NetworkIterator {
             next: start,
             end: end,
         }
-
     }
 
     /// Returns the address of the network denoted by this `Ipv6Network`.
@@ -137,9 +135,12 @@ impl Ipv6Network {
         let a = self.addr.segments();
         let b = ip.segments();
         let addrs = Iterator::zip(a.iter(), b.iter());
-        self.mask().segments().iter().zip(addrs).all(|(mask, (a, b))| a & mask == b & mask)
+        self.mask()
+            .segments()
+            .iter()
+            .zip(addrs)
+            .all(|(mask, (a, b))| a & mask == b & mask)
     }
-
 
     /// Returns number of possible host addresses in this `Ipv6Network`.
     ///
@@ -166,7 +167,8 @@ impl FromStr for Ipv6Network {
     type Err = IpNetworkError;
     fn from_str(s: &str) -> Result<Ipv6Network, IpNetworkError> {
         let (addr_str, prefix_str) = cidr_parts(s)?;
-        let addr = Ipv6Addr::from_str(addr_str).map_err(|_| IpNetworkError::InvalidAddr(addr_str.to_string()))?;
+        let addr = Ipv6Addr::from_str(addr_str)
+            .map_err(|_| IpNetworkError::InvalidAddr(addr_str.to_string()))?;
         let prefix = parse_prefix(prefix_str, IPV6_BITS)?;
         Ipv6Network::new(addr, prefix)
     }
@@ -192,19 +194,13 @@ impl Iterator for Ipv6NetworkIterator {
     type Item = Ipv6Addr;
 
     fn next(&mut self) -> Option<Ipv6Addr> {
-
         if self.next <= self.end {
-
             let next = Ipv6Addr::from(self.next);
             self.next += 1;
             Some(next)
-
         } else {
-
             None
-
         }
-
     }
 }
 
@@ -338,10 +334,22 @@ mod test {
     fn iterator_v6() {
         let cidr: Ipv6Network = "2001:db8::/126".parse().unwrap();
         let mut iter = cidr.iter();
-        assert_eq!(Ipv6Addr::new(0x2001, 0xdb8, 0, 0, 0, 0, 0, 0), iter.next().unwrap());
-        assert_eq!(Ipv6Addr::new(0x2001, 0xdb8, 0, 0, 0, 0, 0, 1), iter.next().unwrap());
-        assert_eq!(Ipv6Addr::new(0x2001, 0xdb8, 0, 0, 0, 0, 0, 2), iter.next().unwrap());
-        assert_eq!(Ipv6Addr::new(0x2001, 0xdb8, 0, 0, 0, 0, 0, 3), iter.next().unwrap());
+        assert_eq!(
+            Ipv6Addr::new(0x2001, 0xdb8, 0, 0, 0, 0, 0, 0),
+            iter.next().unwrap()
+        );
+        assert_eq!(
+            Ipv6Addr::new(0x2001, 0xdb8, 0, 0, 0, 0, 0, 1),
+            iter.next().unwrap()
+        );
+        assert_eq!(
+            Ipv6Addr::new(0x2001, 0xdb8, 0, 0, 0, 0, 0, 2),
+            iter.next().unwrap()
+        );
+        assert_eq!(
+            Ipv6Addr::new(0x2001, 0xdb8, 0, 0, 0, 0, 0, 3),
+            iter.next().unwrap()
+        );
         assert_eq!(None, iter.next());
     }
 
@@ -350,7 +358,10 @@ mod test {
     fn iterator_v6_tiny() {
         let cidr: Ipv6Network = "2001:db8::/128".parse().unwrap();
         let mut iter = cidr.iter();
-        assert_eq!(Ipv6Addr::new(0x2001, 0xdb8, 0, 0, 0, 0, 0, 0), iter.next().unwrap());
+        assert_eq!(
+            Ipv6Addr::new(0x2001, 0xdb8, 0, 0, 0, 0, 0, 0),
+            iter.next().unwrap()
+        );
         assert_eq!(None, iter.next());
     }
 
