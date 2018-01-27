@@ -2,6 +2,8 @@ use std::cmp;
 use std::fmt;
 use std::net::Ipv6Addr;
 use std::str::FromStr;
+#[cfg(all(any(feature = "ipv6-methods", feature = "ipv6-iterator"), feature = "i128_extprim"))]
+use extprim::u128::u128;
 
 use common::{cidr_parts, parse_prefix, IpNetworkError};
 
@@ -14,6 +16,34 @@ pub struct Ipv6Network {
     addr: Ipv6Addr,
     prefix: u8,
 }
+
+#[cfg(all(any(feature = "ipv6-methods", feature = "ipv6-iterator"), feature = "i128_extprim"))]
+fn from_u128_to_ipv6_addr(ip: u128) -> Ipv6Addr {
+    Ipv6Addr::new(
+        (ip.high64() >> 48) as u16, (ip.high64() >> 32) as u16, (ip.high64() >> 16) as u16,
+        ip.high64() as u16, (ip.low64() >> 48) as u16, (ip.low64() >> 32) as u16,
+        (ip.low64() >> 16) as u16, ip.low64() as u16,
+    )
+}
+
+#[cfg(all(any(feature = "ipv6-methods", feature = "ipv6-iterator"), feature = "i128_extprim"))]
+fn from_ipv6_addr_to_u128(ip: Ipv6Addr) -> u128 {
+    let ip = ip.segments();
+    (u128::from(ip[0]) << 112) + (u128::from(ip[1]) << 96) + (u128::from(ip[2]) << 80) +
+        (u128::from(ip[3]) << 64) + (u128::from(ip[4]) << 48) + (u128::from(ip[5]) << 32) +
+        (u128::from(ip[6]) << 16) + u128::from(ip[7])
+}
+
+#[cfg(all(any(feature = "ipv6-methods", feature = "ipv6-iterator"), not(feature = "i128_extprim")))]
+fn from_u128_to_ipv6_addr(ip: u128) -> Ipv6Addr {
+    ip.into()
+}
+
+#[cfg(all(any(feature = "ipv6-methods", feature = "ipv6-iterator"), not(feature = "i128_extprim")))]
+fn from_ipv6_addr_to_u128(ip: Ipv6Addr) -> u128 {
+    ip.into()
+}
+
 
 impl Ipv6Network {
     /// Constructs a new `Ipv6Network` from any `Ipv6Addr` and a prefix denoting the network size.
@@ -34,7 +64,7 @@ impl Ipv6Network {
     /// addresses.
     #[cfg(feature = "ipv6-iterator")]
     pub fn iter(&self) -> Ipv6NetworkIterator {
-        let dec = u128::from(self.addr);
+        let dec = from_ipv6_addr_to_u128(self.addr);
         let max = u128::max_value();
         let prefix = self.prefix;
 
@@ -64,9 +94,9 @@ impl Ipv6Network {
     /// ```
     #[cfg(feature = "ipv6-methods")]
     pub fn network(&self) -> Ipv6Addr {
-        let mask = u128::from(self.mask());
-        let ip = u128::from(self.addr) & mask;
-        Ipv6Addr::from(ip)
+        let mask = from_ipv6_addr_to_u128(self.mask());
+        let ip = from_ipv6_addr_to_u128(self.addr) & mask;
+        from_u128_to_ipv6_addr(ip)
     }
 
     /// Returns the broadcast address of this `Ipv6Network`.
@@ -83,9 +113,9 @@ impl Ipv6Network {
     /// ```
     #[cfg(feature = "ipv6-methods")]
     pub fn broadcast(&self) -> Ipv6Addr {
-        let mask = u128::from(self.mask());
-        let broadcast = u128::from(self.addr) | !mask;
-        Ipv6Addr::from(broadcast)
+        let mask = from_ipv6_addr_to_u128(self.mask());
+        let broadcast = from_ipv6_addr_to_u128(self.addr) | !mask;
+        from_u128_to_ipv6_addr(broadcast)
     }
 
     pub fn ip(&self) -> Ipv6Addr {
@@ -159,7 +189,7 @@ impl Ipv6Network {
     #[cfg(feature = "ipv6-methods")]
     pub fn size(&self) -> u128 {
         let host_bits = (IPV6_BITS - self.prefix) as u32;
-        (2 as u128).pow(host_bits)
+        u128::from(2u8).pow(host_bits)
     }
 }
 
@@ -195,7 +225,7 @@ impl Iterator for Ipv6NetworkIterator {
 
     fn next(&mut self) -> Option<Ipv6Addr> {
         if self.next <= self.end {
-            let next = Ipv6Addr::from(self.next);
+            let next = from_u128_to_ipv6_addr(self.next);
             self.next += 1;
             Some(next)
         } else {

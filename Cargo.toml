@@ -12,6 +12,7 @@ categories = ["network-programming", "os"]
 
 [dependencies]
 clippy = {version = "0.0.104", optional = true}
+extprim = {version = "1.5.1", optional = true}
 
 [badges]
 travis-ci = { repository = "achanda/ipnetwork" }
@@ -21,3 +22,4 @@ default = []
 dev = ["clippy"]
 ipv6-iterator = []
 ipv6-methods = []
+i128_extprim = ["extprim"]
