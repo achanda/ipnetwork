@@ -2,7 +2,7 @@ use std::cmp;
 use std::fmt;
 use std::net::Ipv6Addr;
 use std::str::FromStr;
-#[cfg(all(any(feature = "ipv6-methods", feature = "ipv6-iterator"), feature = "i128_extprim"))]
+#[cfg(all(any(feature = "ipv6-methods", feature = "ipv6-iterator"), feature = "i128-extprim"))]
 use extprim::u128::u128;
 
 use common::{cidr_parts, parse_prefix, IpNetworkError};
@@ -17,7 +17,7 @@ pub struct Ipv6Network {
     prefix: u8,
 }
 
-#[cfg(all(any(feature = "ipv6-methods", feature = "ipv6-iterator"), feature = "i128_extprim"))]
+#[cfg(all(any(feature = "ipv6-methods", feature = "ipv6-iterator"), feature = "i128-extprim"))]
 fn from_u128_to_ipv6_addr(ip: u128) -> Ipv6Addr {
     Ipv6Addr::new(
         (ip.high64() >> 48) as u16, (ip.high64() >> 32) as u16, (ip.high64() >> 16) as u16,
@@ -26,7 +26,7 @@ fn from_u128_to_ipv6_addr(ip: u128) -> Ipv6Addr {
     )
 }
 
-#[cfg(all(any(feature = "ipv6-methods", feature = "ipv6-iterator"), feature = "i128_extprim"))]
+#[cfg(all(any(feature = "ipv6-methods", feature = "ipv6-iterator"), feature = "i128-extprim"))]
 fn from_ipv6_addr_to_u128(ip: Ipv6Addr) -> u128 {
     let ip = ip.segments();
     (u128::from(ip[0]) << 112) + (u128::from(ip[1]) << 96) + (u128::from(ip[2]) << 80) +
@@ -34,12 +34,12 @@ fn from_ipv6_addr_to_u128(ip: Ipv6Addr) -> u128 {
         (u128::from(ip[6]) << 16) + u128::from(ip[7])
 }
 
-#[cfg(all(any(feature = "ipv6-methods", feature = "ipv6-iterator"), not(feature = "i128_extprim")))]
+#[cfg(all(any(feature = "ipv6-methods", feature = "ipv6-iterator"), not(feature = "i128-extprim")))]
 fn from_u128_to_ipv6_addr(ip: u128) -> Ipv6Addr {
     ip.into()
 }
 
-#[cfg(all(any(feature = "ipv6-methods", feature = "ipv6-iterator"), not(feature = "i128_extprim")))]
+#[cfg(all(any(feature = "ipv6-methods", feature = "ipv6-iterator"), not(feature = "i128-extprim")))]
 fn from_ipv6_addr_to_u128(ip: Ipv6Addr) -> u128 {
     ip.into()
 }

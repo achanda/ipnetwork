@@ -3,12 +3,12 @@
 //! is still WIP.
 #![cfg_attr(feature = "dev", feature(plugin))]
 #![cfg_attr(feature = "dev", plugin(clippy))]
-#![cfg_attr(all(feature = "ipv6-iterator", not(feature = "i128_extprim")), feature(i128_type))]
-#![cfg_attr(all(feature = "ipv6-methods", not(feature = "i128_extprim")), feature(i128_type))]
+#![cfg_attr(all(feature = "ipv6-iterator", not(feature = "i128-extprim")), feature(i128_type))]
+#![cfg_attr(all(feature = "ipv6-methods", not(feature = "i128-extprim")), feature(i128_type))]
 #![crate_type = "lib"]
 #![doc(html_root_url = "https://docs.rs/ipnetwork/0.12.7")]
 
-#[cfg(all(any(feature = "ipv6-methods", feature = "ipv6-iterator"), feature = "i128_extprim"))]
+#[cfg(all(any(feature = "ipv6-methods", feature = "ipv6-iterator"), feature = "i128-extprim"))]
 extern crate extprim;
 
 use std::fmt;
