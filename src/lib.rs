@@ -122,6 +122,30 @@ impl IpNetwork {
             IpNetwork::V6(_) => true,
         }
     }
+
+    /// Checks if a given `IpAddr` is in this `IpNetwork`
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use std::net::IpAddr;
+    /// use ipnetwork::IpNetwork;
+    ///
+    /// let net: IpNetwork = "127.0.0.0/24".parse().unwrap();
+    /// let ip1: IpAddr = "127.0.0.1".parse().unwrap();
+    /// let ip2: IpAddr = "172.0.0.1".parse().unwrap();
+    /// let ip4: IpAddr = "::1".parse().unwrap();
+    /// assert!(net.contains(ip1));
+    /// assert!(!net.contains(ip2));
+    /// assert!(!net.contains(ip4));
+    /// ```
+    pub fn contains(&self, ip: IpAddr) -> bool {
+        match (*self, ip) {
+            (IpNetwork::V4(net), IpAddr::V4(ip)) => net.contains(ip),
+            (IpNetwork::V6(net), IpAddr::V6(ip)) => net.contains(ip),
+            _ => false,
+        }
+    }
 }
 
 /// Tries to parse the given string into a `IpNetwork`. Will first try to parse
