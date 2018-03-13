@@ -97,6 +97,27 @@ impl IpNetwork {
         }
     }
 
+    /// Returns the address of the network denoted by this `IpNetwork`.
+    /// This means the lowest possible IP address inside of the network.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use std::net::IpAddr;
+    /// use ipnetwork::IpNetwork;
+    ///
+    /// let net: IpNetwork = "10.1.9.32/16".parse().unwrap();
+    /// assert_eq!(net.network(), IpNetwork::V4(Ipv4Addr::new(10, 1, 0, 0)));
+    /// let net: IpNetwork = "2001:db8::/96".parse().unwrap();
+    /// assert_eq!(net.network(), IpNetwork::V6(Ipv6Addr::new(0x2001, 0xdb8, 0, 0, 0, 0, 0, 0)));
+    /// ```
+    pub fn network(&self) -> IpAddr {
+        match *self {
+            IpNetwork::V4(ref a) => IpAddr::V4(a.network()),
+            IpNetwork::V6(ref a) => IpAddr::V6(a.network()),
+        }
+    }
+
     /// Returns true if the IP in this `IpNetwork` is a valid IPv4 address,
     /// false if it's a valid IPv6 address.
     ///
