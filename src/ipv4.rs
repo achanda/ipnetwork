@@ -194,7 +194,7 @@ impl FromStr for Ipv4Network {
         let addr = parse_addr(addr_str)?;
         let prefix = if prefix_str.is_empty() {
             IPV4_BITS
-        }else {
+        } else {
             parse_prefix(prefix_str, IPV4_BITS)?
         };
         Ipv4Network::new(addr, prefix)

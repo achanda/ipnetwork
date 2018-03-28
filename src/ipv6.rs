@@ -174,7 +174,7 @@ impl FromStr for Ipv6Network {
             .map_err(|_| IpNetworkError::InvalidAddr(addr_str.to_string()))?;
         let prefix = if prefix_str.is_empty() {
             IPV6_BITS
-        }else {
+        } else {
             parse_prefix(prefix_str, IPV6_BITS)?
         };
         Ipv6Network::new(addr, prefix)
