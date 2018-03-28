@@ -35,7 +35,7 @@ impl Error for IpNetworkError {
 pub fn cidr_parts(cidr: &str) -> Result<(&str, &str), IpNetworkError> {
     let parts = cidr.split('/').collect::<Vec<&str>>();
     if parts.len() == 1 {
-        Ok((parts[0], "32"))
+        Ok((parts[0], ""))
     } else if parts.len() == 2 {
         Ok((parts[0], parts[1]))
     } else {
