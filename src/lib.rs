@@ -62,6 +62,7 @@ impl IpNetwork {
     /// ```
     /// use ipnetwork::IpNetwork;
     ///
+    /// assert_eq!(IpNetwork::V4("10.9.0.1".parse().unwrap()).prefix(), 32u8);
     /// assert_eq!(IpNetwork::V4("10.9.0.32/16".parse().unwrap()).prefix(), 16u8);
     /// assert_eq!(IpNetwork::V6("ff01::0/32".parse().unwrap()).prefix(), 32u8);
     /// ```
@@ -80,6 +81,8 @@ impl IpNetwork {
     /// use ipnetwork::IpNetwork;
     /// use std::net::{Ipv4Addr, Ipv6Addr};
     ///
+    /// let v4_net: IpNetwork = "10.9.0.1".parse().unwrap();
+    /// assert_eq!(v4_net.mask(), Ipv4Addr::new(255, 255, 255, 255));
     /// let v4_net: IpNetwork = "10.9.0.32/16".parse().unwrap();
     /// assert_eq!(v4_net.mask(), Ipv4Addr::new(255, 255, 0, 0));
     /// let v6_net: IpNetwork = "ff01::0/32".parse().unwrap();
