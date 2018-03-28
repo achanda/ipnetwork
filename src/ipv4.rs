@@ -190,14 +190,11 @@ impl FromStr for Ipv4Network {
     fn from_str(s: &str) -> Result<Ipv4Network, IpNetworkError> {
         let (addr_str, prefix_str) = cidr_parts(s)?;
         let addr = parse_addr(addr_str)?;
-        let prefix = parse_prefix(
-            if prefix_str.is_empty() {
-                IPV4_BITS.to_string()
-            } else {
-                prefix_str
-            },
-            IPV4_BITS,
-        )?;
+        let prefix = if prefix_str.is_empty() {
+            IPV4_BITS
+        }else {
+            parse_prefix(prefix_str, IPV4_BITS)?
+        };
         Ipv4Network::new(addr, prefix)
     }
 }
