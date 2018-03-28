@@ -172,10 +172,9 @@ impl FromStr for Ipv6Network {
         let (addr_str, prefix_str) = cidr_parts(s)?;
         let addr = Ipv6Addr::from_str(addr_str)
             .map_err(|_| IpNetworkError::InvalidAddr(addr_str.to_string()))?;
-        let prefix = if prefix_str.is_empty() {
-            IPV6_BITS
-        } else {
-            parse_prefix(prefix_str, IPV6_BITS)?
+        let prefix = match prefix_str {
+            Some(v) => parse_prefix(v, IPV6_BITS)?,
+            None => IPV6_BITS,
         };
         Ipv6Network::new(addr, prefix)
     }
