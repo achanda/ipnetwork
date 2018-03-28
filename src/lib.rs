@@ -64,6 +64,8 @@ impl IpNetwork {
     ///
     /// assert_eq!(IpNetwork::V4("10.9.0.1".parse().unwrap()).prefix(), 32u8);
     /// assert_eq!(IpNetwork::V4("10.9.0.32/16".parse().unwrap()).prefix(), 16u8);
+    ///
+    /// assert_eq!(IpNetwork::V6("ff01::0".parse().unwrap()).prefix(), 128u8);
     /// assert_eq!(IpNetwork::V6("ff01::0/32".parse().unwrap()).prefix(), 32u8);
     /// ```
     pub fn prefix(&self) -> u8 {
@@ -85,6 +87,9 @@ impl IpNetwork {
     /// assert_eq!(v4_net.mask(), Ipv4Addr::new(255, 255, 255, 255));
     /// let v4_net: IpNetwork = "10.9.0.32/16".parse().unwrap();
     /// assert_eq!(v4_net.mask(), Ipv4Addr::new(255, 255, 0, 0));
+    ///
+    /// let v6_net: IpNetwork = "ff01::0".parse().unwrap();
+    /// assert_eq!(v6_net.mask(), Ipv6Addr::new(0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff));
     /// let v6_net: IpNetwork = "ff01::0/32".parse().unwrap();
     /// assert_eq!(v6_net.mask(), Ipv6Addr::new(0xffff, 0xffff, 0, 0, 0, 0, 0, 0));
     ///```

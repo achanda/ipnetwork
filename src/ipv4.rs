@@ -57,6 +57,8 @@ impl Ipv4Network {
     /// use std::net::Ipv4Addr;
     /// use ipnetwork::Ipv4Network;
     ///
+    /// let net: Ipv4Network = "127.0.0.0".parse().unwrap();
+    /// assert_eq!(net.mask(), Ipv4Addr::new(255, 255, 255, 255));
     /// let net: Ipv4Network = "127.0.0.0/16".parse().unwrap();
     /// assert_eq!(net.mask(), Ipv4Addr::new(255, 255, 0, 0));
     /// ```
@@ -276,6 +278,13 @@ mod test {
     #[test]
     fn parse_v4_32bit() {
         let cidr: Ipv4Network = "127.0.0.0/32".parse().unwrap();
+        assert_eq!(cidr.ip(), Ipv4Addr::new(127, 0, 0, 0));
+        assert_eq!(cidr.prefix(), 32);
+    }
+
+    #[test]
+    fn parse_v4_noprefix() {
+        let cidr: Ipv4Network = "127.0.0.0".parse().unwrap();
         assert_eq!(cidr.ip(), Ipv4Addr::new(127, 0, 0, 0));
         assert_eq!(cidr.prefix(), 32);
     }
