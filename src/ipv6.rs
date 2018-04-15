@@ -106,6 +106,8 @@ impl Ipv6Network {
     /// use std::net::Ipv6Addr;
     /// use ipnetwork::Ipv6Network;
     ///
+    /// let net: Ipv6Network = "ff01::0".parse().unwrap();
+    /// assert_eq!(net.mask(), Ipv6Addr::new(0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff));
     /// let net: Ipv6Network = "ff01::0/32".parse().unwrap();
     /// assert_eq!(net.mask(), Ipv6Addr::new(0xffff, 0xffff, 0, 0, 0, 0, 0, 0));
     /// ```
@@ -170,7 +172,10 @@ impl FromStr for Ipv6Network {
         let (addr_str, prefix_str) = cidr_parts(s)?;
         let addr = Ipv6Addr::from_str(addr_str)
             .map_err(|_| IpNetworkError::InvalidAddr(addr_str.to_string()))?;
-        let prefix = parse_prefix(prefix_str, IPV6_BITS)?;
+        let prefix = match prefix_str {
+            Some(v) => parse_prefix(v, IPV6_BITS)?,
+            None => IPV6_BITS,
+        };
         Ipv6Network::new(addr, prefix)
     }
 }
@@ -275,6 +280,13 @@ mod test {
         let cidr: Ipv6Network = "FF01:0:0:17:0:0:0:2/64".parse().unwrap();
         assert_eq!(cidr.ip(), Ipv6Addr::new(0xff01, 0, 0, 0x17, 0, 0, 0, 0x2));
         assert_eq!(cidr.prefix(), 64);
+    }
+
+    #[test]
+    fn parse_v6_noprefix() {
+        let cidr: Ipv6Network = "::1".parse().unwrap();
+        assert_eq!(cidr.ip(), Ipv6Addr::new(0, 0, 0, 0, 0, 0, 0, 1));
+        assert_eq!(cidr.prefix(), 128);
     }
 
     #[test]

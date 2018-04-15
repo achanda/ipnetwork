@@ -32,15 +32,12 @@ impl Error for IpNetworkError {
     }
 }
 
-pub fn cidr_parts(cidr: &str) -> Result<(&str, &str), IpNetworkError> {
+pub fn cidr_parts(cidr: &str) -> Result<(&str, Option<&str>), IpNetworkError> {
     let parts = cidr.split('/').collect::<Vec<&str>>();
     if parts.len() == 1 {
-        Err(IpNetworkError::InvalidCidrFormat(format!(
-            "CIDR must contain '/': {}",
-            cidr
-        )))
+        Ok((parts[0], None))
     } else if parts.len() == 2 {
-        Ok((parts[0], parts[1]))
+        Ok((parts[0], Some(parts[1])))
     } else {
         Err(IpNetworkError::InvalidCidrFormat(format!(
             "CIDR must contain a single '/': {}",
