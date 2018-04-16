@@ -253,8 +253,8 @@ pub fn ipv6_mask_to_prefix(mask: Ipv6Addr) -> Result<u8, IpNetworkError> {
 
 #[cfg(test)]
 mod test {
-    use std::net::Ipv6Addr;
     use super::*;
+    use std::net::Ipv6Addr;
 
     #[test]
     fn create_v6() {

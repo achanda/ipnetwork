@@ -8,7 +8,6 @@ extern crate serde_derive;
 
 extern crate ipnetwork;
 
-
 #[cfg(test)]
 mod tests {
 
@@ -45,7 +44,10 @@ mod tests {
 
         let mystruct: MyStruct = ::serde_json::from_str(json_string).unwrap();
 
-        assert_eq!(mystruct.ipnetwork.ip(), Ipv6Addr::new(0, 0, 0, 0, 0, 0, 0, 1));
+        assert_eq!(
+            mystruct.ipnetwork.ip(),
+            Ipv6Addr::new(0, 0, 0, 0, 0, 0, 0, 1)
+        );
         assert_eq!(mystruct.ipnetwork.prefix(), 0);
 
         assert_eq!(::serde_json::to_string(&mystruct).unwrap(), json_string);
@@ -65,7 +67,10 @@ mod tests {
 
         assert_eq!(mystruct.ipnetwork[0].ip(), Ipv4Addr::new(127, 1, 0, 0));
         assert_eq!(mystruct.ipnetwork[0].prefix(), 24);
-        assert_eq!(mystruct.ipnetwork[1].ip(), Ipv6Addr::new(0, 0, 0, 0, 0, 0, 0, 1));
+        assert_eq!(
+            mystruct.ipnetwork[1].ip(),
+            Ipv6Addr::new(0, 0, 0, 0, 0, 0, 0, 1)
+        );
         assert_eq!(mystruct.ipnetwork[1].prefix(), 0);
 
         assert_eq!(::serde_json::to_string(&mystruct).unwrap(), json_string);

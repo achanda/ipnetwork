@@ -17,15 +17,15 @@ extern crate serde_derive;
 use std::fmt;
 use std::net::IpAddr;
 
+mod common;
 mod ipv4;
 mod ipv6;
-mod common;
 
 use std::str::FromStr;
 
-pub use ipv4::{Ipv4Network, ipv4_mask_to_prefix};
-pub use ipv6::{Ipv6Network, ipv6_mask_to_prefix};
 pub use common::IpNetworkError;
+pub use ipv4::{ipv4_mask_to_prefix, Ipv4Network};
+pub use ipv6::{ipv6_mask_to_prefix, Ipv6Network};
 
 /// Represents a generic network range. This type can have two variants:
 /// the v4 and the v6 case.

@@ -243,10 +243,10 @@ pub fn ipv4_mask_to_prefix(mask: Ipv4Addr) -> Result<u8, IpNetworkError> {
 
 #[cfg(test)]
 mod test {
-    use std::mem;
-    use std::collections::HashMap;
-    use std::net::Ipv4Addr;
     use super::*;
+    use std::collections::HashMap;
+    use std::mem;
+    use std::net::Ipv4Addr;
 
     #[test]
     fn create_v4() {
