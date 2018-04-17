@@ -14,9 +14,6 @@ extern crate serde;
 #[macro_use]
 extern crate serde_derive;
 
-#[cfg(feature = "with-serde")]
-use serde::{de, Deserialize, Deserializer, Serialize, Serializer};
-
 use std::fmt;
 use std::net::IpAddr;
 
@@ -32,31 +29,12 @@ pub use ipv6::{ipv6_mask_to_prefix, Ipv6Network};
 
 /// Represents a generic network range. This type can have two variants:
 /// the v4 and the v6 case.
+#[cfg_attr(feature = "with-serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "with-serde", serde(untagged))]
 #[derive(Debug, Clone, Copy, Hash, PartialEq, Eq, PartialOrd, Ord)]
 pub enum IpNetwork {
     V4(Ipv4Network),
     V6(Ipv6Network),
-}
-
-#[cfg(feature = "with-serde")]
-impl<'de> Deserialize<'de> for IpNetwork {
-    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
-    where
-        D: Deserializer<'de>,
-    {
-        let s = <&str>::deserialize(deserializer)?;
-        IpNetwork::from_str(s).map_err(de::Error::custom)
-    }
-}
-
-#[cfg(feature = "with-serde")]
-impl Serialize for IpNetwork {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: Serializer,
-    {
-        serializer.serialize_str(&self.to_string())
-    }
 }
 
 impl IpNetwork {
