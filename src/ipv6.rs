@@ -3,17 +3,40 @@ use std::fmt;
 use std::net::Ipv6Addr;
 use std::str::FromStr;
 
+#[cfg(feature = "with-serde")]
+use serde::{de, Deserialize, Deserializer, Serialize, Serializer};
+
 use common::{cidr_parts, parse_prefix, IpNetworkError};
 
 const IPV6_BITS: u8 = 128;
 const IPV6_SEGMENT_BITS: u8 = 16;
 
 /// Represents a network range where the IP addresses are of v6
-#[cfg_attr(feature = "with-serde", derive(Serialize, Deserialize))]
 #[derive(Debug, Clone, Copy, Hash, PartialEq, Eq, PartialOrd, Ord)]
 pub struct Ipv6Network {
     addr: Ipv6Addr,
     prefix: u8,
+}
+
+#[cfg(feature = "with-serde")]
+impl<'de> Deserialize<'de> for Ipv6Network {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        let s = <&str>::deserialize(deserializer)?;
+        Ipv6Network::from_str(s).map_err(de::Error::custom)
+    }
+}
+
+#[cfg(feature = "with-serde")]
+impl Serialize for Ipv6Network {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        serializer.serialize_str(&self.to_string())
+    }
 }
 
 impl Ipv6Network {

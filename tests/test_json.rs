@@ -17,7 +17,7 @@ mod tests {
     #[cfg(feature = "with-serde")]
     #[test]
     fn test_ipv4_json() {
-        let json_string = r#"{"ipnetwork":{"addr":"127.1.0.0","prefix":24}}"#;
+        let json_string = r#"{"ipnetwork":"127.1.0.0/24"}"#;
 
         #[derive(Serialize, Deserialize)]
         struct MyStruct {
@@ -35,7 +35,7 @@ mod tests {
     #[cfg(feature = "with-serde")]
     #[test]
     fn test_ipv6_json() {
-        let json_string = r#"{"ipnetwork":{"addr":"::1","prefix":0}}"#;
+        let json_string = r#"{"ipnetwork":"::1/0"}"#;
 
         #[derive(Serialize, Deserialize)]
         struct MyStruct {
@@ -56,7 +56,7 @@ mod tests {
     #[cfg(feature = "with-serde")]
     #[test]
     fn test_ipnetwork_json() {
-        let json_string = r#"{"ipnetwork":[{"V4":{"addr":"127.1.0.0","prefix":24}},{"V6":{"addr":"::1","prefix":0}}]}"#;
+        let json_string = r#"{"ipnetwork":["127.1.0.0/24","::1/0"]}"#;
 
         #[derive(Serialize, Deserialize)]
         struct MyStruct {
