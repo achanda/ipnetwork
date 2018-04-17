@@ -8,9 +8,9 @@
 #![crate_type = "lib"]
 #![doc(html_root_url = "https://docs.rs/ipnetwork/0.12.8")]
 
-#[cfg(feature = "with-serde")]
+#[cfg(feature = "serde")]
 extern crate serde;
-#[cfg(feature = "with-serde")]
+#[cfg(feature = "serde")]
 #[macro_use]
 extern crate serde_derive;
 
@@ -29,8 +29,8 @@ pub use ipv6::{ipv6_mask_to_prefix, Ipv6Network};
 
 /// Represents a generic network range. This type can have two variants:
 /// the v4 and the v6 case.
-#[cfg_attr(feature = "with-serde", derive(Serialize, Deserialize))]
-#[cfg_attr(feature = "with-serde", serde(untagged))]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", serde(untagged))]
 #[derive(Debug, Clone, Copy, Hash, PartialEq, Eq, PartialOrd, Ord)]
 pub enum IpNetwork {
     V4(Ipv4Network),

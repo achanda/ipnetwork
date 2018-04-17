@@ -3,7 +3,7 @@ use std::fmt;
 use std::net::Ipv6Addr;
 use std::str::FromStr;
 
-#[cfg(feature = "with-serde")]
+#[cfg(feature = "serde")]
 use serde::{de, Deserialize, Deserializer, Serialize, Serializer};
 
 use common::{cidr_parts, parse_prefix, IpNetworkError};
@@ -18,7 +18,7 @@ pub struct Ipv6Network {
     prefix: u8,
 }
 
-#[cfg(feature = "with-serde")]
+#[cfg(feature = "serde")]
 impl<'de> Deserialize<'de> for Ipv6Network {
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
     where
@@ -29,7 +29,7 @@ impl<'de> Deserialize<'de> for Ipv6Network {
     }
 }
 
-#[cfg(feature = "with-serde")]
+#[cfg(feature = "serde")]
 impl Serialize for Ipv6Network {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where

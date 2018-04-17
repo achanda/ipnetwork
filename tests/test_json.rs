@@ -1,8 +1,8 @@
-#[cfg(feature = "with-serde")]
+#[cfg(feature = "serde")]
 extern crate serde;
-#[cfg(feature = "with-serde")]
+#[cfg(feature = "serde")]
 extern crate serde_json;
-#[cfg(feature = "with-serde")]
+#[cfg(feature = "serde")]
 #[macro_use]
 extern crate serde_derive;
 
@@ -14,7 +14,7 @@ mod tests {
     use ipnetwork::{IpNetwork, Ipv4Network, Ipv6Network};
     use std::net::{Ipv4Addr, Ipv6Addr};
 
-    #[cfg(feature = "with-serde")]
+    #[cfg(feature = "serde")]
     #[test]
     fn test_ipv4_json() {
         let json_string = r#"{"ipnetwork":"127.1.0.0/24"}"#;
@@ -32,7 +32,7 @@ mod tests {
         assert_eq!(::serde_json::to_string(&mystruct).unwrap(), json_string);
     }
 
-    #[cfg(feature = "with-serde")]
+    #[cfg(feature = "serde")]
     #[test]
     fn test_ipv6_json() {
         let json_string = r#"{"ipnetwork":"::1/0"}"#;
@@ -53,7 +53,7 @@ mod tests {
         assert_eq!(::serde_json::to_string(&mystruct).unwrap(), json_string);
     }
 
-    #[cfg(feature = "with-serde")]
+    #[cfg(feature = "serde")]
     #[test]
     fn test_ipnetwork_json() {
         let json_string = r#"{"ipnetwork":["127.1.0.0/24","::1/0"]}"#;
