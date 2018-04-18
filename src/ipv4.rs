@@ -2,7 +2,6 @@ use std::fmt;
 use std::net::Ipv4Addr;
 use std::str::FromStr;
 
-#[cfg(feature = "serde")]
 use serde::{de, Deserialize, Deserializer, Serialize, Serializer};
 
 use common::{cidr_parts, parse_addr, parse_prefix, IpNetworkError};
@@ -16,7 +15,6 @@ pub struct Ipv4Network {
     prefix: u8,
 }
 
-#[cfg(feature = "serde")]
 impl<'de> Deserialize<'de> for Ipv4Network {
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
     where
@@ -27,7 +25,6 @@ impl<'de> Deserialize<'de> for Ipv4Network {
     }
 }
 
-#[cfg(feature = "serde")]
 impl Serialize for Ipv4Network {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where

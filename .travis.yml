@@ -11,7 +11,7 @@ env:
 matrix:
   include:
     - rust: nightly
-      env: FEATURES=ipv6-iterator,ipv6-methods,serde,serde-derive
+      env: FEATURES=ipv6-iterator,ipv6-methods
 
 script:
   - cargo build --features $FEATURES --verbose
