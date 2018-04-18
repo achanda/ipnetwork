@@ -43,10 +43,7 @@ impl Ipv6Network {
         if prefix > IPV6_BITS {
             Err(IpNetworkError::InvalidPrefix)
         } else {
-            Ok(Ipv6Network {
-                addr: addr,
-                prefix: prefix,
-            })
+            Ok(Ipv6Network { addr, prefix })
         }
     }
 

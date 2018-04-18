@@ -41,10 +41,7 @@ impl Ipv4Network {
         if prefix > IPV4_BITS {
             Err(IpNetworkError::InvalidPrefix)
         } else {
-            Ok(Ipv4Network {
-                addr: addr,
-                prefix: prefix,
-            })
+            Ok(Ipv4Network { addr, prefix })
         }
     }
 
@@ -54,10 +51,7 @@ impl Ipv4Network {
     pub fn iter(&self) -> Ipv4NetworkIterator {
         let start = u64::from(u32::from(self.network()));
         let end = start + self.size();
-        Ipv4NetworkIterator {
-            next: start,
-            end: end,
-        }
+        Ipv4NetworkIterator { next: start, end }
     }
 
     pub fn ip(&self) -> Ipv4Addr {
@@ -254,7 +248,7 @@ pub fn ipv4_mask_to_prefix(mask: Ipv4Addr) -> Result<u8, IpNetworkError> {
     let mask = u32::from(mask);
 
     let prefix = (!mask).leading_zeros() as u8;
-    if ((mask as u64) << prefix) & 0xffff_ffff != 0 {
+    if (u64::from(mask) << prefix) & 0xffff_ffff != 0 {
         Err(IpNetworkError::InvalidPrefix)
     } else {
         Ok(prefix)
