@@ -3,17 +3,37 @@ use std::fmt;
 use std::net::Ipv6Addr;
 use std::str::FromStr;
 
+use serde::{de, Deserialize, Deserializer, Serialize, Serializer};
+
 use common::{cidr_parts, parse_prefix, IpNetworkError};
 
 const IPV6_BITS: u8 = 128;
 const IPV6_SEGMENT_BITS: u8 = 16;
 
 /// Represents a network range where the IP addresses are of v6
-#[cfg_attr(feature = "with-serde", derive(Serialize, Deserialize))]
 #[derive(Debug, Clone, Copy, Hash, PartialEq, Eq, PartialOrd, Ord)]
 pub struct Ipv6Network {
     addr: Ipv6Addr,
     prefix: u8,
+}
+
+impl<'de> Deserialize<'de> for Ipv6Network {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        let s = <&str>::deserialize(deserializer)?;
+        Ipv6Network::from_str(s).map_err(de::Error::custom)
+    }
+}
+
+impl Serialize for Ipv6Network {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        serializer.serialize_str(&self.to_string())
+    }
 }
 
 impl Ipv6Network {
@@ -23,10 +43,7 @@ impl Ipv6Network {
         if prefix > IPV6_BITS {
             Err(IpNetworkError::InvalidPrefix)
         } else {
-            Ok(Ipv6Network {
-                addr: addr,
-                prefix: prefix,
-            })
+            Ok(Ipv6Network { addr, prefix })
         }
     }
 
@@ -253,8 +270,8 @@ pub fn ipv6_mask_to_prefix(mask: Ipv6Addr) -> Result<u8, IpNetworkError> {
 
 #[cfg(test)]
 mod test {
-    use std::net::Ipv6Addr;
     use super::*;
+    use std::net::Ipv6Addr;
 
     #[test]
     fn create_v6() {

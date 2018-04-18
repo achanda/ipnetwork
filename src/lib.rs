@@ -8,29 +8,27 @@
 #![crate_type = "lib"]
 #![doc(html_root_url = "https://docs.rs/ipnetwork/0.12.8")]
 
-#[cfg(feature = "with-serde")]
 extern crate serde;
-#[cfg(feature = "with-serde")]
 #[macro_use]
 extern crate serde_derive;
 
 use std::fmt;
 use std::net::IpAddr;
 
+mod common;
 mod ipv4;
 mod ipv6;
-mod common;
 
 use std::str::FromStr;
 
-pub use ipv4::{Ipv4Network, ipv4_mask_to_prefix};
-pub use ipv6::{Ipv6Network, ipv6_mask_to_prefix};
 pub use common::IpNetworkError;
+pub use ipv4::{ipv4_mask_to_prefix, Ipv4Network};
+pub use ipv6::{ipv6_mask_to_prefix, Ipv6Network};
 
 /// Represents a generic network range. This type can have two variants:
 /// the v4 and the v6 case.
-#[cfg_attr(feature = "with-serde", derive(Serialize, Deserialize))]
-#[derive(Debug, Clone, Copy, Hash, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Debug, Clone, Copy, Hash, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize)]
+#[serde(untagged)]
 pub enum IpNetwork {
     V4(Ipv4Network),
     V6(Ipv6Network),
@@ -79,6 +77,7 @@ impl IpNetwork {
     /// That means the `prefix` most significant bits will be 1 and the rest 0
     ///
     /// # Example
+    ///
     /// ```
     /// use ipnetwork::IpNetwork;
     /// use std::net::{Ipv4Addr, Ipv6Addr};
@@ -92,7 +91,7 @@ impl IpNetwork {
     /// assert_eq!(v6_net.mask(), Ipv6Addr::new(0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff));
     /// let v6_net: IpNetwork = "ff01::0/32".parse().unwrap();
     /// assert_eq!(v6_net.mask(), Ipv6Addr::new(0xffff, 0xffff, 0, 0, 0, 0, 0, 0));
-    ///```
+    /// ```
     pub fn mask(&self) -> IpAddr {
         match *self {
             IpNetwork::V4(ref a) => IpAddr::V4(a.mask()),

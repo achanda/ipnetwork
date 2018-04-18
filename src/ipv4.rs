@@ -2,16 +2,36 @@ use std::fmt;
 use std::net::Ipv4Addr;
 use std::str::FromStr;
 
+use serde::{de, Deserialize, Deserializer, Serialize, Serializer};
+
 use common::{cidr_parts, parse_addr, parse_prefix, IpNetworkError};
 
 const IPV4_BITS: u8 = 32;
 
 /// Represents a network range where the IP addresses are of v4
-#[cfg_attr(feature = "with-serde", derive(Serialize, Deserialize))]
 #[derive(Debug, Clone, Copy, Hash, PartialEq, Eq, PartialOrd, Ord)]
 pub struct Ipv4Network {
     addr: Ipv4Addr,
     prefix: u8,
+}
+
+impl<'de> Deserialize<'de> for Ipv4Network {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        let s = <&str>::deserialize(deserializer)?;
+        Ipv4Network::from_str(s).map_err(de::Error::custom)
+    }
+}
+
+impl Serialize for Ipv4Network {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        serializer.serialize_str(&self.to_string())
+    }
 }
 
 impl Ipv4Network {
@@ -21,10 +41,7 @@ impl Ipv4Network {
         if prefix > IPV4_BITS {
             Err(IpNetworkError::InvalidPrefix)
         } else {
-            Ok(Ipv4Network {
-                addr: addr,
-                prefix: prefix,
-            })
+            Ok(Ipv4Network { addr, prefix })
         }
     }
 
@@ -34,10 +51,7 @@ impl Ipv4Network {
     pub fn iter(&self) -> Ipv4NetworkIterator {
         let start = u64::from(u32::from(self.network()));
         let end = start + self.size();
-        Ipv4NetworkIterator {
-            next: start,
-            end: end,
-        }
+        Ipv4NetworkIterator { next: start, end }
     }
 
     pub fn ip(&self) -> Ipv4Addr {
@@ -234,7 +248,7 @@ pub fn ipv4_mask_to_prefix(mask: Ipv4Addr) -> Result<u8, IpNetworkError> {
     let mask = u32::from(mask);
 
     let prefix = (!mask).leading_zeros() as u8;
-    if ((mask as u64) << prefix) & 0xffff_ffff != 0 {
+    if (u64::from(mask) << prefix) & 0xffff_ffff != 0 {
         Err(IpNetworkError::InvalidPrefix)
     } else {
         Ok(prefix)
@@ -243,10 +257,10 @@ pub fn ipv4_mask_to_prefix(mask: Ipv4Addr) -> Result<u8, IpNetworkError> {
 
 #[cfg(test)]
 mod test {
-    use std::mem;
-    use std::collections::HashMap;
-    use std::net::Ipv4Addr;
     use super::*;
+    use std::collections::HashMap;
+    use std::mem;
+    use std::net::Ipv4Addr;
 
     #[test]
     fn create_v4() {
