@@ -24,5 +24,3 @@ travis-ci = { repository = "achanda/ipnetwork" }
 [features]
 default = []
 dev = ["clippy"]
-ipv6-iterator = []
-ipv6-methods = []
