@@ -50,7 +50,6 @@ impl Ipv6Network {
     /// Returns an iterator over `Ipv6Network`. Each call to `next` will return the next
     /// `Ipv6Addr` in the given network. `None` will be returned when there are no more
     /// addresses.
-    #[cfg(feature = "ipv6-iterator")]
     pub fn iter(&self) -> Ipv6NetworkIterator {
         let dec = u128::from(self.addr);
         let max = u128::max_value();
@@ -80,7 +79,6 @@ impl Ipv6Network {
     /// let net: Ipv6Network = "2001:db8::/96".parse().unwrap();
     /// assert_eq!(net.network(), Ipv6Addr::new(0x2001, 0xdb8, 0, 0, 0, 0, 0, 0));
     /// ```
-    #[cfg(feature = "ipv6-methods")]
     pub fn network(&self) -> Ipv6Addr {
         let mask = u128::from(self.mask());
         let ip = u128::from(self.addr) & mask;
@@ -99,7 +97,6 @@ impl Ipv6Network {
     /// let net: Ipv6Network = "2001:db8::/96".parse().unwrap();
     /// assert_eq!(net.broadcast(), Ipv6Addr::new(0x2001, 0xdb8, 0, 0, 0, 0, 0xffff, 0xffff));
     /// ```
-    #[cfg(feature = "ipv6-methods")]
     pub fn broadcast(&self) -> Ipv6Addr {
         let mask = u128::from(self.mask());
         let broadcast = u128::from(self.addr) | !mask;
@@ -176,7 +173,6 @@ impl Ipv6Network {
     /// let tinynet: Ipv6Network = "ff01::0/128".parse().unwrap();
     /// assert_eq!(tinynet.size(), 1);
     /// ```
-    #[cfg(feature = "ipv6-methods")]
     pub fn size(&self) -> u128 {
         let host_bits = (IPV6_BITS - self.prefix) as u32;
         (2 as u128).pow(host_bits)
@@ -206,13 +202,11 @@ impl From<Ipv6Addr> for Ipv6Network {
     }
 }
 
-#[cfg(feature = "ipv6-iterator")]
 pub struct Ipv6NetworkIterator {
     next: u128,
     end: u128,
 }
 
-#[cfg(feature = "ipv6-iterator")]
 impl Iterator for Ipv6NetworkIterator {
     type Item = Ipv6Addr;
 
@@ -360,7 +354,6 @@ mod test {
     }
 
     #[test]
-    #[cfg(feature = "ipv6-iterator")]
     fn iterator_v6() {
         let cidr: Ipv6Network = "2001:db8::/126".parse().unwrap();
         let mut iter = cidr.iter();
@@ -384,7 +377,6 @@ mod test {
     }
 
     #[test]
-    #[cfg(feature = "ipv6-iterator")]
     fn iterator_v6_tiny() {
         let cidr: Ipv6Network = "2001:db8::/128".parse().unwrap();
         let mut iter = cidr.iter();
@@ -396,7 +388,6 @@ mod test {
     }
 
     #[test]
-    #[cfg(feature = "ipv6-iterator")]
     fn iterator_v6_huge() {
         let cidr: Ipv6Network = "2001:db8::/0".parse().unwrap();
         let mut iter = cidr.iter();
@@ -406,7 +397,6 @@ mod test {
     }
 
     #[test]
-    #[cfg(feature = "ipv6-methods")]
     fn network_v6() {
         let cidr: Ipv6Network = "2001:db8::0/96".parse().unwrap();
         let net = cidr.network();
@@ -415,7 +405,6 @@ mod test {
     }
 
     #[test]
-    #[cfg(feature = "ipv6-methods")]
     fn broadcast_v6() {
         let cidr: Ipv6Network = "2001:db8::0/96".parse().unwrap();
         let net = cidr.broadcast();
@@ -424,7 +413,6 @@ mod test {
     }
 
     #[test]
-    #[cfg(feature = "ipv6-methods")]
     fn size_v6() {
         let cidr: Ipv6Network = "2001:db8::0/96".parse().unwrap();
         assert_eq!(cidr.size(), 4294967296);
