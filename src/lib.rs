@@ -20,8 +20,8 @@ mod ipv6;
 use std::str::FromStr;
 
 pub use common::IpNetworkError;
-pub use ipv4::{ipv4_mask_to_prefix, Ipv4Network};
-pub use ipv6::{ipv6_mask_to_prefix, Ipv6Network};
+pub use ipv4::{Ipv4Network, ipv4_mask_to_prefix};
+pub use ipv6::{Ipv6Network, ipv6_mask_to_prefix};
 
 /// Represents a generic network range. This type can have two variants:
 /// the v4 and the v6 case.
