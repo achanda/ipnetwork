@@ -118,6 +118,25 @@ impl IpNetwork {
         }
     }
 
+    /// Returns the broadcasting address of this `IpNetwork`.
+    /// This means the highest possible IP address inside of the network.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use std::net::Ipv4Addr;
+    /// use ipnetwork::Ipv4Network;
+    ///
+    /// let net: IpvNetwork = "10.9.0.32/16".parse().unwrap();
+    /// assert_eq!(net.broadcast(), IpNetwork::V4(Ipv4Addr::new(10, 9, 255, 255)));
+    /// ```
+    pub fn broadcast(&self) -> IpAddr {
+        match *self {
+            IpNetwork::V4(ref a) => IpAddr::V4(a.broadcast()),
+            IpNetwork::V6(ref a) => IpAddr::V6(a.broadcast()),
+        }
+    }
+
     /// Returns true if the IP in this `IpNetwork` is a valid IPv4 address,
     /// false if it's a valid IPv6 address.
     ///
