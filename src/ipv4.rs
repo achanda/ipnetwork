@@ -48,17 +48,17 @@ impl Ipv4Network {
     /// Returns an iterator over `Ipv4Network`. Each call to `next` will return the next
     /// `Ipv4Addr` in the given network. `None` will be returned when there are no more
     /// addresses.
-    pub fn iter(&self) -> Ipv4NetworkIterator {
+    pub fn iter(self) -> Ipv4NetworkIterator {
         let start = u64::from(u32::from(self.network()));
         let end = start + self.size();
         Ipv4NetworkIterator { next: start, end }
     }
 
-    pub fn ip(&self) -> Ipv4Addr {
+    pub fn ip(self) -> Ipv4Addr {
         self.addr
     }
 
-    pub fn prefix(&self) -> u8 {
+    pub fn prefix(self) -> u8 {
         self.prefix
     }
 
@@ -76,7 +76,7 @@ impl Ipv4Network {
     /// let net: Ipv4Network = "127.0.0.0/16".parse().unwrap();
     /// assert_eq!(net.mask(), Ipv4Addr::new(255, 255, 0, 0));
     /// ```
-    pub fn mask(&self) -> Ipv4Addr {
+    pub fn mask(self) -> Ipv4Addr {
         let prefix = self.prefix;
         let mask = !(0xffff_ffff as u64 >> prefix) as u32;
         Ipv4Addr::from(mask)
@@ -94,7 +94,7 @@ impl Ipv4Network {
     /// let net: Ipv4Network = "10.1.9.32/16".parse().unwrap();
     /// assert_eq!(net.network(), Ipv4Addr::new(10, 1, 0, 0));
     /// ```
-    pub fn network(&self) -> Ipv4Addr {
+    pub fn network(self) -> Ipv4Addr {
         let mask = u32::from(self.mask());
         let ip = u32::from(self.addr) & mask;
         Ipv4Addr::from(ip)
@@ -112,7 +112,7 @@ impl Ipv4Network {
     /// let net: Ipv4Network = "10.9.0.32/16".parse().unwrap();
     /// assert_eq!(net.broadcast(), Ipv4Addr::new(10, 9, 255, 255));
     /// ```
-    pub fn broadcast(&self) -> Ipv4Addr {
+    pub fn broadcast(self) -> Ipv4Addr {
         let mask = u32::from(self.mask());
         let broadcast = u32::from(self.addr) | !mask;
         Ipv4Addr::from(broadcast)
@@ -130,7 +130,7 @@ impl Ipv4Network {
     /// assert!(net.contains(Ipv4Addr::new(127, 0, 0, 70)));
     /// assert!(!net.contains(Ipv4Addr::new(127, 0, 1, 70)));
     /// ```
-    pub fn contains(&self, ip: Ipv4Addr) -> bool {
+    pub fn contains(self, ip: Ipv4Addr) -> bool {
         let net = u32::from(self.network());
         let mask = u32::from(self.mask());
         (u32::from(ip) & mask) == net
@@ -150,7 +150,7 @@ impl Ipv4Network {
     /// let tinynet: Ipv4Network = "0.0.0.0/32".parse().unwrap();
     /// assert_eq!(tinynet.size(), 1);
     /// ```
-    pub fn size(&self) -> u64 {
+    pub fn size(self) -> u64 {
         let host_bits = u32::from(IPV4_BITS - self.prefix);
         (2 as u64).pow(host_bits)
     }
@@ -172,7 +172,7 @@ impl Ipv4Network {
     /// let net2: Ipv4Network = "10.0.0.0/16".parse().unwrap();
     /// assert_eq!(net2.nth(256).unwrap(), Ipv4Addr::new(10, 0, 1, 0));
     /// ```
-    pub fn nth(&self, n: u32) -> Option<Ipv4Addr> {
+    pub fn nth(self, n: u32) -> Option<Ipv4Addr> {
         if u64::from(n) < self.size() {
             let net = u32::from(self.network());
             Some(Ipv4Addr::from(net + n))

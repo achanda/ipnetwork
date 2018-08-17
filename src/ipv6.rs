@@ -50,15 +50,15 @@ impl Ipv6Network {
     /// Returns an iterator over `Ipv6Network`. Each call to `next` will return the next
     /// `Ipv6Addr` in the given network. `None` will be returned when there are no more
     /// addresses.
-    pub fn iter(&self) -> Ipv6NetworkIterator {
+    pub fn iter(self) -> Ipv6NetworkIterator {
         let dec = u128::from(self.addr);
         let max = u128::max_value();
         let prefix = self.prefix;
 
-        let mask = max.checked_shl((IPV6_BITS - prefix) as u32).unwrap_or(0);
+        let mask = max.checked_shl(u32::from(IPV6_BITS - prefix)).unwrap_or(0);
         let start: u128 = dec & mask;
 
-        let mask = max.checked_shr(prefix as u32).unwrap_or(0);
+        let mask = max.checked_shr(u32::from(prefix)).unwrap_or(0);
         let end: u128 = dec | mask;
 
         Ipv6NetworkIterator {
@@ -79,7 +79,7 @@ impl Ipv6Network {
     /// let net: Ipv6Network = "2001:db8::/96".parse().unwrap();
     /// assert_eq!(net.network(), Ipv6Addr::new(0x2001, 0xdb8, 0, 0, 0, 0, 0, 0));
     /// ```
-    pub fn network(&self) -> Ipv6Addr {
+    pub fn network(self) -> Ipv6Addr {
         let mask = u128::from(self.mask());
         let ip = u128::from(self.addr) & mask;
         Ipv6Addr::from(ip)
@@ -97,17 +97,17 @@ impl Ipv6Network {
     /// let net: Ipv6Network = "2001:db8::/96".parse().unwrap();
     /// assert_eq!(net.broadcast(), Ipv6Addr::new(0x2001, 0xdb8, 0, 0, 0, 0, 0xffff, 0xffff));
     /// ```
-    pub fn broadcast(&self) -> Ipv6Addr {
+    pub fn broadcast(self) -> Ipv6Addr {
         let mask = u128::from(self.mask());
         let broadcast = u128::from(self.addr) | !mask;
         Ipv6Addr::from(broadcast)
     }
 
-    pub fn ip(&self) -> Ipv6Addr {
+    pub fn ip(self) -> Ipv6Addr {
         self.addr
     }
 
-    pub fn prefix(&self) -> u8 {
+    pub fn prefix(self) -> u8 {
         self.prefix
     }
 
@@ -125,7 +125,7 @@ impl Ipv6Network {
     /// let net: Ipv6Network = "ff01::0/32".parse().unwrap();
     /// assert_eq!(net.mask(), Ipv6Addr::new(0xffff, 0xffff, 0, 0, 0, 0, 0, 0));
     /// ```
-    pub fn mask(&self) -> Ipv6Addr {
+    pub fn mask(self) -> Ipv6Addr {
         // Ipv6Addr::from is only implemented for [u8; 16]
         let mut segments = [0; 16];
         for (i, segment) in segments.iter_mut().enumerate() {
@@ -148,7 +148,7 @@ impl Ipv6Network {
     /// assert!(net.contains(Ipv6Addr::new(0xff01, 0, 0, 0, 0, 0, 0, 0x1)));
     /// assert!(!net.contains(Ipv6Addr::new(0xffff, 0, 0, 0, 0, 0, 0, 0x1)));
     /// ```
-    pub fn contains(&self, ip: Ipv6Addr) -> bool {
+    pub fn contains(self, ip: Ipv6Addr) -> bool {
         let a = self.addr.segments();
         let b = ip.segments();
         let addrs = Iterator::zip(a.iter(), b.iter());
@@ -173,8 +173,8 @@ impl Ipv6Network {
     /// let tinynet: Ipv6Network = "ff01::0/128".parse().unwrap();
     /// assert_eq!(tinynet.size(), 1);
     /// ```
-    pub fn size(&self) -> u128 {
-        let host_bits = (IPV6_BITS - self.prefix) as u32;
+    pub fn size(self) -> u128 {
+        let host_bits = u32::from(IPV6_BITS - self.prefix);
         (2 as u128).pow(host_bits)
     }
 }
