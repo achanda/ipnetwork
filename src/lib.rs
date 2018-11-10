@@ -71,6 +71,46 @@ impl IpNetwork {
         }
     }
 
+        /// Returns the address of the network denoted by this `IpNetwork`.
+    /// This means the lowest possible IP address inside of the network.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use std::net::{Ipv4Addr, Ipv6Addr};
+    /// use ipnetwork::IpNetwork;
+    ///
+    /// let net: IpNetwork = "10.1.9.32/16".parse().unwrap();
+    /// assert_eq!(net.network(), Ipv4Addr::new(10, 1, 0, 0));
+    /// let net: IpNetwork = "2001:db8::/96".parse().unwrap();
+    /// assert_eq!(net.network(), Ipv6Addr::new(0x2001, 0xdb8, 0, 0, 0, 0, 0, 0));
+    /// ```
+    pub fn network(&self) -> IpAddr {
+        match *self {
+            IpNetwork::V4(ref a) => IpAddr::V4(a.network()),
+            IpNetwork::V6(ref a) => IpAddr::V6(a.network()),
+        }
+    }
+
+    /// Returns the broadcasting address of this `IpNetwork`.
+    /// This means the highest possible IP address inside of the network.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use std::net::Ipv4Addr;
+    /// use ipnetwork::{IpNetwork, Ipv4Network};
+    ///
+    /// let net: Ipv4Network = "10.9.0.32/16".parse().unwrap();
+    /// assert_eq!(net.broadcast(), Ipv4Addr::new(10, 9, 255, 255));
+    /// ```
+    pub fn broadcast(&self) -> IpAddr {
+        match *self {
+            IpNetwork::V4(ref a) => IpAddr::V4(a.broadcast()),
+            IpNetwork::V6(ref a) => IpAddr::V6(a.broadcast()),
+        }
+    }
+
     /// Returns the mask for this `IpNetwork`.
     /// That means the `prefix` most significant bits will be 1 and the rest 0
     ///
