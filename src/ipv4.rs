@@ -49,7 +49,7 @@ impl Ipv4Network {
     /// `Ipv4Addr` in the given network. `None` will be returned when there are no more
     /// addresses.
     pub fn iter(&self) -> Ipv4NetworkIterator {
-        let start = u64::from(u32::from(self.network()));
+        let start = u32::from(self.network());
         let end = start + self.size();
         Ipv4NetworkIterator { next: start, end }
     }
@@ -150,9 +150,9 @@ impl Ipv4Network {
     /// let tinynet: Ipv4Network = "0.0.0.0/32".parse().unwrap();
     /// assert_eq!(tinynet.size(), 1);
     /// ```
-    pub fn size(&self) -> u64 {
+    pub fn size(&self) -> u32 {
         let host_bits = u32::from(IPV4_BITS - self.prefix);
-        (2 as u64).pow(host_bits)
+        (2 as u32).pow(host_bits)
     }
 
     /// Returns the `n`:th address within this network.
@@ -173,7 +173,7 @@ impl Ipv4Network {
     /// assert_eq!(net2.nth(256).unwrap(), Ipv4Addr::new(10, 0, 1, 0));
     /// ```
     pub fn nth(&self, n: u32) -> Option<Ipv4Addr> {
-        if u64::from(n) < self.size() {
+        if n < self.size() {
             let net = u32::from(self.network());
             Some(Ipv4Addr::from(net + n))
         } else {
@@ -225,8 +225,8 @@ impl From<Ipv4Addr> for Ipv4Network {
 }
 
 pub struct Ipv4NetworkIterator {
-    next: u64,
-    end: u64,
+    next: u32,
+    end: u32,
 }
 
 impl Iterator for Ipv4NetworkIterator {

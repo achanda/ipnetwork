@@ -32,6 +32,14 @@ pub enum IpNetwork {
     V6(Ipv6Network),
 }
 
+
+/// Represents a generic network size. For IPv4, the max size is a u32 and for IPv6, it is a u128
+#[derive(Debug, Clone, Copy, Hash, PartialEq, Eq, PartialOrd, Ord)]
+pub enum NetworkSize {
+    V4(u32),
+    V6(u128),
+}
+
 impl IpNetwork {
     /// Constructs a new `IpNetwork` from a given `IpAddr` and a prefix denoting the
     /// network size. If the prefix is larger than 32 (for IPv4) or 128 (for IPv6), this
@@ -196,6 +204,25 @@ impl IpNetwork {
             (IpNetwork::V4(net), IpAddr::V4(ip)) => net.contains(ip),
             (IpNetwork::V6(net), IpAddr::V6(ip)) => net.contains(ip),
             _ => false,
+        }
+    }
+
+
+    /// Returns the number of possible host addresses in this `IpAddr`
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use ipnetwork::{IpNetwork, NetworkSize};
+    ///
+    ///
+    /// let net: IpNetwork = "127.0.0.0/24".parse().unwrap();
+    /// assert_eq!(net.size(), NetworkSize::V4(256))
+    /// ```
+    pub fn size(&self) -> NetworkSize {
+        match *self {
+            IpNetwork::V4(ref ip) => NetworkSize::V4(ip.size()),
+            IpNetwork::V6(ref ip) => NetworkSize::V6(ip.size()),
         }
     }
 }
