@@ -55,10 +55,10 @@ impl Ipv6Network {
         let max = u128::max_value();
         let prefix = self.prefix;
 
-        let mask = max.checked_shl((IPV6_BITS - prefix) as u32).unwrap_or(0);
+        let mask = max.checked_shl(u32::from(IPV6_BITS - prefix)).unwrap_or(0);
         let start: u128 = dec & mask;
 
-        let mask = max.checked_shr(prefix as u32).unwrap_or(0);
+        let mask = max.checked_shr(u32::from(prefix)).unwrap_or(0);
         let end: u128 = dec | mask;
 
         Ipv6NetworkIterator {
@@ -174,7 +174,7 @@ impl Ipv6Network {
     /// assert_eq!(tinynet.size(), 1);
     /// ```
     pub fn size(&self) -> u128 {
-        let host_bits = (IPV6_BITS - self.prefix) as u32;
+        let host_bits = u32::from(IPV6_BITS - self.prefix);
         (2 as u128).pow(host_bits)
     }
 }
