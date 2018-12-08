@@ -11,7 +11,7 @@ documentation = "https://docs.rs/ipnetwork/"
 categories = ["network-programming", "os"]
 
 [dependencies]
-clippy = {version = "0.0.104", optional = true}
+clippy = {version = "0.0.302", optional = true}
 serde = ">=0.8.0, <2.0"
 serde_derive = ">=0.8.0, <2.0"
 
