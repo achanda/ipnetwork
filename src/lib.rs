@@ -7,8 +7,6 @@
 #![doc(html_root_url = "https://docs.rs/ipnetwork/0.13.1")]
 
 extern crate serde;
-#[macro_use]
-extern crate serde_derive;
 
 use std::fmt;
 use std::net::IpAddr;
@@ -19,19 +17,38 @@ mod ipv6;
 
 use std::str::FromStr;
 
+use serde::{de, Deserialize, Deserializer, Serialize, Serializer};
+
 pub use common::IpNetworkError;
-pub use ipv4::{Ipv4Network, ipv4_mask_to_prefix};
-pub use ipv6::{Ipv6Network, ipv6_mask_to_prefix};
+pub use ipv4::{ipv4_mask_to_prefix, Ipv4Network};
+pub use ipv6::{ipv6_mask_to_prefix, Ipv6Network};
 
 /// Represents a generic network range. This type can have two variants:
 /// the v4 and the v6 case.
-#[derive(Debug, Clone, Copy, Hash, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize)]
-#[serde(untagged)]
+#[derive(Debug, Clone, Copy, Hash, PartialEq, Eq, PartialOrd, Ord)]
 pub enum IpNetwork {
     V4(Ipv4Network),
     V6(Ipv6Network),
 }
 
+impl<'de> Deserialize<'de> for IpNetwork {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        let s = <String>::deserialize(deserializer)?;
+        IpNetwork::from_str(&s).map_err(de::Error::custom)
+    }
+}
+
+impl Serialize for IpNetwork {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        serializer.serialize_str(&self.to_string())
+    }
+}
 
 /// Represents a generic network size. For IPv4, the max size is a u32 and for IPv6, it is a u128
 #[derive(Debug, Clone, Copy, Hash, PartialEq, Eq, PartialOrd, Ord)]
@@ -79,7 +96,7 @@ impl IpNetwork {
         }
     }
 
-        /// Returns the address of the network denoted by this `IpNetwork`.
+    /// Returns the address of the network denoted by this `IpNetwork`.
     /// This means the lowest possible IP address inside of the network.
     ///
     /// # Examples
@@ -207,7 +224,6 @@ impl IpNetwork {
         }
     }
 
-
     /// Returns the number of possible host addresses in this `IpAddr`
     ///
     /// # Examples
@@ -290,5 +306,17 @@ pub fn ip_mask_to_prefix(mask: IpAddr) -> Result<u8, IpNetworkError> {
     match mask {
         IpAddr::V4(mask) => ipv4_mask_to_prefix(mask),
         IpAddr::V6(mask) => ipv6_mask_to_prefix(mask),
+    }
+}
+
+#[cfg(test)]
+mod test {
+    #[test]
+    fn deserialize_from_serde_json_value() {
+        use super::*;
+        let network = IpNetwork::from_str("0.0.0.0/0").unwrap();
+        let val: serde_json::value::Value = serde_json::from_str(&serde_json::to_string(&network).unwrap()).unwrap();
+        let _deser: IpNetwork =
+            serde_json::from_value(val).expect("Fails to deserialize from json_value::value::Value");
     }
 }
