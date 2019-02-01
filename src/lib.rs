@@ -4,7 +4,7 @@
 #![cfg_attr(feature = "dev", feature(plugin))]
 #![cfg_attr(feature = "dev", plugin(clippy))]
 #![crate_type = "lib"]
-#![doc(html_root_url = "https://docs.rs/ipnetwork/0.13.1")]
+#![doc(html_root_url = "https://docs.rs/ipnetwork/0.14.0")]
 
 extern crate serde;
 
