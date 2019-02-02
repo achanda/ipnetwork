@@ -17,6 +17,7 @@ serde = ">=0.8.0, <2.0"
 [dev-dependencies]
 serde_json = "1.0"
 serde_derive = ">=0.8.0, <2.0"
+criterion = "0.2.9"
 
 [badges]
 travis-ci = { repository = "achanda/ipnetwork" }
@@ -24,3 +25,7 @@ travis-ci = { repository = "achanda/ipnetwork" }
 [features]
 default = []
 dev = ["clippy"]
+
+[[bench]]
+name = "parse_bench"
+harness = false

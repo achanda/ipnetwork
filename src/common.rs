@@ -32,16 +32,23 @@ impl Error for IpNetworkError {
 }
 
 pub fn cidr_parts(cidr: &str) -> Result<(&str, Option<&str>), IpNetworkError> {
-    let parts = cidr.split('/').collect::<Vec<&str>>();
-    if parts.len() == 1 {
-        Ok((parts[0], None))
-    } else if parts.len() == 2 {
-        Ok((parts[0], Some(parts[1])))
-    } else {
-        Err(IpNetworkError::InvalidCidrFormat(format!(
+    // Try to find a single slash
+    if let Some(sep) = cidr.find('/') {
+        let (ip, prefix) = cidr.split_at(sep);
+        // Error if cidr has multiple slashes
+        if prefix[1..].find('/').is_some() {
+            return Err(IpNetworkError::InvalidCidrFormat(format!(
             "CIDR must contain a single '/': {}",
             cidr
-        )))
+            )));
+        }
+        else {
+            // Handle the case when cidr has exactly one slash
+            return Ok((ip, Some(&prefix[1..])));
+        }
+    } else {
+        // Handle the case when cidr does not have a slash
+        return Ok((cidr, None));
     }
 }
 
