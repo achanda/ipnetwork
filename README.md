@@ -4,6 +4,7 @@ This is a library to work with IPv4 and v6 CIDRs in rust
 The IPv4 implementation is stable, IPv6 implementation is not done yet.
 
 [![Build Status](https://travis-ci.org/achanda/ipnetwork.svg?branch=master)](https://travis-ci.org/achanda/ipnetwork)
+[![Coverage Status](https://coveralls.io/repos/github/achanda/ipnetwork/badge.svg?branch=master)](https://coveralls.io/github/achanda/ipnetwork?branch=master)
 [![Merit Badge](http://meritbadge.herokuapp.com/ipnetwork)](https://crates.io/crates/ipnetwork)
 
 Run Clippy by doing
