@@ -3,13 +3,23 @@ rust:
   - stable
   - beta
   - nightly
+
 env:
   global:
     - secure: gokQ7xIWwmAuEUW3IyS5B/pbZxdFSSDBto5beJ+4ACGcRMDqJ/eCPf1ekSVXME4TWM46uUCjxcdUjYhIhQ6sG4zfWck4u45qRJ5JbIoTvR+ykxhN1j3Zi5x9ptP3ALDbHn2i3v6t9xohORfQpz3dVND5c7thbYDyKP2ZR1sez5c=
-    - FEATURES: default
+    - FEATURES: "default"
+
+before_script:
+  - export PATH=$HOME/.cargo/bin:$PATH
+  - cargo install cargo-update || echo "cargo-update already installed"
+  - cargo install cargo-travis || echo "cargo-travis already installed"
+  - cargo install-update -a # update outdated cached binaries
 
 script:
   - cargo build --verbose
   - cargo test --verbose
   - cargo build --release --verbose
   - cargo doc --verbose
+
+after_success:
+  - cargo coveralls
