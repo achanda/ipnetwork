@@ -62,6 +62,16 @@ impl Ipv4Network {
         self.prefix
     }
 
+    /// Checks if the given `Ipv4Network` is a subnet of the other.
+    pub fn is_subnet_of(self, other: Ipv4Network) -> bool {
+        other.ip() <= self.ip() && other.broadcast() >= self.broadcast()
+    }
+
+    /// Checks if the given `Ipv4Network` is a supernet of the other.
+    pub fn is_supernet_of(self, other: Ipv4Network) -> bool {
+        other.is_subnet_of(self)
+    }
+
     /// Returns the mask for this `Ipv4Network`.
     /// That means the `prefix` most significant bits will be 1 and the rest 0
     ///
@@ -453,5 +463,36 @@ mod test {
     fn test_sync() {
         fn assert_sync<T: Sync>() {}
         assert_sync::<Ipv4Network>();
+    }
+
+    // Tests from cpython https://github.com/python/cpython/blob/e9bc4172d18db9c182d8e04dd7b033097a994c06/Lib/test/test_ipaddress.py
+    #[test]
+    fn test_is_subnet_of() {
+        let mut test_cases: HashMap<(Ipv4Network, Ipv4Network), bool> = HashMap::new();
+
+        test_cases.insert(("10.0.0.0/30".parse().unwrap(), "10.0.1.0/24".parse().unwrap()), false);
+        test_cases.insert(("10.0.0.0/30".parse().unwrap(), "10.0.0.0/24".parse().unwrap()), true);
+        test_cases.insert(("10.0.0.0/30".parse().unwrap(), "10.0.1.0/24".parse().unwrap()), false);
+        test_cases.insert(("10.0.1.0/24".parse().unwrap(), "10.0.0.0/30".parse().unwrap()), false);
+
+        for (key, val) in test_cases.iter() {
+            let (src, dest) = (key.0, key.1);
+            assert_eq!(src.is_subnet_of(dest), *val, "testing with {} and {}", src, dest);
+        }
+    }
+
+    #[test]
+    fn test_is_supernet_of() {
+        let mut test_cases: HashMap<(Ipv4Network, Ipv4Network), bool> = HashMap::new();
+
+        test_cases.insert(("10.0.0.0/30".parse().unwrap(), "10.0.1.0/24".parse().unwrap()), false);
+        test_cases.insert(("10.0.0.0/30".parse().unwrap(), "10.0.0.0/24".parse().unwrap()), false);
+        test_cases.insert(("10.0.0.0/30".parse().unwrap(), "10.0.1.0/24".parse().unwrap()), false);
+        test_cases.insert(("10.0.0.0/24".parse().unwrap(), "10.0.0.0/30".parse().unwrap()), true);
+
+        for (key, val) in test_cases.iter() {
+            let (src, dest) = (key.0, key.1);
+            assert_eq!(src.is_supernet_of(dest), *val, "testing with {} and {}", src, dest);
+        }
     }
 }
