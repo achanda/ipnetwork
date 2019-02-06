@@ -72,6 +72,17 @@ impl Ipv4Network {
         other.is_subnet_of(self)
     }
 
+    /// Checks if the given `Ipv4Network` is partly contained in other.
+    pub fn overlaps(self, other: Ipv4Network) -> bool {
+        other.contains(self.ip()) || (
+            other.contains(self.broadcast()) || (
+                self.contains(other.ip()) || (
+                    self.contains(other.broadcast())
+                )
+            )
+        )
+    }
+
     /// Returns the mask for this `Ipv4Network`.
     /// That means the `prefix` most significant bits will be 1 and the rest 0
     ///
@@ -494,5 +505,17 @@ mod test {
             let (src, dest) = (key.0, key.1);
             assert_eq!(src.is_supernet_of(dest), *val, "testing with {} and {}", src, dest);
         }
+    }
+
+    #[test]
+    fn test_overlaps() {
+        let other: Ipv4Network = "1.2.3.0/30".parse().unwrap();
+        let other2: Ipv4Network = "1.2.2.0/24".parse().unwrap();
+        let other3: Ipv4Network = "1.2.2.64/26".parse().unwrap();
+
+        let skynet: Ipv4Network = "1.2.3.0/24".parse().unwrap();
+        assert_eq!(skynet.overlaps(other), true);
+        assert_eq!(skynet.overlaps(other2), false);
+        assert_eq!(other2.overlaps(other3), true);
     }
 }

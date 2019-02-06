@@ -121,6 +121,17 @@ impl Ipv6Network {
         other.is_subnet_of(self)
     }
 
+    /// Checks if the given `Ipv6Network` is partly contained in other.
+    pub fn overlaps(self, other: Ipv6Network) -> bool {
+        other.contains(self.ip()) || (
+            other.contains(self.broadcast()) || (
+                self.contains(other.ip()) || (
+                    self.contains(other.broadcast())
+                )
+            )
+        )
+    }
+
     /// Returns the mask for this `Ipv6Network`.
     /// That means the `prefix` most significant bits will be 1 and the rest 0
     ///
@@ -477,5 +488,13 @@ mod test {
             let (src, dest) = (key.0, key.1);
             assert_eq!(src.is_supernet_of(dest), *val, "testing with {} and {}", src, dest);
         }
+    }
+
+    #[test]
+    fn test_overlaps() {
+        let other: Ipv6Network = "2001:DB8:ACAD::1/64".parse().unwrap();
+        let other2: Ipv6Network = "2001:DB8:ACAD::20:2/64".parse().unwrap();
+
+        assert_eq!(other2.overlaps(other), true);
     }
 }
