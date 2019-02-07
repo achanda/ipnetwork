@@ -200,6 +200,10 @@ impl IpNetwork {
         }
     }
 
+    // TODO(abhishek) when TryFrom is stable, implement it for IpNetwork to
+    // variant conversions. Then use that to implement a generic is_subnet_of
+    // is_supernet_of, overlaps
+
     /// Checks if a given `IpAddr` is in this `IpNetwork`
     ///
     /// # Examples

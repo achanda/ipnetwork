@@ -111,6 +111,27 @@ impl Ipv6Network {
         self.prefix
     }
 
+    /// Checks if the given `Ipv6Network` is a subnet of the other.
+    pub fn is_subnet_of(self, other: Ipv6Network) -> bool {
+        other.ip() <= self.ip() && other.broadcast() >= self.broadcast()
+    }
+
+    /// Checks if the given `Ipv6Network` is a supernet of the other.
+    pub fn is_supernet_of(self, other: Ipv6Network) -> bool {
+        other.is_subnet_of(self)
+    }
+
+    /// Checks if the given `Ipv6Network` is partly contained in other.
+    pub fn overlaps(self, other: Ipv6Network) -> bool {
+        other.contains(self.ip()) || (
+            other.contains(self.broadcast()) || (
+                self.contains(other.ip()) || (
+                    self.contains(other.broadcast())
+                )
+            )
+        )
+    }
+
     /// Returns the mask for this `Ipv6Network`.
     /// That means the `prefix` most significant bits will be 1 and the rest 0
     ///
@@ -265,6 +286,7 @@ pub fn ipv6_mask_to_prefix(mask: Ipv6Addr) -> Result<u8, IpNetworkError> {
 #[cfg(test)]
 mod test {
     use super::*;
+    use std::collections::HashMap;
     use std::net::Ipv6Addr;
 
     #[test]
@@ -435,5 +457,44 @@ mod test {
     fn test_sync() {
         fn assert_sync<T: Sync>() {}
         assert_sync::<Ipv6Network>();
+    }
+
+    // Tests from cpython https://github.com/python/cpython/blob/e9bc4172d18db9c182d8e04dd7b033097a994c06/Lib/test/test_ipaddress.py
+    #[test]
+    fn test_is_subnet_of() {
+        let mut test_cases: HashMap<(Ipv6Network, Ipv6Network), bool> = HashMap::new();
+
+        test_cases.insert(("2000:999::/56".parse().unwrap(), "2000:aaa::/48".parse().unwrap()), false);
+        test_cases.insert(("2000:aaa::/56".parse().unwrap(), "2000:aaa::/48".parse().unwrap()), true);
+        test_cases.insert(("2000:bbb::/56".parse().unwrap(), "2000:aaa::/48".parse().unwrap()), false);
+        test_cases.insert(("2000:aaa::/48".parse().unwrap(), "2000:aaa::/56".parse().unwrap()), false);
+
+        for (key, val) in test_cases.iter() {
+            let (src, dest) = (key.0, key.1);
+            assert_eq!(src.is_subnet_of(dest), *val, "testing with {} and {}", src, dest);
+        }
+    }
+
+    #[test]
+    fn test_is_supernet_of() {
+        let mut test_cases: HashMap<(Ipv6Network, Ipv6Network), bool> = HashMap::new();
+
+        test_cases.insert(("2000:999::/56".parse().unwrap(), "2000:aaa::/48".parse().unwrap()), false);
+        test_cases.insert(("2000:aaa::/56".parse().unwrap(), "2000:aaa::/48".parse().unwrap()), false);
+        test_cases.insert(("2000:bbb::/56".parse().unwrap(), "2000:aaa::/48".parse().unwrap()), false);
+        test_cases.insert(("2000:aaa::/48".parse().unwrap(), "2000:aaa::/56".parse().unwrap()), true);
+
+        for (key, val) in test_cases.iter() {
+            let (src, dest) = (key.0, key.1);
+            assert_eq!(src.is_supernet_of(dest), *val, "testing with {} and {}", src, dest);
+        }
+    }
+
+    #[test]
+    fn test_overlaps() {
+        let other: Ipv6Network = "2001:DB8:ACAD::1/64".parse().unwrap();
+        let other2: Ipv6Network = "2001:DB8:ACAD::20:2/64".parse().unwrap();
+
+        assert_eq!(other2.overlaps(other), true);
     }
 }
