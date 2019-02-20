@@ -20,8 +20,8 @@ impl<'de> Deserialize<'de> for Ipv4Network {
     where
         D: Deserializer<'de>,
     {
-        let s = <&str>::deserialize(deserializer)?;
-        Ipv4Network::from_str(s).map_err(de::Error::custom)
+        let s = <String>::deserialize(deserializer)?;
+        Ipv4Network::from_str(&s).map_err(de::Error::custom)
     }
 }
 
