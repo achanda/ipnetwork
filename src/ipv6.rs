@@ -22,8 +22,8 @@ impl<'de> Deserialize<'de> for Ipv6Network {
     where
         D: Deserializer<'de>,
     {
-        let s = <&str>::deserialize(deserializer)?;
-        Ipv6Network::from_str(s).map_err(de::Error::custom)
+        let s = <String>::deserialize(deserializer)?;
+        Ipv6Network::from_str(&s).map_err(de::Error::custom)
     }
 }
 
