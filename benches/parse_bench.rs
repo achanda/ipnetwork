@@ -1,10 +1,5 @@
-#[macro_use]
-extern crate criterion;
-extern crate ipnetwork;
-
+use criterion::{criterion_group, criterion_main, Criterion};
 use ipnetwork::{Ipv4Network, Ipv6Network};
-use criterion::Criterion;
-
 use std::net::{Ipv4Addr, Ipv6Addr};
 
 fn parse_ipv4_benchmark(c: &mut Criterion) {

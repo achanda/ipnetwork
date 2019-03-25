@@ -6,22 +6,16 @@
 #![crate_type = "lib"]
 #![doc(html_root_url = "https://docs.rs/ipnetwork/0.14.0")]
 
-extern crate serde;
-
-use std::fmt;
-use std::net::IpAddr;
+use serde::{de, Deserialize, Deserializer, Serialize, Serializer};
+use std::{fmt, net::IpAddr, str::FromStr};
 
 mod common;
 mod ipv4;
 mod ipv6;
 
-use std::str::FromStr;
-
-use serde::{de, Deserialize, Deserializer, Serialize, Serializer};
-
-pub use common::IpNetworkError;
-pub use ipv4::{ipv4_mask_to_prefix, Ipv4Network};
-pub use ipv6::{ipv6_mask_to_prefix, Ipv6Network};
+pub use crate::common::IpNetworkError;
+pub use crate::ipv4::{ipv4_mask_to_prefix, Ipv4Network};
+pub use crate::ipv6::{ipv6_mask_to_prefix, Ipv6Network};
 
 /// Represents a generic network range. This type can have two variants:
 /// the v4 and the v6 case.
@@ -296,7 +290,7 @@ impl From<IpAddr> for IpNetwork {
 }
 
 impl fmt::Display for IpNetwork {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match *self {
             IpNetwork::V4(net) => net.fmt(f),
             IpNetwork::V6(net) => net.fmt(f),

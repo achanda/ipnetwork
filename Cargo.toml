@@ -9,6 +9,7 @@ keywords = ["network", "ip", "address"]
 readme = "README.md"
 documentation = "https://docs.rs/ipnetwork/"
 categories = ["network-programming", "os"]
+edition = "2018"
 
 [dependencies]
 clippy = {version = "0.0.302", optional = true}

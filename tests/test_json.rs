@@ -1,16 +1,7 @@
-extern crate serde;
-
-extern crate serde_json;
-
-#[macro_use]
-extern crate serde_derive;
-
-extern crate ipnetwork;
-
 #[cfg(test)]
 mod tests {
-
     use ipnetwork::{IpNetwork, Ipv4Network, Ipv6Network};
+    use serde_derive::{Deserialize, Serialize};
     use std::net::{Ipv4Addr, Ipv6Addr};
 
     #[test]

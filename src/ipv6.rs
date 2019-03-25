@@ -1,11 +1,6 @@
-use std::cmp;
-use std::fmt;
-use std::net::Ipv6Addr;
-use std::str::FromStr;
-
+use crate::common::{cidr_parts, parse_prefix, IpNetworkError};
 use serde::{de, Deserialize, Deserializer, Serialize, Serializer};
-
-use common::{cidr_parts, parse_prefix, IpNetworkError};
+use std::{cmp, fmt, net::Ipv6Addr, str::FromStr};
 
 const IPV6_BITS: u8 = 128;
 const IPV6_SEGMENT_BITS: u8 = 16;
@@ -243,7 +238,7 @@ impl Iterator for Ipv6NetworkIterator {
 }
 
 impl fmt::Display for Ipv6Network {
-    fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
+    fn fmt(&self, fmt: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(fmt, "{}/{}", self.ip(), self.prefix())
     }
 }
