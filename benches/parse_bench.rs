@@ -1,6 +1,6 @@
 #[macro_use]
 extern crate criterion;
-extern crate ipnetwork;
+
 
 use ipnetwork::{Ipv4Network, Ipv6Network};
 use criterion::Criterion;

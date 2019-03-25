@@ -10,7 +10,7 @@ pub enum IpNetworkError {
 }
 
 impl fmt::Display for IpNetworkError {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         use crate::IpNetworkError::*;
         match *self {
             InvalidAddr(ref s) => write!(f, "invalid address: {}", s),

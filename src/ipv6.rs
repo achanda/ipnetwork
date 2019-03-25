@@ -243,7 +243,7 @@ impl Iterator for Ipv6NetworkIterator {
 }
 
 impl fmt::Display for Ipv6Network {
-    fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
+    fn fmt(&self, fmt: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(fmt, "{}/{}", self.ip(), self.prefix())
     }
 }

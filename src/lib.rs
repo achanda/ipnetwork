@@ -6,7 +6,7 @@
 #![crate_type = "lib"]
 #![doc(html_root_url = "https://docs.rs/ipnetwork/0.14.0")]
 
-extern crate serde;
+
 
 use std::fmt;
 use std::net::IpAddr;
@@ -296,7 +296,7 @@ impl From<IpAddr> for IpNetwork {
 }
 
 impl fmt::Display for IpNetwork {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match *self {
             IpNetwork::V4(net) => net.fmt(f),
             IpNetwork::V6(net) => net.fmt(f),

@@ -204,7 +204,7 @@ impl Ipv4Network {
 }
 
 impl fmt::Display for Ipv4Network {
-    fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
+    fn fmt(&self, fmt: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(fmt, "{}/{}", self.ip(), self.prefix())
     }
 }
