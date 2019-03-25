@@ -6,18 +6,12 @@
 #![crate_type = "lib"]
 #![doc(html_root_url = "https://docs.rs/ipnetwork/0.14.0")]
 
-
-
-use std::fmt;
-use std::net::IpAddr;
+use serde::{de, Deserialize, Deserializer, Serialize, Serializer};
+use std::{fmt, net::IpAddr, str::FromStr};
 
 mod common;
 mod ipv4;
 mod ipv6;
-
-use std::str::FromStr;
-
-use serde::{de, Deserialize, Deserializer, Serialize, Serializer};
 
 pub use crate::common::IpNetworkError;
 pub use crate::ipv4::{ipv4_mask_to_prefix, Ipv4Network};

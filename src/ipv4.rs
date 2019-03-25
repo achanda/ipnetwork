@@ -1,10 +1,6 @@
-use std::fmt;
-use std::net::Ipv4Addr;
-use std::str::FromStr;
-
-use serde::{de, Deserialize, Deserializer, Serialize, Serializer};
-
 use crate::common::{cidr_parts, parse_prefix, IpNetworkError};
+use serde::{de, Deserialize, Deserializer, Serialize, Serializer};
+use std::{fmt, net::Ipv4Addr, str::FromStr};
 
 const IPV4_BITS: u8 = 32;
 

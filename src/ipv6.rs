@@ -1,11 +1,6 @@
-use std::cmp;
-use std::fmt;
-use std::net::Ipv6Addr;
-use std::str::FromStr;
-
-use serde::{de, Deserialize, Deserializer, Serialize, Serializer};
-
 use crate::common::{cidr_parts, parse_prefix, IpNetworkError};
+use serde::{de, Deserialize, Deserializer, Serialize, Serializer};
+use std::{cmp, fmt, net::Ipv6Addr, str::FromStr};
 
 const IPV6_BITS: u8 = 128;
 const IPV6_SEGMENT_BITS: u8 = 16;
