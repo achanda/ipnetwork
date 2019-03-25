@@ -19,9 +19,9 @@ use std::str::FromStr;
 
 use serde::{de, Deserialize, Deserializer, Serialize, Serializer};
 
-pub use common::IpNetworkError;
-pub use ipv4::{ipv4_mask_to_prefix, Ipv4Network};
-pub use ipv6::{ipv6_mask_to_prefix, Ipv6Network};
+pub use crate::common::IpNetworkError;
+pub use crate::ipv4::{ipv4_mask_to_prefix, Ipv4Network};
+pub use crate::ipv6::{ipv6_mask_to_prefix, Ipv6Network};
 
 /// Represents a generic network range. This type can have two variants:
 /// the v4 and the v6 case.

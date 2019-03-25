@@ -5,7 +5,7 @@ use std::str::FromStr;
 
 use serde::{de, Deserialize, Deserializer, Serialize, Serializer};
 
-use common::{cidr_parts, parse_prefix, IpNetworkError};
+use crate::common::{cidr_parts, parse_prefix, IpNetworkError};
 
 const IPV6_BITS: u8 = 128;
 const IPV6_SEGMENT_BITS: u8 = 16;

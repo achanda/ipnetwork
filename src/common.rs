@@ -11,7 +11,7 @@ pub enum IpNetworkError {
 
 impl fmt::Display for IpNetworkError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        use IpNetworkError::*;
+        use crate::IpNetworkError::*;
         match *self {
             InvalidAddr(ref s) => write!(f, "invalid address: {}", s),
             InvalidPrefix => write!(f, "invalid prefix"),
@@ -22,7 +22,7 @@ impl fmt::Display for IpNetworkError {
 
 impl Error for IpNetworkError {
     fn description(&self) -> &str {
-        use IpNetworkError::*;
+        use crate::IpNetworkError::*;
         match *self {
             InvalidAddr(_) => "address is invalid",
             InvalidPrefix => "prefix is invalid",
