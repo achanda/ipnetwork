@@ -18,7 +18,7 @@ serde = ">=0.8.0, <2.0"
 [dev-dependencies]
 serde_json = "1.0"
 serde_derive = ">=0.8.0, <2.0"
-criterion = "0.2.9"
+criterion = "0.3.0"
 
 [badges]
 travis-ci = { repository = "achanda/ipnetwork" }
