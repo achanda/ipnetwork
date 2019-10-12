@@ -18,6 +18,8 @@ jobs:
     - uses: actions/checkout@master
       with:
         ref: ${{ github.ref }}
+    - name: Show current git branch
+      run: git branch
     - name: Build
       run: cargo build --verbose
     - name: Run tests
