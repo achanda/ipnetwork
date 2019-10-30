@@ -247,7 +247,7 @@ impl fmt::Display for Ipv6Network {
 /// If the mask is invalid this will return an `IpNetworkError::InvalidPrefix`.
 pub fn ipv6_mask_to_prefix(mask: Ipv6Addr) -> Result<u8, IpNetworkError> {
     let mask = mask.segments();
-    let mut mask_iter = mask.into_iter();
+    let mut mask_iter = mask.iter();
 
     // Count the number of set bits from the start of the address
     let mut prefix = 0;
