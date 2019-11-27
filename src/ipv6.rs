@@ -118,13 +118,9 @@ impl Ipv6Network {
 
     /// Checks if the given `Ipv6Network` is partly contained in other.
     pub fn overlaps(self, other: Ipv6Network) -> bool {
-        other.contains(self.ip()) || (
-            other.contains(self.broadcast()) || (
-                self.contains(other.ip()) || (
-                    self.contains(other.broadcast())
-                )
-            )
-        )
+        other.contains(self.ip())
+            || (other.contains(self.broadcast())
+                || (self.contains(other.ip()) || (self.contains(other.broadcast()))))
     }
 
     /// Returns the mask for this `Ipv6Network`.
@@ -459,14 +455,44 @@ mod test {
     fn test_is_subnet_of() {
         let mut test_cases: HashMap<(Ipv6Network, Ipv6Network), bool> = HashMap::new();
 
-        test_cases.insert(("2000:999::/56".parse().unwrap(), "2000:aaa::/48".parse().unwrap()), false);
-        test_cases.insert(("2000:aaa::/56".parse().unwrap(), "2000:aaa::/48".parse().unwrap()), true);
-        test_cases.insert(("2000:bbb::/56".parse().unwrap(), "2000:aaa::/48".parse().unwrap()), false);
-        test_cases.insert(("2000:aaa::/48".parse().unwrap(), "2000:aaa::/56".parse().unwrap()), false);
+        test_cases.insert(
+            (
+                "2000:999::/56".parse().unwrap(),
+                "2000:aaa::/48".parse().unwrap(),
+            ),
+            false,
+        );
+        test_cases.insert(
+            (
+                "2000:aaa::/56".parse().unwrap(),
+                "2000:aaa::/48".parse().unwrap(),
+            ),
+            true,
+        );
+        test_cases.insert(
+            (
+                "2000:bbb::/56".parse().unwrap(),
+                "2000:aaa::/48".parse().unwrap(),
+            ),
+            false,
+        );
+        test_cases.insert(
+            (
+                "2000:aaa::/48".parse().unwrap(),
+                "2000:aaa::/56".parse().unwrap(),
+            ),
+            false,
+        );
 
         for (key, val) in test_cases.iter() {
             let (src, dest) = (key.0, key.1);
-            assert_eq!(src.is_subnet_of(dest), *val, "testing with {} and {}", src, dest);
+            assert_eq!(
+                src.is_subnet_of(dest),
+                *val,
+                "testing with {} and {}",
+                src,
+                dest
+            );
         }
     }
 
@@ -474,14 +500,44 @@ mod test {
     fn test_is_supernet_of() {
         let mut test_cases: HashMap<(Ipv6Network, Ipv6Network), bool> = HashMap::new();
 
-        test_cases.insert(("2000:999::/56".parse().unwrap(), "2000:aaa::/48".parse().unwrap()), false);
-        test_cases.insert(("2000:aaa::/56".parse().unwrap(), "2000:aaa::/48".parse().unwrap()), false);
-        test_cases.insert(("2000:bbb::/56".parse().unwrap(), "2000:aaa::/48".parse().unwrap()), false);
-        test_cases.insert(("2000:aaa::/48".parse().unwrap(), "2000:aaa::/56".parse().unwrap()), true);
+        test_cases.insert(
+            (
+                "2000:999::/56".parse().unwrap(),
+                "2000:aaa::/48".parse().unwrap(),
+            ),
+            false,
+        );
+        test_cases.insert(
+            (
+                "2000:aaa::/56".parse().unwrap(),
+                "2000:aaa::/48".parse().unwrap(),
+            ),
+            false,
+        );
+        test_cases.insert(
+            (
+                "2000:bbb::/56".parse().unwrap(),
+                "2000:aaa::/48".parse().unwrap(),
+            ),
+            false,
+        );
+        test_cases.insert(
+            (
+                "2000:aaa::/48".parse().unwrap(),
+                "2000:aaa::/56".parse().unwrap(),
+            ),
+            true,
+        );
 
         for (key, val) in test_cases.iter() {
             let (src, dest) = (key.0, key.1);
-            assert_eq!(src.is_supernet_of(dest), *val, "testing with {} and {}", src, dest);
+            assert_eq!(
+                src.is_supernet_of(dest),
+                *val,
+                "testing with {} and {}",
+                src,
+                dest
+            );
         }
     }
 

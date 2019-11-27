@@ -70,13 +70,9 @@ impl Ipv4Network {
 
     /// Checks if the given `Ipv4Network` is partly contained in other.
     pub fn overlaps(self, other: Ipv4Network) -> bool {
-        other.contains(self.ip()) || (
-            other.contains(self.broadcast()) || (
-                self.contains(other.ip()) || (
-                    self.contains(other.broadcast())
-                )
-            )
-        )
+        other.contains(self.ip())
+            || (other.contains(self.broadcast())
+                || (self.contains(other.ip()) || (self.contains(other.broadcast()))))
     }
 
     /// Returns the mask for this `Ipv4Network`.
@@ -477,14 +473,44 @@ mod test {
     fn test_is_subnet_of() {
         let mut test_cases: HashMap<(Ipv4Network, Ipv4Network), bool> = HashMap::new();
 
-        test_cases.insert(("10.0.0.0/30".parse().unwrap(), "10.0.1.0/24".parse().unwrap()), false);
-        test_cases.insert(("10.0.0.0/30".parse().unwrap(), "10.0.0.0/24".parse().unwrap()), true);
-        test_cases.insert(("10.0.0.0/30".parse().unwrap(), "10.0.1.0/24".parse().unwrap()), false);
-        test_cases.insert(("10.0.1.0/24".parse().unwrap(), "10.0.0.0/30".parse().unwrap()), false);
+        test_cases.insert(
+            (
+                "10.0.0.0/30".parse().unwrap(),
+                "10.0.1.0/24".parse().unwrap(),
+            ),
+            false,
+        );
+        test_cases.insert(
+            (
+                "10.0.0.0/30".parse().unwrap(),
+                "10.0.0.0/24".parse().unwrap(),
+            ),
+            true,
+        );
+        test_cases.insert(
+            (
+                "10.0.0.0/30".parse().unwrap(),
+                "10.0.1.0/24".parse().unwrap(),
+            ),
+            false,
+        );
+        test_cases.insert(
+            (
+                "10.0.1.0/24".parse().unwrap(),
+                "10.0.0.0/30".parse().unwrap(),
+            ),
+            false,
+        );
 
         for (key, val) in test_cases.iter() {
             let (src, dest) = (key.0, key.1);
-            assert_eq!(src.is_subnet_of(dest), *val, "testing with {} and {}", src, dest);
+            assert_eq!(
+                src.is_subnet_of(dest),
+                *val,
+                "testing with {} and {}",
+                src,
+                dest
+            );
         }
     }
 
@@ -492,14 +518,44 @@ mod test {
     fn test_is_supernet_of() {
         let mut test_cases: HashMap<(Ipv4Network, Ipv4Network), bool> = HashMap::new();
 
-        test_cases.insert(("10.0.0.0/30".parse().unwrap(), "10.0.1.0/24".parse().unwrap()), false);
-        test_cases.insert(("10.0.0.0/30".parse().unwrap(), "10.0.0.0/24".parse().unwrap()), false);
-        test_cases.insert(("10.0.0.0/30".parse().unwrap(), "10.0.1.0/24".parse().unwrap()), false);
-        test_cases.insert(("10.0.0.0/24".parse().unwrap(), "10.0.0.0/30".parse().unwrap()), true);
+        test_cases.insert(
+            (
+                "10.0.0.0/30".parse().unwrap(),
+                "10.0.1.0/24".parse().unwrap(),
+            ),
+            false,
+        );
+        test_cases.insert(
+            (
+                "10.0.0.0/30".parse().unwrap(),
+                "10.0.0.0/24".parse().unwrap(),
+            ),
+            false,
+        );
+        test_cases.insert(
+            (
+                "10.0.0.0/30".parse().unwrap(),
+                "10.0.1.0/24".parse().unwrap(),
+            ),
+            false,
+        );
+        test_cases.insert(
+            (
+                "10.0.0.0/24".parse().unwrap(),
+                "10.0.0.0/30".parse().unwrap(),
+            ),
+            true,
+        );
 
         for (key, val) in test_cases.iter() {
             let (src, dest) = (key.0, key.1);
-            assert_eq!(src.is_supernet_of(dest), *val, "testing with {} and {}", src, dest);
+            assert_eq!(
+                src.is_supernet_of(dest),
+                *val,
+                "testing with {} and {}",
+                src,
+                dest
+            );
         }
     }
 

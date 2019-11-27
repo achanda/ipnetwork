@@ -313,8 +313,9 @@ mod test {
     fn deserialize_from_serde_json_value() {
         use super::*;
         let network = IpNetwork::from_str("0.0.0.0/0").unwrap();
-        let val: serde_json::value::Value = serde_json::from_str(&serde_json::to_string(&network).unwrap()).unwrap();
-        let _deser: IpNetwork =
-            serde_json::from_value(val).expect("Fails to deserialize from json_value::value::Value");
+        let val: serde_json::value::Value =
+            serde_json::from_str(&serde_json::to_string(&network).unwrap()).unwrap();
+        let _deser: IpNetwork = serde_json::from_value(val)
+            .expect("Fails to deserialize from json_value::value::Value");
     }
 }
