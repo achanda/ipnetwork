@@ -63,6 +63,14 @@ impl IpNetwork {
         }
     }
 
+    /// Constructs a new `IpNetwork` from a network address and a network mask.
+    ///
+    /// If the netmask is not valid this will return an `IpNetworkError::InvalidPrefix`.
+    pub fn with_netmask(netaddr: IpAddr, netmask: IpAddr) -> Result<Self, IpNetworkError> {
+        let prefix = ip_mask_to_prefix(netmask)?;
+        Self::new(netaddr, prefix)
+    }
+
     /// Returns the IP part of a given `IpNetwork`
     pub fn ip(&self) -> IpAddr {
         match *self {

@@ -33,6 +33,7 @@ impl Serialize for Ipv6Network {
 
 impl Ipv6Network {
     /// Constructs a new `Ipv6Network` from any `Ipv6Addr` and a prefix denoting the network size.
+    ///
     /// If the prefix is larger than 128 this will return an `IpNetworkError::InvalidPrefix`.
     pub fn new(addr: Ipv6Addr, prefix: u8) -> Result<Ipv6Network, IpNetworkError> {
         if prefix > IPV6_BITS {
@@ -40,6 +41,18 @@ impl Ipv6Network {
         } else {
             Ok(Ipv6Network { addr, prefix })
         }
+    }
+
+    /// Constructs a new `Ipv6Network` from a network address and a network mask.
+    ///
+    /// If the netmask is not valid this will return an `IpNetworkError::InvalidPrefix`.
+    pub fn with_netmask(netaddr: Ipv6Addr, netmask: Ipv6Addr) -> Result<Self, IpNetworkError> {
+        let prefix = ipv6_mask_to_prefix(netmask)?;
+        let net = Self {
+            addr: netaddr,
+            prefix,
+        };
+        Ok(net)
     }
 
     /// Returns an iterator over `Ipv6Network`. Each call to `next` will return the next
@@ -364,6 +377,25 @@ mod test {
         let mask = Ipv6Addr::new(0, 0, 0xffff, 0xffff, 0, 0, 0, 0);
         let prefix = ipv6_mask_to_prefix(mask);
         assert!(prefix.is_err());
+    }
+
+    #[test]
+    fn ipv6network_with_netmask() {
+        {
+            // Positive test-case.
+            let addr = Ipv6Addr::new(0xff01, 0, 0, 0x17, 0, 0, 0, 0x2);
+            let mask = Ipv6Addr::new(0xffff, 0xffff, 0xffff, 0, 0, 0, 0, 0);
+            let net = Ipv6Network::with_netmask(addr, mask).unwrap();
+            let expected =
+                Ipv6Network::new(Ipv6Addr::new(0xff01, 0, 0, 0x17, 0, 0, 0, 0x2), 48).unwrap();
+            assert_eq!(net, expected);
+        }
+        {
+            // Negative test-case.
+            let addr = Ipv6Addr::new(0xff01, 0, 0, 0x17, 0, 0, 0, 0x2);
+            let mask = Ipv6Addr::new(0, 0, 0xffff, 0xffff, 0, 0, 0, 0);
+            Ipv6Network::with_netmask(addr, mask).unwrap_err();
+        }
     }
 
     #[test]

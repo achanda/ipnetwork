@@ -32,6 +32,7 @@ impl Serialize for Ipv4Network {
 
 impl Ipv4Network {
     /// Constructs a new `Ipv4Network` from any `Ipv4Addr` and a prefix denoting the network size.
+    ///
     /// If the prefix is larger than 32 this will return an `IpNetworkError::InvalidPrefix`.
     pub fn new(addr: Ipv4Addr, prefix: u8) -> Result<Ipv4Network, IpNetworkError> {
         if prefix > IPV4_BITS {
@@ -39,6 +40,21 @@ impl Ipv4Network {
         } else {
             Ok(Ipv4Network { addr, prefix })
         }
+    }
+
+    /// Constructs a new `Ipv4Network` from a network address and a network mask.
+    ///
+    /// If the netmask is not valid this will return an `IpNetworkError::InvalidPrefix`.
+    pub fn with_netmask(
+        netaddr: Ipv4Addr,
+        netmask: Ipv4Addr,
+    ) -> Result<Ipv4Network, IpNetworkError> {
+        let prefix = ipv4_mask_to_prefix(netmask)?;
+        let net = Self {
+            addr: netaddr,
+            prefix,
+        };
+        Ok(net)
     }
 
     /// Returns an iterator over `Ipv4Network`. Each call to `next` will return the next
@@ -257,6 +273,7 @@ impl Iterator for Ipv4NetworkIterator {
 }
 
 /// Converts a `Ipv4Addr` network mask into a prefix.
+///
 /// If the mask is invalid this will return an `IpNetworkError::InvalidPrefix`.
 pub fn ipv4_mask_to_prefix(mask: Ipv4Addr) -> Result<u8, IpNetworkError> {
     let mask = u32::from(mask);
@@ -447,6 +464,24 @@ mod test {
         let mask = Ipv4Addr::new(255, 0, 255, 0);
         let prefix = ipv4_mask_to_prefix(mask);
         assert!(prefix.is_err());
+    }
+
+    #[test]
+    fn ipv4network_with_netmask() {
+        {
+            // Positive test-case.
+            let addr = Ipv4Addr::new(127, 0, 0, 1);
+            let mask = Ipv4Addr::new(255, 0, 0, 0);
+            let net = Ipv4Network::with_netmask(addr, mask).unwrap();
+            let expected = Ipv4Network::new(Ipv4Addr::new(127, 0, 0, 1), 8).unwrap();
+            assert_eq!(net, expected);
+        }
+        {
+            // Negative test-case.
+            let addr = Ipv4Addr::new(127, 0, 0, 1);
+            let mask = Ipv4Addr::new(255, 0, 255, 0);
+            Ipv4Network::with_netmask(addr, mask).unwrap_err();
+        }
     }
 
     #[test]
