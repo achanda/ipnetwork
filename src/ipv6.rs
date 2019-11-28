@@ -33,6 +33,7 @@ impl Serialize for Ipv6Network {
 
 impl Ipv6Network {
     /// Constructs a new `Ipv6Network` from any `Ipv6Addr` and a prefix denoting the network size.
+    ///
     /// If the prefix is larger than 128 this will return an `IpNetworkError::InvalidPrefix`.
     pub fn new(addr: Ipv6Addr, prefix: u8) -> Result<Ipv6Network, IpNetworkError> {
         if prefix > IPV6_BITS {
@@ -40,6 +41,18 @@ impl Ipv6Network {
         } else {
             Ok(Ipv6Network { addr, prefix })
         }
+    }
+
+    /// Constructs a new `Ipv6Network` from a network address and a network mask.
+    ///
+    /// If the netmask is not valid this will return an `IpNetworkError::InvalidPrefix`.
+    pub fn with_netmask(netaddr: Ipv6Addr, netmask: Ipv6Addr) -> Result<Self, IpNetworkError> {
+        let prefix = ipv6_mask_to_prefix(netmask)?;
+        let net = Self {
+            addr: netaddr,
+            prefix,
+        };
+        Ok(net)
     }
 
     /// Returns an iterator over `Ipv6Network`. Each call to `next` will return the next
@@ -118,13 +131,9 @@ impl Ipv6Network {
 
     /// Checks if the given `Ipv6Network` is partly contained in other.
     pub fn overlaps(self, other: Ipv6Network) -> bool {
-        other.contains(self.ip()) || (
-            other.contains(self.broadcast()) || (
-                self.contains(other.ip()) || (
-                    self.contains(other.broadcast())
-                )
-            )
-        )
+        other.contains(self.ip())
+            || (other.contains(self.broadcast())
+                || (self.contains(other.ip()) || (self.contains(other.broadcast()))))
     }
 
     /// Returns the mask for this `Ipv6Network`.
@@ -371,6 +380,25 @@ mod test {
     }
 
     #[test]
+    fn ipv6network_with_netmask() {
+        {
+            // Positive test-case.
+            let addr = Ipv6Addr::new(0xff01, 0, 0, 0x17, 0, 0, 0, 0x2);
+            let mask = Ipv6Addr::new(0xffff, 0xffff, 0xffff, 0, 0, 0, 0, 0);
+            let net = Ipv6Network::with_netmask(addr, mask).unwrap();
+            let expected =
+                Ipv6Network::new(Ipv6Addr::new(0xff01, 0, 0, 0x17, 0, 0, 0, 0x2), 48).unwrap();
+            assert_eq!(net, expected);
+        }
+        {
+            // Negative test-case.
+            let addr = Ipv6Addr::new(0xff01, 0, 0, 0x17, 0, 0, 0, 0x2);
+            let mask = Ipv6Addr::new(0, 0, 0xffff, 0xffff, 0, 0, 0, 0);
+            Ipv6Network::with_netmask(addr, mask).unwrap_err();
+        }
+    }
+
+    #[test]
     fn iterator_v6() {
         let cidr: Ipv6Network = "2001:db8::/126".parse().unwrap();
         let mut iter = cidr.iter();
@@ -459,14 +487,44 @@ mod test {
     fn test_is_subnet_of() {
         let mut test_cases: HashMap<(Ipv6Network, Ipv6Network), bool> = HashMap::new();
 
-        test_cases.insert(("2000:999::/56".parse().unwrap(), "2000:aaa::/48".parse().unwrap()), false);
-        test_cases.insert(("2000:aaa::/56".parse().unwrap(), "2000:aaa::/48".parse().unwrap()), true);
-        test_cases.insert(("2000:bbb::/56".parse().unwrap(), "2000:aaa::/48".parse().unwrap()), false);
-        test_cases.insert(("2000:aaa::/48".parse().unwrap(), "2000:aaa::/56".parse().unwrap()), false);
+        test_cases.insert(
+            (
+                "2000:999::/56".parse().unwrap(),
+                "2000:aaa::/48".parse().unwrap(),
+            ),
+            false,
+        );
+        test_cases.insert(
+            (
+                "2000:aaa::/56".parse().unwrap(),
+                "2000:aaa::/48".parse().unwrap(),
+            ),
+            true,
+        );
+        test_cases.insert(
+            (
+                "2000:bbb::/56".parse().unwrap(),
+                "2000:aaa::/48".parse().unwrap(),
+            ),
+            false,
+        );
+        test_cases.insert(
+            (
+                "2000:aaa::/48".parse().unwrap(),
+                "2000:aaa::/56".parse().unwrap(),
+            ),
+            false,
+        );
 
         for (key, val) in test_cases.iter() {
             let (src, dest) = (key.0, key.1);
-            assert_eq!(src.is_subnet_of(dest), *val, "testing with {} and {}", src, dest);
+            assert_eq!(
+                src.is_subnet_of(dest),
+                *val,
+                "testing with {} and {}",
+                src,
+                dest
+            );
         }
     }
 
@@ -474,14 +532,44 @@ mod test {
     fn test_is_supernet_of() {
         let mut test_cases: HashMap<(Ipv6Network, Ipv6Network), bool> = HashMap::new();
 
-        test_cases.insert(("2000:999::/56".parse().unwrap(), "2000:aaa::/48".parse().unwrap()), false);
-        test_cases.insert(("2000:aaa::/56".parse().unwrap(), "2000:aaa::/48".parse().unwrap()), false);
-        test_cases.insert(("2000:bbb::/56".parse().unwrap(), "2000:aaa::/48".parse().unwrap()), false);
-        test_cases.insert(("2000:aaa::/48".parse().unwrap(), "2000:aaa::/56".parse().unwrap()), true);
+        test_cases.insert(
+            (
+                "2000:999::/56".parse().unwrap(),
+                "2000:aaa::/48".parse().unwrap(),
+            ),
+            false,
+        );
+        test_cases.insert(
+            (
+                "2000:aaa::/56".parse().unwrap(),
+                "2000:aaa::/48".parse().unwrap(),
+            ),
+            false,
+        );
+        test_cases.insert(
+            (
+                "2000:bbb::/56".parse().unwrap(),
+                "2000:aaa::/48".parse().unwrap(),
+            ),
+            false,
+        );
+        test_cases.insert(
+            (
+                "2000:aaa::/48".parse().unwrap(),
+                "2000:aaa::/56".parse().unwrap(),
+            ),
+            true,
+        );
 
         for (key, val) in test_cases.iter() {
             let (src, dest) = (key.0, key.1);
-            assert_eq!(src.is_supernet_of(dest), *val, "testing with {} and {}", src, dest);
+            assert_eq!(
+                src.is_supernet_of(dest),
+                *val,
+                "testing with {} and {}",
+                src,
+                dest
+            );
         }
     }
 

@@ -63,6 +63,14 @@ impl IpNetwork {
         }
     }
 
+    /// Constructs a new `IpNetwork` from a network address and a network mask.
+    ///
+    /// If the netmask is not valid this will return an `IpNetworkError::InvalidPrefix`.
+    pub fn with_netmask(netaddr: IpAddr, netmask: IpAddr) -> Result<Self, IpNetworkError> {
+        let prefix = ip_mask_to_prefix(netmask)?;
+        Self::new(netaddr, prefix)
+    }
+
     /// Returns the IP part of a given `IpNetwork`
     pub fn ip(&self) -> IpAddr {
         match *self {
@@ -313,8 +321,9 @@ mod test {
     fn deserialize_from_serde_json_value() {
         use super::*;
         let network = IpNetwork::from_str("0.0.0.0/0").unwrap();
-        let val: serde_json::value::Value = serde_json::from_str(&serde_json::to_string(&network).unwrap()).unwrap();
-        let _deser: IpNetwork =
-            serde_json::from_value(val).expect("Fails to deserialize from json_value::value::Value");
+        let val: serde_json::value::Value =
+            serde_json::from_str(&serde_json::to_string(&network).unwrap()).unwrap();
+        let _deser: IpNetwork = serde_json::from_value(val)
+            .expect("Fails to deserialize from json_value::value::Value");
     }
 }
