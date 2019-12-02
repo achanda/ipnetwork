@@ -49,6 +49,9 @@ impl serde::Serialize for IpNetwork {
 
 /// Represents a generic network size. For IPv4, the max size is a u32 and for IPv6, it is a u128
 #[derive(Debug, Clone, Copy, Hash, PartialEq, Eq, PartialOrd, Ord)]
+#[deprecated(
+    since="0.16",
+    note="This API will change in a future release. Please refer to https://github.com/achanda/ipnetwork/issues/102")]
 pub enum NetworkSize {
     V4(u32),
     V6(u128),
@@ -244,6 +247,9 @@ impl IpNetwork {
     /// let net: IpNetwork = "127.0.0.0/24".parse().unwrap();
     /// assert_eq!(net.size(), NetworkSize::V4(256))
     /// ```
+    #[deprecated(
+        since="0.16",
+        note="This API will change in a future release. Please refer to https://github.com/achanda/ipnetwork/issues/102")]
     pub fn size(&self) -> NetworkSize {
         match *self {
             IpNetwork::V4(ref ip) => NetworkSize::V4(ip.size()),
