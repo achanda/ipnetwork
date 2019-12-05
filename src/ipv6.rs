@@ -227,6 +227,7 @@ impl From<Ipv6Addr> for Ipv6Network {
     }
 }
 
+#[derive(Clone, Debug)]
 pub struct Ipv6NetworkIterator {
     next: u128,
     end: u128,
@@ -243,6 +244,14 @@ impl Iterator for Ipv6NetworkIterator {
         } else {
             None
         }
+    }
+}
+
+impl IntoIterator for &'_ Ipv6Network {
+    type IntoIter = Ipv6NetworkIterator;
+    type Item = Ipv6Addr;
+    fn into_iter(self) -> Ipv6NetworkIterator {
+        self.iter()
     }
 }
 

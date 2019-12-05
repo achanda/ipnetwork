@@ -253,6 +253,7 @@ impl From<Ipv4Addr> for Ipv4Network {
     }
 }
 
+#[derive(Clone, Debug)]
 pub struct Ipv4NetworkIterator {
     next: u32,
     end: u32,
@@ -269,6 +270,14 @@ impl Iterator for Ipv4NetworkIterator {
         } else {
             None
         }
+    }
+}
+
+impl IntoIterator for &'_ Ipv4Network {
+    type IntoIter = Ipv4NetworkIterator;
+    type Item = Ipv4Addr;
+    fn into_iter(self) -> Ipv4NetworkIterator {
+        self.iter()
     }
 }
 
