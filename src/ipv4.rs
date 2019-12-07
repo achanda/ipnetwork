@@ -62,8 +62,8 @@ impl Ipv4Network {
     /// addresses.
     pub fn iter(&self) -> Ipv4NetworkIterator {
         let start = u32::from(self.network());
-        let end = start + self.size();
-        Ipv4NetworkIterator { next: start, end }
+        let end = start + (self.size() - 1);
+        Ipv4NetworkIterator { next: Some(start), end }
     }
 
     pub fn ip(&self) -> Ipv4Addr {
@@ -255,7 +255,7 @@ impl From<Ipv4Addr> for Ipv4Network {
 
 #[derive(Clone, Debug)]
 pub struct Ipv4NetworkIterator {
-    next: u32,
+    next: Option<u32>,
     end: u32,
 }
 
@@ -263,13 +263,13 @@ impl Iterator for Ipv4NetworkIterator {
     type Item = Ipv4Addr;
 
     fn next(&mut self) -> Option<Ipv4Addr> {
-        if self.next < self.end {
-            let next = Ipv4Addr::from(self.next as u32);
-            self.next += 1;
-            Some(next)
-        } else {
+        let next = self.next?;
+        self.next = if next == self.end {
             None
-        }
+        } else {
+            Some(next + 1)
+        };
+        Some(next.into())
     }
 }
 
