@@ -589,4 +589,15 @@ mod test {
 
         assert_eq!(other2.overlaps(other), true);
     }
+
+    #[test]
+    fn edges() {
+        let low: Ipv6Network = "::0/120".parse().unwrap();
+        let low_addrs: Vec<Ipv6Addr> = low.iter().collect();
+        assert_eq!(256, low_addrs.len());
+
+        let high: Ipv6Network = "ffff:ffff:ffff:ffff:ffff:ffff:ffff:ff00/120".parse().unwrap();
+        let high_addrs: Vec<Ipv6Addr> = high.iter().collect();
+        assert_eq!(256, high_addrs.len());
+    }
 }
