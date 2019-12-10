@@ -5,9 +5,9 @@ authors = ["Abhishek Chanda <abhishek.becs@gmail.com>", "Linus Färnstrand <faer
 description = "A library to work with IP CIDRs in Rust, heavily WIP"
 license = "Apache-2.0"
 repository = "https://github.com/achanda/ipnetwork"
-keywords = ["network", "ip", "address"]
+keywords = ["network", "ip", "address", "cidr"]
 readme = "README.md"
-categories = ["network-programming", "os"]
+categories = ["network-programming", "parser-implementations"]
 edition = "2018"
 
 [dependencies]
