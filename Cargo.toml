@@ -7,7 +7,6 @@ license = "Apache-2.0"
 repository = "https://github.com/achanda/ipnetwork"
 keywords = ["network", "ip", "address"]
 readme = "README.md"
-documentation = "https://docs.rs/ipnetwork/"
 categories = ["network-programming", "os"]
 edition = "2018"
 
