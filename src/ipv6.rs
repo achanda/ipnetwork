@@ -70,7 +70,7 @@ impl Ipv6Network {
         let end: u128 = dec | mask;
 
         Ipv6NetworkIterator {
-            next: start,
+            next: Some(start),
             end: end,
         }
     }
@@ -227,8 +227,9 @@ impl From<Ipv6Addr> for Ipv6Network {
     }
 }
 
+#[derive(Clone, Debug)]
 pub struct Ipv6NetworkIterator {
-    next: u128,
+    next: Option<u128>,
     end: u128,
 }
 
@@ -236,13 +237,21 @@ impl Iterator for Ipv6NetworkIterator {
     type Item = Ipv6Addr;
 
     fn next(&mut self) -> Option<Ipv6Addr> {
-        if self.next <= self.end {
-            let next = Ipv6Addr::from(self.next);
-            self.next += 1;
-            Some(next)
-        } else {
+        let next = self.next?;
+        self.next = if next == self.end {
             None
-        }
+        } else {
+            Some(next + 1)
+        };
+        Some(next.into())
+    }
+}
+
+impl IntoIterator for &'_ Ipv6Network {
+    type IntoIter = Ipv6NetworkIterator;
+    type Item = Ipv6Addr;
+    fn into_iter(self) -> Ipv6NetworkIterator {
+        self.iter()
     }
 }
 
@@ -579,5 +588,16 @@ mod test {
         let other2: Ipv6Network = "2001:DB8:ACAD::20:2/64".parse().unwrap();
 
         assert_eq!(other2.overlaps(other), true);
+    }
+
+    #[test]
+    fn edges() {
+        let low: Ipv6Network = "::0/120".parse().unwrap();
+        let low_addrs: Vec<Ipv6Addr> = low.iter().collect();
+        assert_eq!(256, low_addrs.len());
+
+        let high: Ipv6Network = "ffff:ffff:ffff:ffff:ffff:ffff:ffff:ff00/120".parse().unwrap();
+        let high_addrs: Vec<Ipv6Addr> = high.iter().collect();
+        assert_eq!(256, high_addrs.len());
     }
 }

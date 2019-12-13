@@ -16,6 +16,8 @@ mod ipv6;
 pub use crate::common::IpNetworkError;
 pub use crate::ipv4::{ipv4_mask_to_prefix, Ipv4Network};
 pub use crate::ipv6::{ipv6_mask_to_prefix, Ipv6Network};
+use crate::ipv4::Ipv4NetworkIterator;
+use crate::ipv6::Ipv6NetworkIterator;
 
 /// Represents a generic network range. This type can have two variants:
 /// the v4 and the v6 case.
@@ -247,6 +249,17 @@ impl IpNetwork {
             IpNetwork::V6(ref ip) => NetworkSize::V6(ip.size()),
         }
     }
+
+    /// Returns an iterator over the addresses contained in the network.
+    ///
+    /// This lists all the addresses in the network range, in ascending order.
+    pub fn iter(&self) -> IpNetworkIterator {
+        let inner = match self {
+            IpNetwork::V4(ip) => IpNetworkIteratorInner::V4(ip.iter()),
+            IpNetwork::V6(ip) => IpNetworkIteratorInner::V6(ip.iter()),
+        };
+        IpNetworkIterator { inner }
+    }
 }
 
 /// Tries to parse the given string into a `IpNetwork`. Will first try to parse
@@ -303,6 +316,34 @@ impl fmt::Display for IpNetwork {
             IpNetwork::V4(net) => net.fmt(f),
             IpNetwork::V6(net) => net.fmt(f),
         }
+    }
+}
+
+#[derive(Clone, Debug)]
+enum IpNetworkIteratorInner {
+    V4(Ipv4NetworkIterator),
+    V6(Ipv6NetworkIterator),
+}
+
+pub struct IpNetworkIterator {
+    inner: IpNetworkIteratorInner,
+}
+
+impl Iterator for IpNetworkIterator {
+    type Item = IpAddr;
+    fn next(&mut self) -> Option<IpAddr> {
+        match &mut self.inner {
+            IpNetworkIteratorInner::V4(iter) => iter.next().map(IpAddr::V4),
+            IpNetworkIteratorInner::V6(iter) => iter.next().map(IpAddr::V6),
+        }
+    }
+}
+
+impl IntoIterator for &'_ IpNetwork {
+    type IntoIter = IpNetworkIterator;
+    type Item = IpAddr;
+    fn into_iter(self) -> IpNetworkIterator {
+        self.iter()
     }
 }
 

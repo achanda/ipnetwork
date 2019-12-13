@@ -62,8 +62,8 @@ impl Ipv4Network {
     /// addresses.
     pub fn iter(&self) -> Ipv4NetworkIterator {
         let start = u32::from(self.network());
-        let end = start + self.size();
-        Ipv4NetworkIterator { next: start, end }
+        let end = start + (self.size() - 1);
+        Ipv4NetworkIterator { next: Some(start), end }
     }
 
     pub fn ip(&self) -> Ipv4Addr {
@@ -253,8 +253,9 @@ impl From<Ipv4Addr> for Ipv4Network {
     }
 }
 
+#[derive(Clone, Debug)]
 pub struct Ipv4NetworkIterator {
-    next: u32,
+    next: Option<u32>,
     end: u32,
 }
 
@@ -262,13 +263,21 @@ impl Iterator for Ipv4NetworkIterator {
     type Item = Ipv4Addr;
 
     fn next(&mut self) -> Option<Ipv4Addr> {
-        if self.next < self.end {
-            let next = Ipv4Addr::from(self.next as u32);
-            self.next += 1;
-            Some(next)
-        } else {
+        let next = self.next?;
+        self.next = if next == self.end {
             None
-        }
+        } else {
+            Some(next + 1)
+        };
+        Some(next.into())
+    }
+}
+
+impl IntoIterator for &'_ Ipv4Network {
+    type IntoIter = Ipv4NetworkIterator;
+    type Item = Ipv4Addr;
+    fn into_iter(self) -> Ipv4NetworkIterator {
+        self.iter()
     }
 }
 
@@ -604,5 +613,20 @@ mod test {
         assert_eq!(skynet.overlaps(other), true);
         assert_eq!(skynet.overlaps(other2), false);
         assert_eq!(other2.overlaps(other3), true);
+    }
+
+    #[test]
+    fn edges() {
+        let low: Ipv4Network = "0.0.0.0/24".parse().unwrap();
+        let low_addrs: Vec<Ipv4Addr> = low.iter().collect();
+        assert_eq!(256, low_addrs.len());
+        assert_eq!("0.0.0.0".parse::<Ipv4Addr>().unwrap(), low_addrs[0]);
+        assert_eq!("0.0.0.255".parse::<Ipv4Addr>().unwrap(), low_addrs[255]);
+
+        let high: Ipv4Network = "255.255.255.0/24".parse().unwrap();
+        let high_addrs: Vec<Ipv4Addr> = high.iter().collect();
+        assert_eq!(256, high_addrs.len());
+        assert_eq!("255.255.255.0".parse::<Ipv4Addr>().unwrap(), high_addrs[0]);
+        assert_eq!("255.255.255.255".parse::<Ipv4Addr>().unwrap(), high_addrs[255]);
     }
 }
