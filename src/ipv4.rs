@@ -1,5 +1,4 @@
 use crate::common::{cidr_parts, parse_prefix, IpNetworkError};
-use serde::{de, Deserialize, Deserializer, Serialize, Serializer};
 use std::{fmt, net::Ipv4Addr, str::FromStr};
 
 const IPV4_BITS: u8 = 32;
@@ -11,20 +10,22 @@ pub struct Ipv4Network {
     prefix: u8,
 }
 
-impl<'de> Deserialize<'de> for Ipv4Network {
+#[cfg(feature = "serde")]
+impl<'de> serde::Deserialize<'de> for Ipv4Network {
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
     where
-        D: Deserializer<'de>,
+        D: serde::Deserializer<'de>,
     {
         let s = <String>::deserialize(deserializer)?;
-        Ipv4Network::from_str(&s).map_err(de::Error::custom)
+        Ipv4Network::from_str(&s).map_err(serde::de::Error::custom)
     }
 }
 
-impl Serialize for Ipv4Network {
+#[cfg(feature = "serde")]
+impl serde::Serialize for Ipv4Network {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
-        S: Serializer,
+        S: serde::Serializer,
     {
         serializer.serialize_str(&self.to_string())
     }

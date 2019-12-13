@@ -1,3 +1,5 @@
+#![cfg(feature = "serde")]
+
 #[cfg(test)]
 mod tests {
     use ipnetwork::{IpNetwork, Ipv4Network, Ipv6Network};

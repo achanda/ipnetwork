@@ -6,7 +6,6 @@
 #![crate_type = "lib"]
 #![doc(html_root_url = "https://docs.rs/ipnetwork/0.15.1")]
 
-use serde::{de, Deserialize, Deserializer, Serialize, Serializer};
 use std::{fmt, net::IpAddr, str::FromStr};
 
 mod common;
@@ -27,20 +26,22 @@ pub enum IpNetwork {
     V6(Ipv6Network),
 }
 
-impl<'de> Deserialize<'de> for IpNetwork {
+#[cfg(feature = "serde")]
+impl<'de> serde::Deserialize<'de> for IpNetwork {
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
     where
-        D: Deserializer<'de>,
+        D: serde::Deserializer<'de>,
     {
         let s = <String>::deserialize(deserializer)?;
-        IpNetwork::from_str(&s).map_err(de::Error::custom)
+        IpNetwork::from_str(&s).map_err(serde::de::Error::custom)
     }
 }
 
-impl Serialize for IpNetwork {
+#[cfg(feature = "serde")]
+impl serde::Serialize for IpNetwork {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
-        S: Serializer,
+        S: serde::Serializer,
     {
         serializer.serialize_str(&self.to_string())
     }
@@ -359,6 +360,7 @@ pub fn ip_mask_to_prefix(mask: IpAddr) -> Result<u8, IpNetworkError> {
 #[cfg(test)]
 mod test {
     #[test]
+    #[cfg(feature = "serde")]
     fn deserialize_from_serde_json_value() {
         use super::*;
         let network = IpNetwork::from_str("0.0.0.0/0").unwrap();

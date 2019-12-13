@@ -1,5 +1,4 @@
 use crate::common::{cidr_parts, parse_prefix, IpNetworkError};
-use serde::{de, Deserialize, Deserializer, Serialize, Serializer};
 use std::{cmp, fmt, net::Ipv6Addr, str::FromStr};
 
 const IPV6_BITS: u8 = 128;
@@ -12,20 +11,22 @@ pub struct Ipv6Network {
     prefix: u8,
 }
 
-impl<'de> Deserialize<'de> for Ipv6Network {
+#[cfg(feature = "serde")]
+impl<'de> serde::Deserialize<'de> for Ipv6Network {
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
     where
-        D: Deserializer<'de>,
+        D: serde::Deserializer<'de>,
     {
         let s = <String>::deserialize(deserializer)?;
-        Ipv6Network::from_str(&s).map_err(de::Error::custom)
+        Ipv6Network::from_str(&s).map_err(serde::de::Error::custom)
     }
 }
 
-impl Serialize for Ipv6Network {
+#[cfg(feature = "serde")]
+impl serde::Serialize for Ipv6Network {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
-        S: Serializer,
+        S: serde::Serializer,
     {
         serializer.serialize_str(&self.to_string())
     }

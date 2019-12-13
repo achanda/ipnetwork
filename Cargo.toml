@@ -12,7 +12,7 @@ edition = "2018"
 
 [dependencies]
 clippy = {version = "0.0.302", optional = true}
-serde = ">=0.8.0, <2.0"
+serde = { version = ">=0.8.0, <2.0", optional = true }
 
 [dev-dependencies]
 serde_json = "1.0"
@@ -23,7 +23,7 @@ criterion = "0.3.0"
 travis-ci = { repository = "achanda/ipnetwork" }
 
 [features]
-default = []
+default = ["serde"]
 dev = ["clippy"]
 
 [[bench]]
