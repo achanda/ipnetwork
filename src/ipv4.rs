@@ -238,7 +238,13 @@ impl FromStr for Ipv4Network {
         let addr = Ipv4Addr::from_str(addr_str)
             .map_err(|_| IpNetworkError::InvalidAddr(addr_str.to_string()))?;
         let prefix = match prefix_str {
-            Some(v) => parse_prefix(v, IPV4_BITS)?,
+            Some(v) => {
+                if let Ok(netmask) = Ipv4Addr::from_str(v) {
+                    ipv4_mask_to_prefix(netmask)?
+                } else {
+                    parse_prefix(v, IPV4_BITS)?
+                }
+            },
             None => IPV4_BITS,
         };
         Ipv4Network::new(addr, prefix)
@@ -467,6 +473,19 @@ mod test {
         let mask = Ipv4Addr::new(255, 255, 255, 128);
         let prefix = ipv4_mask_to_prefix(mask).unwrap();
         assert_eq!(prefix, 25);
+    }
+
+    /// Parse netmask as well as prefix
+    #[test]
+    fn parse_netmask() {
+        let from_netmask: Ipv4Network = "192.168.1.0/255.255.255.0".parse().unwrap();
+        let from_prefix: Ipv4Network = "192.168.1.0/24".parse().unwrap();
+        assert_eq!(from_netmask, from_prefix);
+    }
+
+    #[test]
+    fn parse_netmask_broken() {
+        "192.168.1.0/255.0.255.0".parse::<Ipv4Network>().unwrap_err();
     }
 
     #[test]
