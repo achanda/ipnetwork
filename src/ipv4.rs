@@ -484,8 +484,8 @@ mod test {
     }
 
     #[test]
-    fn parse_netmask_broken() {
-        "192.168.1.0/255.0.255.0".parse::<Ipv4Network>().unwrap_err();
+    fn parse_netmask_broken_v4() {
+        assert_eq!("192.168.1.0/255.0.255.0".parse::<Ipv4Network>(), Err(IpNetworkError::InvalidPrefix));
     }
 
     #[test]

@@ -310,6 +310,11 @@ mod test {
     }
 
     #[test]
+    fn parse_netmask_broken_v6() {
+        assert_eq!("FF01:0:0:17:0:0:0:2/255.255.255.0".parse::<Ipv6Network>(), Err(IpNetworkError::InvalidPrefix));
+    }
+
+    #[test]
     fn create_v6_invalid_prefix() {
         let cidr = Ipv6Network::new(Ipv6Addr::new(0, 0, 0, 0, 0, 0, 0, 1), 129);
         assert!(cidr.is_err());
