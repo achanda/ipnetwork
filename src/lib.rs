@@ -13,10 +13,10 @@ mod ipv4;
 mod ipv6;
 
 pub use crate::common::IpNetworkError;
-pub use crate::ipv4::{ipv4_mask_to_prefix, Ipv4Network};
-pub use crate::ipv6::{ipv6_mask_to_prefix, Ipv6Network};
 use crate::ipv4::Ipv4NetworkIterator;
+pub use crate::ipv4::{ipv4_mask_to_prefix, Ipv4Network};
 use crate::ipv6::Ipv6NetworkIterator;
+pub use crate::ipv6::{ipv6_mask_to_prefix, Ipv6Network};
 
 /// Represents a generic network range. This type can have two variants:
 /// the v4 and the v6 case.
