@@ -2,8 +2,8 @@ use criterion::{criterion_group, criterion_main, Criterion};
 use ipnetwork::{Ipv4Network, Ipv6Network};
 use std::net::{Ipv4Addr, Ipv6Addr};
 
-fn parse_ipv4_benchmark(c: &mut Criterion) {
-    c.bench_function("parse ipv4", |b| {
+fn parse_ipv4_prefix_benchmark(c: &mut Criterion) {
+    c.bench_function("parse ipv4 prefix", |b| {
         b.iter(|| "127.1.0.0/24".parse::<Ipv4Network>().unwrap())
     });
 }
@@ -11,6 +11,12 @@ fn parse_ipv4_benchmark(c: &mut Criterion) {
 fn parse_ipv6_benchmark(c: &mut Criterion) {
     c.bench_function("parse ipv6", |b| {
         b.iter(|| "FF01:0:0:17:0:0:0:2/64".parse::<Ipv6Network>().unwrap())
+    });
+}
+
+fn parse_ipv4_netmask_benchmark(c: &mut Criterion) {
+    c.bench_function("parse ipv4 netmask", |b| {
+        b.iter(|| "127.1.0.0/255.255.255.0".parse::<Ipv4Network>().unwrap())
     });
 }
 
@@ -34,8 +40,9 @@ fn contains_ipv6_benchmark(c: &mut Criterion) {
 
 criterion_group!(
     benches,
-    parse_ipv4_benchmark,
+    parse_ipv4_prefix_benchmark,
     parse_ipv6_benchmark,
+    parse_ipv4_netmask_benchmark,
     contains_ipv4_benchmark,
     contains_ipv6_benchmark
 );
