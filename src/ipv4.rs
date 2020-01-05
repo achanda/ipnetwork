@@ -64,7 +64,10 @@ impl Ipv4Network {
     pub fn iter(&self) -> Ipv4NetworkIterator {
         let start = u32::from(self.network());
         let end = start + (self.size() - 1);
-        Ipv4NetworkIterator { next: Some(start), end }
+        Ipv4NetworkIterator {
+            next: Some(start),
+            end,
+        }
     }
 
     pub fn ip(&self) -> Ipv4Addr {
@@ -244,7 +247,7 @@ impl FromStr for Ipv4Network {
                 } else {
                     parse_prefix(v, IPV4_BITS)?
                 }
-            },
+            }
             None => IPV4_BITS,
         };
         Ipv4Network::new(addr, prefix)
@@ -485,7 +488,10 @@ mod test {
 
     #[test]
     fn parse_netmask_broken_v4() {
-        assert_eq!("192.168.1.0/255.0.255.0".parse::<Ipv4Network>(), Err(IpNetworkError::InvalidPrefix));
+        assert_eq!(
+            "192.168.1.0/255.0.255.0".parse::<Ipv4Network>(),
+            Err(IpNetworkError::InvalidPrefix)
+        );
     }
 
     #[test]
@@ -647,6 +653,9 @@ mod test {
         let high_addrs: Vec<Ipv4Addr> = high.iter().collect();
         assert_eq!(256, high_addrs.len());
         assert_eq!("255.255.255.0".parse::<Ipv4Addr>().unwrap(), high_addrs[0]);
-        assert_eq!("255.255.255.255".parse::<Ipv4Addr>().unwrap(), high_addrs[255]);
+        assert_eq!(
+            "255.255.255.255".parse::<Ipv4Addr>().unwrap(),
+            high_addrs[255]
+        );
     }
 }

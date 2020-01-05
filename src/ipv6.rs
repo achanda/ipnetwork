@@ -311,7 +311,10 @@ mod test {
 
     #[test]
     fn parse_netmask_broken_v6() {
-        assert_eq!("FF01:0:0:17:0:0:0:2/255.255.255.0".parse::<Ipv6Network>(), Err(IpNetworkError::InvalidPrefix));
+        assert_eq!(
+            "FF01:0:0:17:0:0:0:2/255.255.255.0".parse::<Ipv6Network>(),
+            Err(IpNetworkError::InvalidPrefix)
+        );
     }
 
     #[test]
@@ -602,7 +605,9 @@ mod test {
         let low_addrs: Vec<Ipv6Addr> = low.iter().collect();
         assert_eq!(256, low_addrs.len());
 
-        let high: Ipv6Network = "ffff:ffff:ffff:ffff:ffff:ffff:ffff:ff00/120".parse().unwrap();
+        let high: Ipv6Network = "ffff:ffff:ffff:ffff:ffff:ffff:ffff:ff00/120"
+            .parse()
+            .unwrap();
         let high_addrs: Vec<Ipv6Addr> = high.iter().collect();
         assert_eq!(256, high_addrs.len());
     }
