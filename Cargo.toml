@@ -21,6 +21,7 @@ criterion = "0.3.0"
 
 [badges]
 travis-ci = { repository = "achanda/ipnetwork" }
+maintenance = { status = "passively-maintained" }
 
 [features]
 default = ["serde"]
