@@ -3,7 +3,7 @@
 #![cfg_attr(feature = "dev", feature(plugin))]
 #![cfg_attr(feature = "dev", plugin(clippy))]
 #![crate_type = "lib"]
-#![doc(html_root_url = "https://docs.rs/ipnetwork/0.15.1")]
+#![doc(html_root_url = "https://docs.rs/ipnetwork/0.16.0")]
 
 use std::{fmt, net::IpAddr, str::FromStr};
 
