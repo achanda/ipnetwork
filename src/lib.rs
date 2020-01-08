@@ -1,6 +1,5 @@
 //! The `ipnetwork` crate provides a set of APIs to work with IP CIDRs in
-//! Rust. Implementation for IPv4 is more or less stable, IPv6 implementation
-//! is still WIP.
+//! Rust.
 #![cfg_attr(feature = "dev", feature(plugin))]
 #![cfg_attr(feature = "dev", plugin(clippy))]
 #![crate_type = "lib"]
