@@ -36,17 +36,17 @@ pub fn cidr_parts(cidr: &str) -> Result<(&str, Option<&str>), IpNetworkError> {
         let (ip, prefix) = cidr.split_at(sep);
         // Error if cidr has multiple slashes
         if prefix[1..].find('/').is_some() {
-            return Err(IpNetworkError::InvalidCidrFormat(format!(
+            Err(IpNetworkError::InvalidCidrFormat(format!(
                 "CIDR must contain a single '/': {}",
                 cidr
-            )));
+            )))
         } else {
             // Handle the case when cidr has exactly one slash
-            return Ok((ip, Some(&prefix[1..])));
+            Ok((ip, Some(&prefix[1..])))
         }
     } else {
         // Handle the case when cidr does not have a slash
-        return Ok((cidr, None));
+        Ok((cidr, None))
     }
 }
 
