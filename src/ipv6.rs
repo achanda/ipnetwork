@@ -72,7 +72,7 @@ impl Ipv6Network {
 
         Ipv6NetworkIterator {
             next: Some(start),
-            end: end,
+            end,
         }
     }
 
