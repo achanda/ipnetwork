@@ -7,7 +7,8 @@ This is a library to work with IPv4 and IPv6 CIDRs in rust
 
 Run Clippy by doing
 ```
-cargo test --features "dev"
+rustup component add clippy
+cargo clippy
 ```
 
 ### Installation

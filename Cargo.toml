@@ -25,7 +25,6 @@ maintenance = { status = "passively-maintained" }
 
 [features]
 default = ["serde"]
-dev = ["clippy"]
 
 [[bench]]
 name = "parse_bench"
