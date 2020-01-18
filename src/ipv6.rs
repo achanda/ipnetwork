@@ -112,17 +112,13 @@ impl Ipv6Network {
         Ipv6Addr::from(broadcast)
     }
 
-    pub fn ip(&self) -> Ipv6Addr {
-        self.addr
-    }
-
     pub fn prefix(&self) -> u8 {
         self.prefix
     }
 
     /// Checks if the given `Ipv6Network` is a subnet of the other.
     pub fn is_subnet_of(self, other: Ipv6Network) -> bool {
-        other.ip() <= self.ip() && other.broadcast() >= self.broadcast()
+        other.network() <= self.network() && other.broadcast() >= self.broadcast()
     }
 
     /// Checks if the given `Ipv6Network` is a supernet of the other.
@@ -132,9 +128,9 @@ impl Ipv6Network {
 
     /// Checks if the given `Ipv6Network` is partly contained in other.
     pub fn overlaps(self, other: Ipv6Network) -> bool {
-        other.contains(self.ip())
+        other.contains(self.network())
             || (other.contains(self.broadcast())
-                || (self.contains(other.ip()) || (self.contains(other.broadcast()))))
+                || (self.contains(other.network()) || (self.contains(other.broadcast()))))
     }
 
     /// Returns the mask for this `Ipv6Network`.
@@ -258,7 +254,7 @@ impl IntoIterator for &'_ Ipv6Network {
 
 impl fmt::Display for Ipv6Network {
     fn fmt(&self, fmt: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(fmt, "{}/{}", self.ip(), self.prefix())
+        write!(fmt, "{}/{}", self.network(), self.prefix())
     }
 }
 
@@ -326,21 +322,24 @@ mod test {
     #[test]
     fn parse_v6() {
         let cidr: Ipv6Network = "::1/0".parse().unwrap();
-        assert_eq!(cidr.ip(), Ipv6Addr::new(0, 0, 0, 0, 0, 0, 0, 1));
+        assert_eq!(cidr.network(), Ipv6Addr::new(0, 0, 0, 0, 0, 0, 0, 0));
         assert_eq!(cidr.prefix(), 0);
     }
 
     #[test]
     fn parse_v6_2() {
         let cidr: Ipv6Network = "FF01:0:0:17:0:0:0:2/64".parse().unwrap();
-        assert_eq!(cidr.ip(), Ipv6Addr::new(0xff01, 0, 0, 0x17, 0, 0, 0, 0x2));
+        assert_eq!(
+            cidr.network(),
+            Ipv6Addr::new(0xff01, 0, 0, 0x17, 0, 0, 0, 0)
+        );
         assert_eq!(cidr.prefix(), 64);
     }
 
     #[test]
     fn parse_v6_noprefix() {
         let cidr: Ipv6Network = "::1".parse().unwrap();
-        assert_eq!(cidr.ip(), Ipv6Addr::new(0, 0, 0, 0, 0, 0, 0, 1));
+        assert_eq!(cidr.network(), Ipv6Addr::new(0, 0, 0, 0, 0, 0, 0, 1));
         assert_eq!(cidr.prefix(), 128);
     }
 

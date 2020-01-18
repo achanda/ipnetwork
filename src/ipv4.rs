@@ -70,17 +70,13 @@ impl Ipv4Network {
         }
     }
 
-    pub fn ip(&self) -> Ipv4Addr {
-        self.addr
-    }
-
     pub fn prefix(&self) -> u8 {
         self.prefix
     }
 
     /// Checks if the given `Ipv4Network` is a subnet of the other.
     pub fn is_subnet_of(self, other: Ipv4Network) -> bool {
-        other.ip() <= self.ip() && other.broadcast() >= self.broadcast()
+        other.network() <= self.network() && other.broadcast() >= self.broadcast()
     }
 
     /// Checks if the given `Ipv4Network` is a supernet of the other.
@@ -90,9 +86,9 @@ impl Ipv4Network {
 
     /// Checks if the given `Ipv4Network` is partly contained in other.
     pub fn overlaps(self, other: Ipv4Network) -> bool {
-        other.contains(self.ip())
+        other.contains(self.network())
             || (other.contains(self.broadcast())
-                || (self.contains(other.ip()) || (self.contains(other.broadcast()))))
+                || (self.contains(other.network()) || (self.contains(other.broadcast()))))
     }
 
     /// Returns the mask for this `Ipv4Network`.
@@ -217,7 +213,7 @@ impl Ipv4Network {
 
 impl fmt::Display for Ipv4Network {
     fn fmt(&self, fmt: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(fmt, "{}/{}", self.ip(), self.prefix())
+        write!(fmt, "{}/{}", self.network(), self.prefix())
     }
 }
 
@@ -231,7 +227,7 @@ impl fmt::Display for Ipv4Network {
 ///
 /// let new = Ipv4Network::new(Ipv4Addr::new(10, 1, 9, 32), 16).unwrap();
 /// let from_cidr: Ipv4Network = "10.1.9.32/16".parse().unwrap();
-/// assert_eq!(new.ip(), from_cidr.ip());
+/// assert_eq!(new.network(), from_cidr.network());
 /// assert_eq!(new.prefix(), from_cidr.prefix());
 /// ```
 impl FromStr for Ipv4Network {
@@ -327,21 +323,21 @@ mod test {
     #[test]
     fn parse_v4_24bit() {
         let cidr: Ipv4Network = "127.1.0.0/24".parse().unwrap();
-        assert_eq!(cidr.ip(), Ipv4Addr::new(127, 1, 0, 0));
+        assert_eq!(cidr.network(), Ipv4Addr::new(127, 1, 0, 0));
         assert_eq!(cidr.prefix(), 24);
     }
 
     #[test]
     fn parse_v4_32bit() {
         let cidr: Ipv4Network = "127.0.0.0/32".parse().unwrap();
-        assert_eq!(cidr.ip(), Ipv4Addr::new(127, 0, 0, 0));
+        assert_eq!(cidr.network(), Ipv4Addr::new(127, 0, 0, 0));
         assert_eq!(cidr.prefix(), 32);
     }
 
     #[test]
     fn parse_v4_noprefix() {
         let cidr: Ipv4Network = "127.0.0.0".parse().unwrap();
-        assert_eq!(cidr.ip(), Ipv4Addr::new(127, 0, 0, 0));
+        assert_eq!(cidr.network(), Ipv4Addr::new(127, 0, 0, 0));
         assert_eq!(cidr.prefix(), 32);
     }
 
@@ -361,13 +357,6 @@ mod test {
     fn parse_v4_fail_addr3() {
         let cidr: Option<Ipv4Network> = "256/8".parse().ok();
         assert_eq!(None, cidr);
-    }
-
-    #[test]
-    fn parse_v4_non_zero_host_bits() {
-        let cidr: Ipv4Network = "10.1.1.1/24".parse().unwrap();
-        assert_eq!(cidr.ip(), Ipv4Addr::new(10, 1, 1, 1));
-        assert_eq!(cidr.prefix(), 24);
     }
 
     #[test]
@@ -554,6 +543,13 @@ mod test {
             (
                 "10.0.0.0/30".parse().unwrap(),
                 "10.0.0.0/24".parse().unwrap(),
+            ),
+            true,
+        );
+        test_cases.insert(
+            (
+                "10.0.0.0/30".parse().unwrap(),
+                "10.0.0.1/24".parse().unwrap(),
             ),
             true,
         );
