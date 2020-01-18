@@ -5,6 +5,12 @@
 #![crate_type = "lib"]
 #![doc(html_root_url = "https://docs.rs/ipnetwork/0.16.0")]
 
+#![deny(missing_copy_implementations,
+    missing_debug_implementations,
+    unsafe_code,
+    unused_extern_crates,
+    unused_import_braces)]
+
 use std::{fmt, net::IpAddr, str::FromStr};
 
 mod common;
@@ -325,6 +331,7 @@ enum IpNetworkIteratorInner {
     V6(Ipv6NetworkIterator),
 }
 
+#[derive(Clone, Debug)]
 pub struct IpNetworkIterator {
     inner: IpNetworkIteratorInner,
 }

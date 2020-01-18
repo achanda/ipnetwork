@@ -263,7 +263,7 @@ impl From<Ipv4Addr> for Ipv4Network {
     }
 }
 
-#[derive(Clone, Debug)]
+#[derive(Copy, Clone, Debug)]
 pub struct Ipv4NetworkIterator {
     next: Option<u32>,
     end: u32,
