@@ -12,6 +12,7 @@ use std::{fmt, net::IpAddr, str::FromStr};
 mod common;
 mod ipv4;
 mod ipv6;
+mod sub;
 
 pub use crate::common::IpNetworkError;
 pub use crate::ipv4::{ipv4_mask_to_prefix, Ipv4Network};
