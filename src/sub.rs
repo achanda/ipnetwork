@@ -1,4 +1,4 @@
-use crate::{Ipv4Network, Ipv6Network};
+use crate::{IpNetwork, Ipv4Network, Ipv6Network};
 use std::{iter, ops::Sub};
 
 impl Sub for Ipv4Network {
@@ -113,6 +113,23 @@ impl Iterator for Ipv6NetworkSubResult {
                     None
                 }
             }
+        }
+    }
+}
+
+#[derive(Clone, Copy, Debug)]
+pub enum IpNetworkSubResult {
+    V4(Ipv4NetworkSubResult),
+    V6(Ipv6NetworkSubResult),
+}
+
+impl Iterator for IpNetworkSubResult {
+    type Item = IpNetwork;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        match self {
+            IpNetworkSubResult::V4(result) => result.next().map(IpNetwork::from),
+            IpNetworkSubResult::V6(result) => result.next().map(IpNetwork::from),
         }
     }
 }
