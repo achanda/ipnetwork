@@ -240,3 +240,20 @@ where
         result
     }
 }
+
+impl<T> Sub<T> for IpNetwork
+where
+    T: IntoIterator<Item = IpNetwork>,
+{
+    type Output = Box<dyn Iterator<Item = IpNetwork>>;
+
+    fn sub(self, minuends: T) -> Self::Output {
+        let mut result: Box<dyn Iterator<Item = Self>> = Box::new(iter::once(self));
+
+        for minuend in minuends {
+            result = Box::new(result.flat_map(move |partial_result| partial_result - minuend));
+        }
+
+        result
+    }
+}
