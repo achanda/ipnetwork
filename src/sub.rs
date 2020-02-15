@@ -60,6 +60,35 @@ impl Iterator for Ipv4NetworkSubResult {
 }
 
 #[derive(Clone, Copy, Debug)]
+pub enum Ipv6NetworkSubResult {
+    Empty,
+    SingleNetwork(Ipv6Network),
+    MultipleNetworks(Ipv6NetworkSubSet),
+}
+
+impl Iterator for Ipv6NetworkSubResult {
+    type Item = Ipv6Network;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        match self {
+            Ipv6NetworkSubResult::Empty => None,
+            &mut Ipv6NetworkSubResult::SingleNetwork(network) => {
+                *self = Ipv6NetworkSubResult::Empty;
+                Some(network)
+            }
+            Ipv6NetworkSubResult::MultipleNetworks(range) => {
+                if let Some(item) = range.next() {
+                    Some(item)
+                } else {
+                    *self = Ipv6NetworkSubResult::Empty;
+                    None
+                }
+            }
+        }
+    }
+}
+
+#[derive(Clone, Copy, Debug)]
 pub struct Ipv4NetworkSubSet {
     network: u32,
     bit_position: u8,
