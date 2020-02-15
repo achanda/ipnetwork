@@ -1,4 +1,34 @@
 use crate::Ipv4Network;
+use std::ops::Sub;
+
+impl Sub for Ipv4Network {
+    type Output = Ipv4NetworkSubResult;
+
+    fn sub(self, other: Self) -> Self::Output {
+        let subtrahend: u32 = self.network().into();
+        let minuend: u32 = other.network().into();
+        let mask: u32 = self.mask().into();
+
+        if minuend & mask == subtrahend {
+            let max_bit_position = 32 - self.prefix();
+            let bit_position = 32 - other.prefix();
+
+            Ipv4NetworkSubResult::MultipleNetworks(Ipv4NetworkSubSet {
+                network: minuend,
+                bit_position,
+                max_bit_position,
+            })
+        } else {
+            let other_mask: u32 = other.mask().into();
+
+            if subtrahend & other_mask == minuend {
+                Ipv4NetworkSubResult::Empty
+            } else {
+                Ipv4NetworkSubResult::SingleNetwork(self)
+            }
+        }
+    }
+}
 
 #[derive(Clone, Copy, Debug)]
 pub enum Ipv4NetworkSubResult {
