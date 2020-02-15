@@ -1,4 +1,4 @@
-use crate::Ipv4Network;
+use crate::{Ipv4Network, Ipv6Network};
 use std::{iter, ops::Sub};
 
 impl Sub for Ipv4Network {
@@ -79,6 +79,32 @@ impl Iterator for Ipv4NetworkSubSet {
             self.bit_position += 1;
 
             Some(Ipv4Network::new(address.into(), prefix).expect("Invalid IPv4 network prefix"))
+        } else {
+            None
+        }
+    }
+}
+
+#[derive(Clone, Copy, Debug)]
+pub struct Ipv6NetworkSubSet {
+    network: u128,
+    bit_position: u8,
+    max_bit_position: u8,
+}
+
+impl Iterator for Ipv6NetworkSubSet {
+    type Item = Ipv6Network;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        if self.bit_position < self.max_bit_position {
+            let bit_mask = 1 << self.bit_position;
+            let prefix_mask = !(bit_mask - 1);
+            let address = (self.network ^ bit_mask) & prefix_mask;
+            let prefix = 128 - self.bit_position;
+
+            self.bit_position += 1;
+
+            Some(Ipv6Network::new(address.into(), prefix).expect("Invalid IPv6 network prefix"))
         } else {
             None
         }
