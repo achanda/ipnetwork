@@ -1,5 +1,5 @@
 use crate::Ipv4Network;
-use std::ops::Sub;
+use std::{iter, ops::Sub};
 
 impl Sub for Ipv4Network {
     type Output = Ipv4NetworkSubResult;
@@ -82,5 +82,22 @@ impl Iterator for Ipv4NetworkSubSet {
         } else {
             None
         }
+    }
+}
+
+impl<T> Sub<T> for Ipv4Network
+where
+    T: IntoIterator<Item = Ipv4Network>,
+{
+    type Output = Box<dyn Iterator<Item = Ipv4Network>>;
+
+    fn sub(self, minuends: T) -> Self::Output {
+        let mut result: Box<dyn Iterator<Item = Self>> = Box::new(iter::once(self));
+
+        for minuend in minuends {
+            result = Box::new(result.flat_map(move |partial_result| partial_result - minuend));
+        }
+
+        result
     }
 }
