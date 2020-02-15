@@ -185,3 +185,20 @@ where
         result
     }
 }
+
+impl<T> Sub<T> for Ipv6Network
+where
+    T: IntoIterator<Item = Ipv6Network>,
+{
+    type Output = Box<dyn Iterator<Item = Ipv6Network>>;
+
+    fn sub(self, minuends: T) -> Self::Output {
+        let mut result: Box<dyn Iterator<Item = Self>> = Box::new(iter::once(self));
+
+        for minuend in minuends {
+            result = Box::new(result.flat_map(move |partial_result| partial_result - minuend));
+        }
+
+        result
+    }
+}
