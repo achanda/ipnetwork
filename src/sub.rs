@@ -59,6 +59,27 @@ impl Sub for Ipv6Network {
     }
 }
 
+impl Sub for IpNetwork {
+    type Output = IpNetworkSubResult;
+
+    fn sub(self, other: Self) -> Self::Output {
+        match (self, other) {
+            (IpNetwork::V4(subtrahend), IpNetwork::V4(minuend)) => {
+                IpNetworkSubResult::V4(subtrahend - minuend)
+            }
+            (IpNetwork::V6(subtrahend), IpNetwork::V6(minuend)) => {
+                IpNetworkSubResult::V6(subtrahend - minuend)
+            }
+            (IpNetwork::V4(_), IpNetwork::V6(_)) => {
+                panic!("Can't subtract IPv6 network from IPv4 network")
+            }
+            (IpNetwork::V6(_), IpNetwork::V4(_)) => {
+                panic!("Can't subtract IPv4 network from IPv6 network")
+            }
+        }
+    }
+}
+
 #[derive(Clone, Copy, Debug)]
 pub enum Ipv4NetworkSubResult {
     Empty,
