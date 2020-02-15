@@ -1,6 +1,35 @@
 use crate::Ipv4Network;
 
 #[derive(Clone, Copy, Debug)]
+pub enum Ipv4NetworkSubResult {
+    Empty,
+    SingleNetwork(Ipv4Network),
+    MultipleNetworks(Ipv4NetworkSubSet),
+}
+
+impl Iterator for Ipv4NetworkSubResult {
+    type Item = Ipv4Network;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        match self {
+            Ipv4NetworkSubResult::Empty => None,
+            &mut Ipv4NetworkSubResult::SingleNetwork(network) => {
+                *self = Ipv4NetworkSubResult::Empty;
+                Some(network)
+            }
+            Ipv4NetworkSubResult::MultipleNetworks(range) => {
+                if let Some(item) = range.next() {
+                    Some(item)
+                } else {
+                    *self = Ipv4NetworkSubResult::Empty;
+                    None
+                }
+            }
+        }
+    }
+}
+
+#[derive(Clone, Copy, Debug)]
 pub struct Ipv4NetworkSubSet {
     network: u32,
     bit_position: u8,
