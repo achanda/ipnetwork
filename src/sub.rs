@@ -30,6 +30,35 @@ impl Sub for Ipv4Network {
     }
 }
 
+impl Sub for Ipv6Network {
+    type Output = Ipv6NetworkSubResult;
+
+    fn sub(self, other: Self) -> Self::Output {
+        let subtrahend: u128 = self.network().into();
+        let minuend: u128 = other.network().into();
+        let mask: u128 = self.mask().into();
+
+        if minuend & mask == subtrahend {
+            let max_bit_position = 32 - self.prefix();
+            let bit_position = 32 - other.prefix();
+
+            Ipv6NetworkSubResult::MultipleNetworks(Ipv6NetworkSubSet {
+                network: minuend,
+                bit_position,
+                max_bit_position,
+            })
+        } else {
+            let other_mask: u128 = other.mask().into();
+
+            if subtrahend & other_mask == minuend {
+                Ipv6NetworkSubResult::Empty
+            } else {
+                Ipv6NetworkSubResult::SingleNetwork(self)
+            }
+        }
+    }
+}
+
 #[derive(Clone, Copy, Debug)]
 pub enum Ipv4NetworkSubResult {
     Empty,
