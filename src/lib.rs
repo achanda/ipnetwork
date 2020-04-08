@@ -212,6 +212,49 @@ impl IpNetwork {
     // variant conversions. Then use that to implement a generic is_subnet_of
     // is_supernet_of, overlaps
 
+
+    /// Checks if the given `IpNetwork` is a subnet of the other.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use std::net::IpAddr;
+    /// use ipnetwork::IpNetwork;
+    ///
+    /// let net1: IpNetwork = "127.0.0.0/24".parse().unwrap();
+    /// let net2: IpNetwork = "127.0.0.0/30".parse().unwrap();
+    /// assert!(net2.is_subnet_of(net1));
+    /// assert!(!net1.is_subnet_of(net2));
+    /// ```
+    pub fn is_subnet_of(&self, other: IpNetwork) -> bool {
+        match (*self, other) {
+            (IpNetwork::V4(net), IpNetwork::V4(other)) => net.is_subnet_of(other),
+            (IpNetwork::V6(net), IpNetwork::V6(other)) => net.is_subnet_of(other),
+            _ => false
+        }
+    }
+
+    /// Checks if the given `Ipv4Network` is a supernet of the other.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use std::net::IpAddr;
+    /// use ipnetwork::IpNetwork;
+    ///
+    /// let net1: IpNetwork = "127.0.0.0/24".parse().unwrap();
+    /// let net2: IpNetwork = "127.0.0.0/30".parse().unwrap();
+    /// assert!(!net2.is_supernet_of(net1));
+    /// assert!(net1.is_supernet_of(net2));
+    /// ```
+    pub fn is_supernet_of(&self, other: IpNetwork) -> bool {
+        match (*self, other) {
+            (IpNetwork::V4(net), IpNetwork::V4(other)) => net.is_supernet_of(other),
+            (IpNetwork::V6(net), IpNetwork::V6(other)) => net.is_supernet_of(other),
+            _ => false
+        }
+    }
+
     /// Checks if a given `IpAddr` is in this `IpNetwork`
     ///
     /// # Examples
