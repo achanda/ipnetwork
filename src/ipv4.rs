@@ -1,5 +1,5 @@
 use crate::common::{cidr_parts, parse_prefix, IpNetworkError};
-use std::{fmt, net::Ipv4Addr, str::FromStr};
+use std::{fmt, net::Ipv4Addr, str::FromStr, convert::TryFrom};
 
 const IPV4_BITS: u8 = 32;
 
@@ -236,7 +236,7 @@ impl fmt::Display for Ipv4Network {
 /// ```
 impl FromStr for Ipv4Network {
     type Err = IpNetworkError;
-    fn from_str(s: &str) -> Result<Ipv4Network, IpNetworkError> {
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
         let (addr_str, prefix_str) = cidr_parts(s)?;
         let addr = Ipv4Addr::from_str(addr_str)
             .map_err(|_| IpNetworkError::InvalidAddr(addr_str.to_string()))?;
@@ -251,6 +251,14 @@ impl FromStr for Ipv4Network {
             None => IPV4_BITS,
         };
         Ipv4Network::new(addr, prefix)
+    }
+}
+
+impl TryFrom<&str> for Ipv4Network {
+    type Error = IpNetworkError;
+
+    fn try_from(s: &str) -> Result<Self, Self::Error> {
+        Ipv4Network::from_str(s)
     }
 }
 

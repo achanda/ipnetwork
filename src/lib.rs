@@ -9,7 +9,7 @@
     unused_extern_crates,
     unused_import_braces)]
 
-use std::{fmt, net::IpAddr, str::FromStr};
+use std::{fmt, net::IpAddr, str::FromStr, convert::TryFrom};
 
 mod common;
 mod ipv4;
@@ -282,7 +282,7 @@ impl IpNetwork {
 /// ```
 impl FromStr for IpNetwork {
     type Err = IpNetworkError;
-    fn from_str(s: &str) -> Result<IpNetwork, IpNetworkError> {
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
         if let Ok(net) = Ipv4Network::from_str(s) {
             Ok(IpNetwork::V4(net))
         } else if let Ok(net) = Ipv6Network::from_str(s) {
@@ -290,6 +290,14 @@ impl FromStr for IpNetwork {
         } else {
             Err(IpNetworkError::InvalidAddr(s.to_string()))
         }
+    }
+}
+
+impl TryFrom<&str> for IpNetwork {
+    type Error = IpNetworkError;
+
+    fn try_from(s: &str) -> Result<Self, Self::Error> {
+        IpNetwork::from_str(s)
     }
 }
 

@@ -1,5 +1,5 @@
 use crate::common::{cidr_parts, parse_prefix, IpNetworkError};
-use std::{cmp, fmt, net::Ipv6Addr, str::FromStr};
+use std::{cmp, fmt, net::Ipv6Addr, str::FromStr, convert::TryFrom};
 
 const IPV6_BITS: u8 = 128;
 const IPV6_SEGMENT_BITS: u8 = 16;
@@ -205,9 +205,22 @@ impl Ipv6Network {
     }
 }
 
+/// Creates an `Ipv6Network` from parsing a string in CIDR notation.
+///
+/// # Examples
+///
+/// ```
+/// use std::net::Ipv6Addr;
+/// use ipnetwork::Ipv6Network;
+///
+/// let new = Ipv6Network::new(Ipv6Addr::new(0xff01, 0, 0, 0x17, 0, 0, 0, 0x2), 65).unwrap();
+/// let from_cidr: Ipv6Network = "FF01:0:0:17:0:0:0:2/65".parse().unwrap();
+/// assert_eq!(new.ip(), from_cidr.ip());
+/// assert_eq!(new.prefix(), from_cidr.prefix());
+/// ```
 impl FromStr for Ipv6Network {
     type Err = IpNetworkError;
-    fn from_str(s: &str) -> Result<Ipv6Network, IpNetworkError> {
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
         let (addr_str, prefix_str) = cidr_parts(s)?;
         let addr = Ipv6Addr::from_str(addr_str)
             .map_err(|_| IpNetworkError::InvalidAddr(addr_str.to_string()))?;
@@ -216,6 +229,14 @@ impl FromStr for Ipv6Network {
             None => IPV6_BITS,
         };
         Ipv6Network::new(addr, prefix)
+    }
+}
+
+impl TryFrom<&str> for Ipv6Network {
+    type Error = IpNetworkError;
+
+    fn try_from(s: &str) -> Result<Self, Self::Error> {
+        Ipv6Network::from_str(s)
     }
 }
 
