@@ -36,7 +36,7 @@ impl Ipv6Network {
     /// Constructs a new `Ipv6Network` from any `Ipv6Addr` and a prefix denoting the network size.
     ///
     /// If the prefix is larger than 128 this will return an `IpNetworkError::InvalidPrefix`.
-    pub fn new(addr: Ipv6Addr, prefix: u8) -> Result<Ipv6Network, IpNetworkError> {
+    pub const fn new(addr: Ipv6Addr, prefix: u8) -> Result<Ipv6Network, IpNetworkError> {
         if prefix > IPV6_BITS {
             Err(IpNetworkError::InvalidPrefix)
         } else {
