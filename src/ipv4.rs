@@ -35,7 +35,7 @@ impl Ipv4Network {
     /// Constructs a new `Ipv4Network` from any `Ipv4Addr` and a prefix denoting the network size.
     ///
     /// If the prefix is larger than 32 this will return an `IpNetworkError::InvalidPrefix`.
-    pub fn new(addr: Ipv4Addr, prefix: u8) -> Result<Ipv4Network, IpNetworkError> {
+    pub const fn new(addr: Ipv4Addr, prefix: u8) -> Result<Ipv4Network, IpNetworkError> {
         if prefix > IPV4_BITS {
             Err(IpNetworkError::InvalidPrefix)
         } else {
