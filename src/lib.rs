@@ -3,7 +3,7 @@
 #![crate_type = "lib"]
 #![doc(html_root_url = "https://docs.rs/ipnetwork/0.17.0")]
 
-#![deny(missing_copy_implementations,
+#![deny(
     missing_debug_implementations,
     unsafe_code,
     unused_extern_crates,
@@ -16,9 +16,9 @@ mod ipv4;
 mod ipv6;
 
 pub use crate::common::IpNetworkError;
-use crate::ipv4::Ipv4NetworkIterator;
+pub use crate::ipv4::Ipv4NetworkIterator;
 pub use crate::ipv4::{ipv4_mask_to_prefix, Ipv4Network};
-use crate::ipv6::Ipv6NetworkIterator;
+pub use crate::ipv6::Ipv6NetworkIterator;
 pub use crate::ipv6::{ipv6_mask_to_prefix, Ipv6Network};
 
 /// Represents a generic network range. This type can have two variants:

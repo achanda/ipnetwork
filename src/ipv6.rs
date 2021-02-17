@@ -249,7 +249,7 @@ impl From<Ipv6Addr> for Ipv6Network {
     }
 }
 
-#[derive(Copy, Clone, Debug)]
+#[derive(Clone, Debug)]
 pub struct Ipv6NetworkIterator {
     next: Option<u128>,
     end: u128,
