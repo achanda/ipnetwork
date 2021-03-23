@@ -1,5 +1,5 @@
 use crate::common::{cidr_parts, parse_prefix, IpNetworkError};
-use std::{fmt, net::Ipv4Addr, str::FromStr, convert::TryFrom};
+use std::{convert::TryFrom, fmt, net::Ipv4Addr, str::FromStr};
 
 const IPV4_BITS: u8 = 32;
 
@@ -167,6 +167,15 @@ impl Ipv4Network {
         let mask = !(0xffff_ffff as u64 >> self.prefix) as u32;
         let net = u32::from(self.addr) & mask;
         (u32::from(ip) & mask) == net
+    }
+
+    /// Checks if a given `Ipv4Addr` is not only in the given `Ipv4Network`, but that
+    /// it is not a special un-assignable address: the network or the broadcast address.
+    ///
+    /// A special case is made for networks with a prefix of 31 or 32, as per RFC 3021.
+    pub fn is_assignable(self, ip: Ipv4Addr) -> bool {
+        self.contains(ip)
+            && (self.prefix() >= 31 || (ip != self.network() && ip != self.broadcast()))
     }
 
     /// Returns number of possible host addresses in this `Ipv4Network`.

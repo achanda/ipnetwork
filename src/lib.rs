@@ -279,6 +279,18 @@ impl IpNetwork {
         }
     }
 
+    /// Checks if a given `Ipv4Addr` is not only in the given `Ipv4Network`, but that
+    /// it is not a special un-assignable address: the network or the broadcast address.
+    ///
+    /// A special case is made for networks with a prefix of 31 or 32, as per RFC 3021.
+    pub fn is_assignable(&self, ip: IpAddr) -> bool {
+        match (*self, ip) {
+            (IpNetwork::V4(net), IpAddr::V4(ip)) => net.is_assignable(ip),
+            (IpNetwork::V6(net), IpAddr::V6(ip)) => net.contains(ip),
+            _ => false,
+        }
+    }
+
     /// Returns the number of possible host addresses in this `IpAddr`
     ///
     /// # Examples
