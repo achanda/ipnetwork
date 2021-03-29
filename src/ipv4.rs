@@ -1,7 +1,7 @@
 use crate::common::{cidr_parts, parse_prefix, IpNetworkError};
 use std::{convert::TryFrom, fmt, net::Ipv4Addr, str::FromStr};
 
-const IPV4_BITS: u8 = 32;
+pub(crate) const IPV4_BITS: u8 = 32;
 
 /// Represents a network range where the IP addresses are of v4
 #[derive(Debug, Clone, Copy, Hash, PartialEq, Eq, PartialOrd, Ord)]

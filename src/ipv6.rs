@@ -1,7 +1,7 @@
 use crate::common::{cidr_parts, parse_prefix, IpNetworkError};
 use std::{cmp, fmt, net::Ipv6Addr, str::FromStr, convert::TryFrom};
 
-const IPV6_BITS: u8 = 128;
+pub(crate) const IPV6_BITS: u8 = 128;
 const IPV6_SEGMENT_BITS: u8 = 16;
 
 /// Represents a network range where the IP addresses are of v6

@@ -170,6 +170,14 @@ impl IpNetwork {
         }
     }
 
+    /// Returns the maximum prefix value for the network.
+    pub fn max_prefix(&self) -> u8 {
+        match *self {
+            IpNetwork::V4(_) => ipv4::IPV4_BITS,
+            IpNetwork::V6(_) => ipv6::IPV6_BITS,
+        }
+    }
+
     /// Returns true if the IP in this `IpNetwork` is a valid IPv4 address,
     /// false if it's a valid IPv6 address.
     ///
@@ -202,10 +210,7 @@ impl IpNetwork {
     /// assert_eq!(v6.is_ipv4(), false);
     ///```
     pub fn is_ipv6(&self) -> bool {
-        match *self {
-            IpNetwork::V4(_) => false,
-            IpNetwork::V6(_) => true,
-        }
+        !self.is_ipv4()
     }
 
     // TODO(abhishek) when TryFrom is stable, implement it for IpNetwork to
