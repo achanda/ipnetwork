@@ -174,6 +174,7 @@ impl Ipv6Network {
     /// assert!(net.contains(Ipv6Addr::new(0xff01, 0, 0, 0, 0, 0, 0, 0x1)));
     /// assert!(!net.contains(Ipv6Addr::new(0xffff, 0, 0, 0, 0, 0, 0, 0x1)));
     /// ```
+    #[inline]
     pub fn contains(&self, ip: Ipv6Addr) -> bool {
         let a = self.addr.segments();
         let b = ip.segments();

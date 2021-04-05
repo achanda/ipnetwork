@@ -163,6 +163,7 @@ impl Ipv4Network {
     /// assert!(net.contains(Ipv4Addr::new(127, 0, 0, 70)));
     /// assert!(!net.contains(Ipv4Addr::new(127, 0, 1, 70)));
     /// ```
+    #[inline]
     pub fn contains(self, ip: Ipv4Addr) -> bool {
         let mask = !(0xffff_ffff as u64 >> self.prefix) as u32;
         let net = u32::from(self.addr) & mask;

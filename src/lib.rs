@@ -228,6 +228,7 @@ impl IpNetwork {
     /// assert!(!net.contains(ip2));
     /// assert!(!net.contains(ip4));
     /// ```
+    #[inline]
     pub fn contains(&self, ip: IpAddr) -> bool {
         match (*self, ip) {
             (IpNetwork::V4(net), IpAddr::V4(ip)) => net.contains(ip),
