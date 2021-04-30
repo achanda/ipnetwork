@@ -14,6 +14,7 @@ use std::{fmt, net::IpAddr, str::FromStr, convert::TryFrom};
 mod common;
 mod ipv4;
 mod ipv6;
+mod sub;
 
 pub use crate::common::IpNetworkError;
 pub use crate::ipv4::Ipv4NetworkIterator;
