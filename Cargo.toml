@@ -8,7 +8,7 @@ repository = "https://github.com/achanda/ipnetwork"
 keywords = ["network", "ip", "address", "cidr"]
 readme = "README.md"
 categories = ["network-programming", "parser-implementations"]
-edition = "2018"
+edition = "2021"
 
 [dependencies]
 serde = { version = "1", optional = true }
