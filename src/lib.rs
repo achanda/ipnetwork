@@ -1,7 +1,6 @@
 //! The `ipnetwork` crate provides a set of APIs to work with IP CIDRs in
 //! Rust.
 #![crate_type = "lib"]
-#![doc(html_root_url = "https://docs.rs/ipnetwork/0.18.0")]
 
 #![deny(
     missing_debug_implementations,
