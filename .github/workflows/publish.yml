@@ -1,8 +1,13 @@
+name: Publish to crates.io
 on:
   push:
     tags:        
       - 'v.*.*'
-steps:
+      
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
     - uses: actions/checkout@v2
     - uses: actions-rs/toolchain@v1
       with:
