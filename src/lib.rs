@@ -23,6 +23,7 @@ pub use crate::ipv6::{ipv6_mask_to_prefix, Ipv6Network};
 /// Represents a generic network range. This type can have two variants:
 /// the v4 and the v6 case.
 #[derive(Debug, Clone, Copy, Hash, PartialEq, Eq, PartialOrd, Ord)]
+#[cfg_attr(feature = "schemars", derive(schemars::JsonSchema))]
 pub enum IpNetwork {
     V4(Ipv4Network),
     V6(Ipv6Network),
