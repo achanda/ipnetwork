@@ -3,7 +3,7 @@
 #[cfg(test)]
 mod tests {
     use ipnetwork::{IpNetwork, Ipv4Network, Ipv6Network};
-    use serde_derive::{Deserialize, Serialize};
+    use serde::{Deserialize, Serialize};
     use std::net::{Ipv4Addr, Ipv6Addr};
 
     #[test]
@@ -11,6 +11,7 @@ mod tests {
         let json_string = r#"{"ipnetwork":"127.1.0.0/24"}"#;
 
         #[derive(Serialize, Deserialize)]
+        #[cfg_attr(feature = "schemars", derive(schemars::JsonSchema))]
         struct MyStruct {
             ipnetwork: Ipv4Network,
         }
@@ -21,6 +22,11 @@ mod tests {
         assert_eq!(mystruct.ipnetwork.prefix(), 24);
 
         assert_eq!(::serde_json::to_string(&mystruct).unwrap(), json_string);
+
+        #[cfg(feature = "schemars")]
+        if let Err(s) = does_it_json::validate_with_output(&mystruct) {
+            panic!("{}", s);
+        }
     }
 
     #[test]
@@ -28,6 +34,7 @@ mod tests {
         let json_string = r#"{"ipnetwork":"::1/0"}"#;
 
         #[derive(Serialize, Deserialize)]
+        #[cfg_attr(feature = "schemars", derive(schemars::JsonSchema))]
         struct MyStruct {
             ipnetwork: Ipv6Network,
         }
@@ -41,6 +48,11 @@ mod tests {
         assert_eq!(mystruct.ipnetwork.prefix(), 0);
 
         assert_eq!(::serde_json::to_string(&mystruct).unwrap(), json_string);
+
+        #[cfg(feature = "schemars")]
+        if let Err(s) = does_it_json::validate_with_output(&mystruct) {
+            panic!("{}", s);
+        }
     }
 
     #[test]
@@ -48,6 +60,7 @@ mod tests {
         let json_string = r#"{"ipnetwork":["127.1.0.0/24","::1/0"]}"#;
 
         #[derive(Serialize, Deserialize)]
+        #[cfg_attr(feature = "schemars", derive(schemars::JsonSchema))]
         struct MyStruct {
             ipnetwork: Vec<IpNetwork>,
         }
@@ -63,5 +76,10 @@ mod tests {
         assert_eq!(mystruct.ipnetwork[1].prefix(), 0);
 
         assert_eq!(::serde_json::to_string(&mystruct).unwrap(), json_string);
+
+        #[cfg(feature = "schemars")]
+        if let Err(s) = does_it_json::validate_with_output(&mystruct) {
+            panic!("{}", s);
+        }
     }
 }
