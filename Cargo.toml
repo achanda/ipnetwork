@@ -16,8 +16,8 @@ schemars = { version = "0.8.10", optional = true }
 
 [dev-dependencies]
 serde_json = "1.0"
-serde_derive = "1"
 criterion = {version = "0.3.4", features= ["html_reports"]}
+does-it-json = "0.0.3"
 
 [badges]
 travis-ci = { repository = "achanda/ipnetwork" }

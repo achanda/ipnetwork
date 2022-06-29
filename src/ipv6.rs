@@ -1,12 +1,11 @@
 use crate::common::{cidr_parts, parse_prefix, IpNetworkError};
-use std::{cmp, fmt, net::Ipv6Addr, str::FromStr, convert::TryFrom};
+use std::{cmp, convert::TryFrom, fmt, net::Ipv6Addr, str::FromStr};
 
 const IPV6_BITS: u8 = 128;
 const IPV6_SEGMENT_BITS: u8 = 16;
 
 /// Represents a network range where the IP addresses are of v6
 #[derive(Debug, Clone, Copy, Hash, PartialEq, Eq, PartialOrd, Ord)]
-#[cfg_attr(feature = "schemars", derive(schemars::JsonSchema))]
 pub struct Ipv6Network {
     addr: Ipv6Addr,
     prefix: u8,
@@ -30,6 +29,46 @@ impl serde::Serialize for Ipv6Network {
         S: serde::Serializer,
     {
         serializer.collect_str(self)
+    }
+}
+
+#[cfg(feature = "schemars")]
+impl schemars::JsonSchema for Ipv6Network {
+    fn schema_name() -> String {
+        "Ipv6Network".to_string()
+    }
+
+    fn json_schema(_: &mut schemars::gen::SchemaGenerator) -> schemars::schema::Schema {
+        schemars::schema::SchemaObject {
+            instance_type: Some(schemars::schema::InstanceType::String.into()),
+            string: Some(Box::new(schemars::schema::StringValidation {
+                pattern: Some(
+                    concat!(
+                        r#"^("#,
+                        r#"([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}"#,
+                        r#"|([0-9a-fA-F]{1,4}:){1,7}:"#,
+                        r#"|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}"#,
+                        r#"|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}"#,
+                        r#"|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}"#,
+                        r#"|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}"#,
+                        r#"|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}"#,
+                        r#"|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})"#,
+                        r#"|:((:[0-9a-fA-F]{1,4}){1,7}|:)"#,
+                        r#"|fe80:(:[0-9a-fA-F]{0,4}){0,4}%[0-9a-zA-Z]{1,}"#,
+                        r#"|::(ffff(:0{1,4}){0,1}:){0,1}((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])"#,
+                        r#"|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])"#,
+                        r#"")[/](12[0-8]|1[0-1][0-9]|[0-9]?[0-9])$"#,
+                    ).to_string(),
+                ),
+                ..Default::default()
+            })),
+            extensions: [("x-rust-type".to_string(), "ipnetwork::Ipv6Network".into())]
+                .iter()
+                .cloned()
+                .collect(),
+            ..Default::default()
+        }
+        .into()
     }
 }
 

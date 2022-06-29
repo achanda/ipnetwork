@@ -1,11 +1,10 @@
 use crate::common::{cidr_parts, parse_prefix, IpNetworkError};
-use std::{fmt, net::Ipv4Addr, str::FromStr, convert::TryFrom};
+use std::{convert::TryFrom, fmt, net::Ipv4Addr, str::FromStr};
 
 const IPV4_BITS: u8 = 32;
 
 /// Represents a network range where the IP addresses are of v4
 #[derive(Debug, Clone, Copy, Hash, PartialEq, Eq, PartialOrd, Ord)]
-#[cfg_attr(feature = "schemars", derive(schemars::JsonSchema))]
 pub struct Ipv4Network {
     addr: Ipv4Addr,
     prefix: u8,
@@ -29,6 +28,36 @@ impl serde::Serialize for Ipv4Network {
         S: serde::Serializer,
     {
         serializer.collect_str(self)
+    }
+}
+
+#[cfg(feature = "schemars")]
+impl schemars::JsonSchema for Ipv4Network {
+    fn schema_name() -> String {
+        "Ipv4Network".to_string()
+    }
+
+    fn json_schema(_: &mut schemars::gen::SchemaGenerator) -> schemars::schema::Schema {
+        schemars::schema::SchemaObject {
+            instance_type: Some(schemars::schema::InstanceType::String.into()),
+            string: Some(Box::new(schemars::schema::StringValidation {
+                pattern: Some(
+                    concat!(
+                        r#"^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}"#,
+                        r#"(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)"#,
+                        r#"\/(3[0-2]|[0-2]?[0-9])$"#,
+                    )
+                    .to_string(),
+                ),
+                ..Default::default()
+            })),
+            extensions: [("x-rust-type".to_string(), "ipnetwork::Ipv4Network".into())]
+                .iter()
+                .cloned()
+                .collect(),
+            ..Default::default()
+        }
+        .into()
     }
 }
 
