@@ -192,15 +192,17 @@ impl Ipv6Network {
     /// assert_eq!(net.mask(), Ipv6Addr::new(0xffff, 0xffff, 0, 0, 0, 0, 0, 0));
     /// ```
     pub fn mask(&self) -> Ipv6Addr {
-        // Ipv6Addr::from is only implemented for [u8; 16]
         let mut segments = [0; 16];
-        for (i, segment) in segments.iter_mut().enumerate() {
-            let bits_remaining = self.prefix.saturating_sub(i as u8 * 8);
-            let set_bits = cmp::min(bits_remaining, 8);
-            *segment = !(0xff as u16 >> set_bits) as u8;
+        for (i, chunk) in segments.chunks_mut(2).enumerate() {
+            let bits_remaining = self.prefix.saturating_sub(i as u8 * 16);
+            let set_bits = cmp::min(bits_remaining, 16);
+            let mask = !(0xffff >> set_bits) as u16;
+            chunk[0] = (mask >> 8) as u8;
+            chunk[1] = mask as u8;
         }
         Ipv6Addr::from(segments)
     }
+    
 
     /// Checks if a given `Ipv6Addr` is in this `Ipv6Network`
     ///
