@@ -156,7 +156,7 @@ impl Ipv4Network {
     /// let net: Ipv4Network = "10.1.9.32/16".parse().unwrap();
     /// assert_eq!(net.network(), Ipv4Addr::new(10, 1, 0, 0));
     /// ```
-    pub fn network(self) -> Ipv4Addr {
+    pub fn network(&self) -> Ipv4Addr {
         let mask = u32::from(self.mask());
         let ip = u32::from(self.addr) & mask;
         Ipv4Addr::from(ip)
@@ -174,7 +174,7 @@ impl Ipv4Network {
     /// let net: Ipv4Network = "10.9.0.32/16".parse().unwrap();
     /// assert_eq!(net.broadcast(), Ipv4Addr::new(10, 9, 255, 255));
     /// ```
-    pub fn broadcast(self) -> Ipv4Addr {
+    pub fn broadcast(&self) -> Ipv4Addr {
         let mask = u32::from(self.mask());
         let broadcast = u32::from(self.addr) | !mask;
         Ipv4Addr::from(broadcast)
@@ -193,7 +193,7 @@ impl Ipv4Network {
     /// assert!(!net.contains(Ipv4Addr::new(127, 0, 1, 70)));
     /// ```
     #[inline]
-    pub fn contains(self, ip: Ipv4Addr) -> bool {
+    pub fn contains(&self, ip: Ipv4Addr) -> bool {
         let mask = !(0xffff_ffff as u64 >> self.prefix) as u32;
         let net = u32::from(self.addr) & mask;
         (u32::from(ip) & mask) == net
