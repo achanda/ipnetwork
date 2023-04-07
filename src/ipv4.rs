@@ -139,11 +139,10 @@ impl Ipv4Network {
     /// let net: Ipv4Network = "127.0.0.0/16".parse().unwrap();
     /// assert_eq!(net.mask(), Ipv4Addr::new(255, 255, 0, 0));
     /// ```
-    pub fn mask(self) -> Ipv4Addr {
-        let prefix = self.prefix;
-        let mask = !(0xffff_ffff as u64 >> prefix) as u32;
+    pub fn mask(&self) -> Ipv4Addr {
+        let mask = !(0xffff_ffff_u64 >> u64::from(self.prefix)) as u32;
         Ipv4Addr::from(mask)
-    }
+    }    
 
     /// Returns the address of the network denoted by this `Ipv4Network`.
     /// This means the lowest possible IPv4 address inside of the network.
