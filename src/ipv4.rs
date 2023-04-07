@@ -669,9 +669,9 @@ mod test {
         let other3: Ipv4Network = "1.2.2.64/26".parse().unwrap();
 
         let skynet: Ipv4Network = "1.2.3.0/24".parse().unwrap();
-        assert_eq!(skynet.overlaps(other), true);
-        assert_eq!(skynet.overlaps(other2), false);
-        assert_eq!(other2.overlaps(other3), true);
+        assert!(skynet.overlaps(other));
+        assert!(!skynet.overlaps(other2));
+        assert!(other2.overlaps(other3));
     }
 
     #[test]
