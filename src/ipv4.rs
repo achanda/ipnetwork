@@ -194,7 +194,7 @@ impl Ipv4Network {
     /// ```
     #[inline]
     pub fn contains(&self, ip: Ipv4Addr) -> bool {
-        let mask = !(0xffff_ffff as u64 >> self.prefix) as u32;
+        let mask = !(0xffff_ffff_u64 >> self.prefix) as u32;
         let net = u32::from(self.addr) & mask;
         (u32::from(ip) & mask) == net
     }
@@ -614,9 +614,7 @@ mod test {
             assert_eq!(
                 src.is_subnet_of(dest),
                 *val,
-                "testing with {} and {}",
-                src,
-                dest
+                "testing with {src} and {dest}"
             );
         }
     }
@@ -659,9 +657,7 @@ mod test {
             assert_eq!(
                 src.is_supernet_of(dest),
                 *val,
-                "testing with {} and {}",
-                src,
-                dest
+                "testing with {src} and {dest}"
             );
         }
     }
