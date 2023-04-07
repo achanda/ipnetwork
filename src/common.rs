@@ -12,9 +12,9 @@ impl fmt::Display for IpNetworkError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         use crate::IpNetworkError::*;
         match *self {
-            InvalidAddr(ref s) => write!(f, "invalid address: {}", s),
+            InvalidAddr(ref s) => write!(f, "invalid address: {s}"),
             InvalidPrefix => write!(f, "invalid prefix"),
-            InvalidCidrFormat(ref s) => write!(f, "invalid cidr format: {}", s),
+            InvalidCidrFormat(ref s) => write!(f, "invalid cidr format: {s}"),
         }
     }
 }
@@ -37,8 +37,7 @@ pub fn cidr_parts(cidr: &str) -> Result<(&str, Option<&str>), IpNetworkError> {
         // Error if cidr has multiple slashes
         if prefix[1..].find('/').is_some() {
             Err(IpNetworkError::InvalidCidrFormat(format!(
-                "CIDR must contain a single '/': {}",
-                cidr
+                "CIDR must contain a single '/': {cidr}"
             )))
         } else {
             // Handle the case when cidr has exactly one slash

@@ -267,7 +267,7 @@ impl FromStr for Ipv6Network {
         let (addr_str, prefix_str) = cidr_parts(s)?;
         let addr = Ipv6Addr::from_str(addr_str).map_err(|e| IpNetworkError::InvalidAddr(e.to_string()))?;
         let prefix = parse_prefix(prefix_str.unwrap_or(&IPV6_BITS.to_string()), IPV6_BITS)?;
-        Ok(Ipv6Network::new(addr, prefix)?)
+        Ipv6Network::new(addr, prefix)
     }
 }
 
@@ -601,9 +601,7 @@ mod test {
             assert_eq!(
                 src.is_subnet_of(dest),
                 *val,
-                "testing with {} and {}",
-                src,
-                dest
+                "testing with {src} and {dest}"
             );
         }
     }
@@ -646,9 +644,7 @@ mod test {
             assert_eq!(
                 src.is_supernet_of(dest),
                 *val,
-                "testing with {} and {}",
-                src,
-                dest
+                "testing with {src} and {dest}"
             );
         }
     }
