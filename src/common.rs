@@ -51,12 +51,14 @@ pub fn cidr_parts(cidr: &str) -> Result<(&str, Option<&str>), IpNetworkError> {
 }
 
 pub fn parse_prefix(prefix: &str, max: u8) -> Result<u8, IpNetworkError> {
-    let mask = prefix
-        .parse::<u8>()
-        .map_err(|_| IpNetworkError::InvalidPrefix)?;
-    if mask > max {
-        Err(IpNetworkError::InvalidPrefix)
-    } else {
-        Ok(mask)
-    }
+    prefix
+        .parse()
+        .map_err(|_| IpNetworkError::InvalidPrefix)
+        .and_then(|mask| {
+            if mask > max {
+                Err(IpNetworkError::InvalidPrefix)
+            } else {
+                Ok(mask)
+            }
+        })
 }
