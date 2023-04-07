@@ -242,7 +242,7 @@ impl Ipv6Network {
     /// ```
     pub fn size(&self) -> u128 {
         let host_bits = u32::from(IPV6_BITS - self.prefix);
-        (2 as u128).pow(host_bits)
+        2u128.pow(host_bits)
     }
 }
 

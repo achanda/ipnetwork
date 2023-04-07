@@ -215,9 +215,8 @@ impl Ipv4Network {
     /// assert_eq!(tinynet.size(), 1);
     /// ```
     pub fn size(self) -> u32 {
-        let host_bits = u32::from(IPV4_BITS - self.prefix);
-        (2 as u32).pow(host_bits)
-    }
+        1 << (u32::from(IPV4_BITS - self.prefix))
+    }    
 
     /// Returns the `n`:th address within this network.
     /// The adresses are indexed from 0 and `n` must be smaller than the size of the network.
