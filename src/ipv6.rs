@@ -263,15 +263,13 @@ impl FromStr for Ipv6Network {
     type Err = IpNetworkError;
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         let (addr_str, prefix_str) = cidr_parts(s)?;
-        let addr = Ipv6Addr::from_str(addr_str)
-            .map_err(|_| IpNetworkError::InvalidAddr(addr_str.to_string()))?;
-        let prefix = match prefix_str {
-            Some(v) => parse_prefix(v, IPV6_BITS)?,
-            None => IPV6_BITS,
-        };
-        Ipv6Network::new(addr, prefix)
+        let addr = Ipv6Addr::from_str(addr_str).map_err(|e| IpNetworkError::InvalidAddr(e.to_string()))?;
+        let prefix = parse_prefix(prefix_str.unwrap_or(&IPV6_BITS.to_string()), IPV6_BITS)?;
+        Ok(Ipv6Network::new(addr, prefix)?)
     }
 }
+
+
 
 impl TryFrom<&str> for Ipv6Network {
     type Error = IpNetworkError;
