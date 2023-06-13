@@ -1,4 +1,5 @@
-use crate::common::{cidr_parts, parse_prefix, IpNetworkError};
+use crate::error::IpNetworkError;
+use crate::parse::{cidr_parts, parse_prefix};
 use std::{cmp, convert::TryFrom, fmt, net::Ipv6Addr, str::FromStr};
 
 const IPV6_BITS: u8 = 128;

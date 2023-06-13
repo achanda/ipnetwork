@@ -1,4 +1,6 @@
-use std::{cmp::Ordering, error::Error, fmt::Display};
+use std::{cmp::Ordering, fmt::Display};
+
+use crate::error::NetworkSizeError;
 
 /// Represents a generic network size. For IPv4, the max size is a u32 and for IPv6, it is a u128
 #[derive(Debug, Clone, Copy, Hash)]
@@ -22,23 +24,12 @@ impl From<u32> for NetworkSize {
     }
 }
 
-#[derive(Copy, Clone, Debug, PartialEq, Eq)]
-/// Cannot convert an IPv6 network size to a u32 as it is a 128-bit value.
-pub struct NetworkIsTooLargeError;
-
-impl Display for NetworkIsTooLargeError {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.write_str("Network is too large to fit into an unsigned 32-bit integer!")
-    }
-}
-impl Error for NetworkIsTooLargeError {}
-
 impl TryInto<u32> for NetworkSize {
-    type Error = NetworkIsTooLargeError;
+    type Error = NetworkSizeError;
     fn try_into(self) -> Result<u32, Self::Error> {
         match self {
             V4(a) => Ok(a),
-            V6(_) => Err(NetworkIsTooLargeError),
+            V6(_) => Err(NetworkSizeError::NetworkIsTooLarge),
         }
     }
 }
@@ -77,6 +68,16 @@ impl PartialOrd for NetworkSize {
 }
 
 impl Eq for NetworkSize {}
+
+// Display
+
+impl Display for NetworkSize {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", Into::<u128>::into(*self))
+    }
+}
+
+// Tests
 
 #[cfg(test)]
 mod tests {
@@ -149,5 +150,12 @@ mod tests {
         let ns1 = V4(100);
         let ns2 = V6(200);
         assert!(ns1 < ns2);
+    }
+
+    #[test]
+    fn test_display() {
+        let ns1 = V4(u32::MAX);
+        let ns2 = V6(ns1.into());
+        assert_eq!(ns1.to_string(), ns2.to_string());
     }
 }

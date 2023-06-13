@@ -1,34 +1,4 @@
-use std::{error::Error, fmt};
-
-/// Represents a bunch of errors that can occur while working with a `IpNetwork`
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub enum IpNetworkError {
-    InvalidAddr(String),
-    InvalidPrefix,
-    InvalidCidrFormat(String),
-}
-
-impl fmt::Display for IpNetworkError {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        use crate::IpNetworkError::*;
-        match *self {
-            InvalidAddr(ref s) => write!(f, "invalid address: {s}"),
-            InvalidPrefix => write!(f, "invalid prefix"),
-            InvalidCidrFormat(ref s) => write!(f, "invalid cidr format: {s}"),
-        }
-    }
-}
-
-impl Error for IpNetworkError {
-    fn description(&self) -> &str {
-        use crate::IpNetworkError::*;
-        match *self {
-            InvalidAddr(_) => "address is invalid",
-            InvalidPrefix => "prefix is invalid",
-            InvalidCidrFormat(_) => "cidr is invalid",
-        }
-    }
-}
+use crate::error::IpNetworkError;
 
 pub fn cidr_parts(cidr: &str) -> Result<(&str, Option<&str>), IpNetworkError> {
     // Try to find a single slash

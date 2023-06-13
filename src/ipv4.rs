@@ -1,4 +1,5 @@
-use crate::common::{cidr_parts, parse_prefix, IpNetworkError};
+use crate::error::IpNetworkError;
+use crate::parse::{cidr_parts, parse_prefix};
 use std::{convert::TryFrom, fmt, net::Ipv4Addr, str::FromStr};
 
 const IPV4_BITS: u8 = 32;

@@ -10,17 +10,18 @@
 
 use std::{convert::TryFrom, fmt, net::IpAddr, str::FromStr};
 
-mod common;
+mod error;
 mod ipv4;
 mod ipv6;
+mod parse;
 mod size;
 
-pub use crate::common::IpNetworkError;
+pub use crate::error::{NetworkSizeError, IpNetworkError};
 pub use crate::ipv4::Ipv4NetworkIterator;
 pub use crate::ipv4::{ipv4_mask_to_prefix, Ipv4Network};
 pub use crate::ipv6::Ipv6NetworkIterator;
 pub use crate::ipv6::{ipv6_mask_to_prefix, Ipv6Network};
-pub use crate::size::{NetworkIsTooLargeError, NetworkSize};
+pub use crate::size::NetworkSize;
 
 /// Represents a generic network range. This type can have two variants:
 /// the v4 and the v6 case.
