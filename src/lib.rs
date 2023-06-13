@@ -13,12 +13,14 @@ use std::{convert::TryFrom, fmt, net::IpAddr, str::FromStr};
 mod common;
 mod ipv4;
 mod ipv6;
+mod size;
 
 pub use crate::common::IpNetworkError;
 pub use crate::ipv4::Ipv4NetworkIterator;
 pub use crate::ipv4::{ipv4_mask_to_prefix, Ipv4Network};
 pub use crate::ipv6::Ipv6NetworkIterator;
 pub use crate::ipv6::{ipv6_mask_to_prefix, Ipv6Network};
+pub use crate::size::{NetworkIsTooLargeError, NetworkSize};
 
 /// Represents a generic network range. This type can have two variants:
 /// the v4 and the v6 case.
@@ -115,13 +117,6 @@ impl schemars::JsonSchema for IpNetwork {
         }
         .into()
     }
-}
-
-/// Represents a generic network size. For IPv4, the max size is a u32 and for IPv6, it is a u128
-#[derive(Debug, Clone, Copy, Hash, PartialEq, Eq, PartialOrd, Ord)]
-pub enum NetworkSize {
-    V4(u32),
-    V6(u128),
 }
 
 impl IpNetwork {
