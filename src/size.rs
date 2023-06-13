@@ -77,3 +77,77 @@ impl PartialOrd for NetworkSize {
 }
 
 impl Eq for NetworkSize {}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_from_u128() {
+        let value: u128 = 100;
+        let ns = NetworkSize::from(value);
+        assert_eq!(ns, V6(100));
+    }
+
+    #[test]
+    fn test_from_u32() {
+        let value: u32 = 100;
+        let ns = NetworkSize::from(value);
+        assert_eq!(ns, V4(100));
+    }
+
+    #[test]
+    fn test_try_into_u32() {
+        let value: u32 = 100;
+        let ns = V4(value);
+        let result: Result<u32, _> = ns.try_into();
+        assert!(result.is_ok());
+        assert_eq!(result.unwrap(), value);
+    }
+
+    #[test]
+    fn test_try_into_u32_error() {
+        let value: u128 = u32::MAX as u128 + 1;
+        let ns = V6(value);
+        let result: Result<u32, _> = ns.try_into();
+        assert!(result.is_err());
+    }
+
+    #[test]
+    fn test_into_u128() {
+        let value: u32 = 100;
+        let ns = V4(value);
+        let result: u128 = ns.into();
+        assert_eq!(result, value as u128);
+    }
+
+    #[test]
+    fn test_eq() {
+        let ns1 = V4(100);
+        let ns2 = V4(100);
+        assert_eq!(ns1, ns2);
+
+        let ns1 = V6(100);
+        let ns2 = V6(100);
+        assert_eq!(ns1, ns2);
+
+        let ns1 = V4(100);
+        let ns2 = V6(100);
+        assert_eq!(ns1, ns2);
+    }
+
+    #[test]
+    fn test_cmp() {
+        let ns1 = V4(100);
+        let ns2 = V4(200);
+        assert!(ns1 < ns2);
+
+        let ns1 = V6(200);
+        let ns2 = V6(100);
+        assert!(ns1 > ns2);
+
+        let ns1 = V4(100);
+        let ns2 = V6(200);
+        assert!(ns1 < ns2);
+    }
+}
