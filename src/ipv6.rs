@@ -697,4 +697,26 @@ mod test {
         let high_addrs: Vec<Ipv6Addr> = high.iter().collect();
         assert_eq!(256, high_addrs.len());
     }
+
+    #[test]
+    fn test_nth_ipv6() {
+        let net = Ipv6Network::from_str("ff01::/32").unwrap();
+
+        assert_eq!(
+            net.nth(0).unwrap(),
+            Ipv6Addr::from_str("ff01:0:0:0:0:0:0:0").unwrap()
+        );
+        assert_eq!(
+            net.nth(255).unwrap(),
+            Ipv6Addr::from_str("ff01::ff").unwrap()
+        );
+        assert_eq!(
+            net.nth(65538).unwrap(),
+            Ipv6Addr::from_str("ff01::1:2").unwrap()
+        );
+        assert_eq!(
+            net.nth(net.size()),
+            None
+        );
+    }
 }
