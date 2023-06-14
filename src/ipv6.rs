@@ -247,6 +247,30 @@ impl Ipv6Network {
         let host_bits = u32::from(IPV6_BITS - self.prefix);
         2u128.pow(host_bits)
     }
+
+    /// Returns the `n`:th address within this network.
+    /// The adresses are indexed from 0 and `n` must be smaller than the size of the network.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use std::net::Ipv6Addr;
+    /// use ipnetwork::Ipv6Network;
+    ///
+    /// let net: Ipv6Network = "ff01::0/32".parse().unwrap();
+    /// assert_eq!(net.nth(0).unwrap(), "ff01::0".parse::<Ipv6Addr>().unwrap());
+    /// assert_eq!(net.nth(255).unwrap(), "ff01::ff".parse::<Ipv6Addr>().unwrap());
+    /// assert_eq!(net.nth(65538).unwrap(), "ff01::1:2".parse::<Ipv6Addr>().unwrap());
+    /// assert!(net.nth(net.size()).is_none());
+    /// ```
+    pub fn nth(self, n: u128) -> Option<Ipv6Addr> {
+        if n < self.size() {
+            let net = u128::from(self.network());
+            Some(Ipv6Addr::from(net + n))
+        } else {
+            None
+        }
+    }
 }
 
 /// Creates an `Ipv6Network` from parsing a string in CIDR notation.
@@ -669,5 +693,27 @@ mod test {
             .unwrap();
         let high_addrs: Vec<Ipv6Addr> = high.iter().collect();
         assert_eq!(256, high_addrs.len());
+    }
+
+    #[test]
+    fn test_nth_ipv6() {
+        let net = Ipv6Network::from_str("ff01::/32").unwrap();
+
+        assert_eq!(
+            net.nth(0).unwrap(),
+            Ipv6Addr::from_str("ff01:0:0:0:0:0:0:0").unwrap()
+        );
+        assert_eq!(
+            net.nth(255).unwrap(),
+            Ipv6Addr::from_str("ff01::ff").unwrap()
+        );
+        assert_eq!(
+            net.nth(65538).unwrap(),
+            Ipv6Addr::from_str("ff01::1:2").unwrap()
+        );
+        assert_eq!(
+            net.nth(net.size()),
+            None
+        );
     }
 }
