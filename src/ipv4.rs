@@ -1,6 +1,6 @@
 use crate::error::IpNetworkError;
 use crate::parse::{cidr_parts, parse_prefix};
-use std::{convert::TryFrom, fmt, net::Ipv4Addr, str::FromStr};
+use std::{convert::TryFrom, fmt, net::Ipv4Addr, str::FromStr, num::Wrapping, ops::Shl};
 
 const IPV4_BITS: u8 = 32;
 
@@ -94,7 +94,7 @@ impl Ipv4Network {
     /// addresses.
     pub fn iter(self) -> Ipv4NetworkIterator {
         let start = u32::from(self.network());
-        let end = start + (self.size() - 1);
+        let end = start + (self.size().wrapping_sub(1));
         Ipv4NetworkIterator {
             next: Some(start),
             end,
@@ -111,7 +111,7 @@ impl Ipv4Network {
 
     /// Checks if the given `Ipv4Network` is a subnet of the other.
     pub fn is_subnet_of(self, other: Ipv4Network) -> bool {
-        other.ip() <= self.ip() && other.broadcast() >= self.broadcast()
+        (other.ip() <= self.ip() && other.broadcast() >= self.broadcast()) || self.prefix == 0
     }
 
     /// Checks if the given `Ipv4Network` is a supernet of the other.
@@ -215,8 +215,11 @@ impl Ipv4Network {
     /// assert_eq!(tinynet.size(), 1);
     /// ```
     pub fn size(self) -> u32 {
-        1 << (u32::from(IPV4_BITS - self.prefix))
-    }    
+        match self.prefix {
+            0 => u32::MAX,
+            p => Wrapping(1usize).shl((IPV4_BITS as usize).wrapping_sub(p as usize)).0 as u32
+        }
+    }
 
     /// Returns the `n`:th address within this network.
     /// The adresses are indexed from 0 and `n` must be smaller than the size of the network.
@@ -346,6 +349,7 @@ pub fn ipv4_mask_to_prefix(mask: Ipv4Addr) -> Result<u8, IpNetworkError> {
 #[cfg(test)]
 mod test {
     use super::*;
+    use std::borrow::BorrowMut;
     use std::collections::HashMap;
     use std::mem;
     use std::net::Ipv4Addr;
@@ -499,12 +503,15 @@ mod test {
     // Tests the entire IPv4 space to see if the iterator will stop at the correct place
     // and not overflow or wrap around. Ignored since it takes a long time to run.
     #[test]
-    #[ignore]
+    #[cfg_attr(debug_assertions, ignore)]
     fn iterator_v4_huge() {
-        let cidr: Ipv4Network = "0/0".parse().unwrap();
-        let mut iter = cidr.iter();
-        for i in 0..(u32::max_value() as u64 + 1) {
-            assert_eq!(i as u32, u32::from(iter.next().unwrap()));
+        let cidr: Ipv4Network = "0.0.0.0/0".parse().unwrap();
+        assert_eq!(cidr.size(), u32::MAX);
+        let mut iter: &mut dyn Iterator<Item=Ipv4Addr> = &mut cidr.iter();
+        let mut skip = iter.skip((u32::MAX - 10) as usize);
+        iter = &mut skip;
+        for i in (1u32..11).rev() {
+            assert_eq!(u32::MAX - i, u32::from(iter.next().unwrap()));
         }
         assert_eq!(None, iter.next());
     }
@@ -652,6 +659,20 @@ mod test {
             ),
             true,
         );
+        test_cases.insert(
+            (
+                "10.0.0.0/24".parse().unwrap(),
+                "0.0.0.0/0".parse().unwrap(),
+            ),
+            true,
+        );
+        test_cases.insert(
+            (
+                "0.0.0.0/0".parse().unwrap(),
+                "10.0.0.0/24".parse().unwrap(),
+            ),
+            true,
+        );
 
         for (key, val) in test_cases.iter() {
             let (src, dest) = (key.0, key.1);
@@ -668,10 +689,12 @@ mod test {
         let other: Ipv4Network = "1.2.3.0/30".parse().unwrap();
         let other2: Ipv4Network = "1.2.2.0/24".parse().unwrap();
         let other3: Ipv4Network = "1.2.2.64/26".parse().unwrap();
-
         let skynet: Ipv4Network = "1.2.3.0/24".parse().unwrap();
+        let uberskynet: Ipv4Network = "0.0.0.0/0".parse().unwrap();
+
         assert!(skynet.overlaps(other));
         assert!(!skynet.overlaps(other2));
+        assert!(uberskynet.overlaps(skynet));
         assert!(other2.overlaps(other3));
     }
 

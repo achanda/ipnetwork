@@ -163,7 +163,7 @@ impl Ipv6Network {
 
     /// Checks if the given `Ipv6Network` is a subnet of the other.
     pub fn is_subnet_of(self, other: Ipv6Network) -> bool {
-        other.ip() <= self.ip() && other.broadcast() >= self.broadcast()
+        (other.ip() <= self.ip() && other.broadcast() >= self.broadcast()) || self.prefix == 0
     }
 
     /// Checks if the given `Ipv6Network` is a supernet of the other.
@@ -244,8 +244,13 @@ impl Ipv6Network {
     /// assert_eq!(tinynet.size(), 1);
     /// ```
     pub fn size(&self) -> u128 {
-        let host_bits = u32::from(IPV6_BITS - self.prefix);
-        2u128.pow(host_bits)
+        match self.prefix {
+            0 => u128::MAX,
+            p => {
+                let host_bits = u32::from(IPV6_BITS - p);
+                2u128.pow(host_bits)
+            }
+        }
     }
 
     /// Returns the `n`:th address within this network.
@@ -678,8 +683,10 @@ mod test {
     fn test_overlaps() {
         let other: Ipv6Network = "2001:DB8:ACAD::1/64".parse().unwrap();
         let other2: Ipv6Network = "2001:DB8:ACAD::20:2/64".parse().unwrap();
+        let skynet: Ipv6Network = "::/0".parse().unwrap();
 
         assert_eq!(other2.overlaps(other), true);
+        assert!(skynet.overlaps(other) && skynet.overlaps(other2));
     }
 
     #[test]
