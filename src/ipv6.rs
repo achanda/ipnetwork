@@ -85,6 +85,12 @@ impl Ipv6Network {
         }
     }
 
+    /// Constructs without checking prefix a new `Ipv6Network` from any `Ipv6Addr,
+    /// and a prefix denoting the network size.
+    pub const unsafe fn new_unchecked(addr: Ipv6Addr, prefix: u8) -> Ipv6Network {
+        Ipv6Network { addr, prefix }
+    }
+
     /// Constructs a new `Ipv6Network` from a network address and a network mask.
     ///
     /// If the netmask is not valid this will return an `IpNetworkError::InvalidPrefix`.

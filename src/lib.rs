@@ -3,7 +3,6 @@
 #![crate_type = "lib"]
 #![deny(
     missing_debug_implementations,
-    unsafe_code,
     unused_extern_crates,
     unused_import_braces
 )]
