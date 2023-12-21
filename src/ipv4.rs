@@ -369,6 +369,14 @@ mod test {
     }
 
     #[test]
+    fn create_unchecked_v4() {
+        let cidr = unsafe { Ipv4Network::new_unchecked(Ipv4Addr::new(77, 88, 21, 11), 24) };
+        assert_eq!(cidr.prefix(), 24);
+        let cidr = unsafe { Ipv4Network::new_unchecked(Ipv4Addr::new(0, 0, 0, 0), 33) };
+        assert_eq!(cidr.prefix(), 33);
+    }
+
+    #[test]
     fn parse_v4_24bit() {
         let cidr: Ipv4Network = "127.1.0.0/24".parse().unwrap();
         assert_eq!(cidr.ip(), Ipv4Addr::new(127, 1, 0, 0));

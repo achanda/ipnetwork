@@ -417,6 +417,15 @@ mod test {
     }
 
     #[test]
+    fn create_unchecked_v6() {
+        let cidr = unsafe { Ipv6Network::new_unchecked(Ipv6Addr::new(0, 0, 0, 0, 0, 0, 0, 1), 24) };
+        assert_eq!(cidr.prefix(), 24);
+        let cidr =
+            unsafe { Ipv6Network::new_unchecked(Ipv6Addr::new(0, 0, 0, 0, 0, 0, 0, 1), 129) };
+        assert_eq!(cidr.prefix(), 129);
+    }
+
+    #[test]
     fn parse_v6() {
         let cidr: Ipv6Network = "::1/0".parse().unwrap();
         assert_eq!(cidr.ip(), Ipv6Addr::new(0, 0, 0, 0, 0, 0, 0, 1));
