@@ -74,6 +74,12 @@ impl Ipv4Network {
         }
     }
 
+    /// Constructs without checking prefix a new `Ipv4Network` from any `Ipv4Addr,
+    /// and a prefix denoting the network size.
+    pub const unsafe fn new_unchecked(addr: Ipv4Addr, prefix: u8) -> Ipv4Network {
+        Ipv4Network { addr, prefix }
+    }
+
     /// Constructs a new `Ipv4Network` from a network address and a network mask.
     ///
     /// If the netmask is not valid this will return an `IpNetworkError::InvalidPrefix`.
@@ -360,6 +366,14 @@ mod test {
     fn create_v4_invalid_prefix() {
         let net = Ipv4Network::new(Ipv4Addr::new(0, 0, 0, 0), 33);
         assert!(net.is_err());
+    }
+
+    #[test]
+    fn create_unchecked_v4() {
+        let cidr = unsafe { Ipv4Network::new_unchecked(Ipv4Addr::new(77, 88, 21, 11), 24) };
+        assert_eq!(cidr.prefix(), 24);
+        let cidr = unsafe { Ipv4Network::new_unchecked(Ipv4Addr::new(0, 0, 0, 0), 33) };
+        assert_eq!(cidr.prefix(), 33);
     }
 
     #[test]

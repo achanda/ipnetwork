@@ -85,6 +85,12 @@ impl Ipv6Network {
         }
     }
 
+    /// Constructs without checking prefix a new `Ipv6Network` from any `Ipv6Addr,
+    /// and a prefix denoting the network size.
+    pub const unsafe fn new_unchecked(addr: Ipv6Addr, prefix: u8) -> Ipv6Network {
+        Ipv6Network { addr, prefix }
+    }
+
     /// Constructs a new `Ipv6Network` from a network address and a network mask.
     ///
     /// If the netmask is not valid this will return an `IpNetworkError::InvalidPrefix`.
@@ -408,6 +414,15 @@ mod test {
     fn create_v6_invalid_prefix() {
         let cidr = Ipv6Network::new(Ipv6Addr::new(0, 0, 0, 0, 0, 0, 0, 1), 129);
         assert!(cidr.is_err());
+    }
+
+    #[test]
+    fn create_unchecked_v6() {
+        let cidr = unsafe { Ipv6Network::new_unchecked(Ipv6Addr::new(0, 0, 0, 0, 0, 0, 0, 1), 24) };
+        assert_eq!(cidr.prefix(), 24);
+        let cidr =
+            unsafe { Ipv6Network::new_unchecked(Ipv6Addr::new(0, 0, 0, 0, 0, 0, 0, 1), 129) };
+        assert_eq!(cidr.prefix(), 129);
     }
 
     #[test]
