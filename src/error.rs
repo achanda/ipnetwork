@@ -1,4 +1,4 @@
-use std::{error::Error, fmt};
+use std::{error::Error, fmt, net::AddrParseError};
 
 use crate::error::IpNetworkError::*;
 
@@ -9,7 +9,7 @@ pub enum IpNetworkError {
     InvalidAddr(String),
     InvalidPrefix,
     InvalidCidrFormat(String),
-    NetworkSizeError(NetworkSizeError)
+    NetworkSizeError(NetworkSizeError),
 }
 
 impl fmt::Display for IpNetworkError {
@@ -18,7 +18,7 @@ impl fmt::Display for IpNetworkError {
             InvalidAddr(ref s) => write!(f, "invalid address: {s}"),
             InvalidPrefix => write!(f, "invalid prefix"),
             InvalidCidrFormat(ref s) => write!(f, "invalid cidr format: {s}"),
-            NetworkSizeError(ref e) => write!(f, "network size error: {e}")
+            NetworkSizeError(ref e) => write!(f, "network size error: {e}"),
         }
     }
 }
@@ -29,8 +29,14 @@ impl Error for IpNetworkError {
             InvalidAddr(_) => "address is invalid",
             InvalidPrefix => "prefix is invalid",
             InvalidCidrFormat(_) => "cidr is invalid",
-            NetworkSizeError(_) => "network size error"
+            NetworkSizeError(_) => "network size error",
         }
+    }
+}
+
+impl From<AddrParseError> for IpNetworkError {
+    fn from(e: AddrParseError) -> Self {
+        InvalidAddr(e.to_string())
     }
 }
 
@@ -38,7 +44,7 @@ impl Error for IpNetworkError {
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 #[non_exhaustive]
 pub enum NetworkSizeError {
-    NetworkIsTooLarge
+    NetworkIsTooLarge,
 }
 
 impl fmt::Display for NetworkSizeError {
