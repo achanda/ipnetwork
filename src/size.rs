@@ -5,18 +5,37 @@ use std::{
 };
 
 use crate::error::NetworkSizeError;
+use NetworkSize::*;
 
-/// Represents a generic network size. For IPv4, the max size is a u32 and for IPv6, it is a u128
+/// Represents a generic network size.
+///
+/// IPv4 network sizes are represented as `u32` values, while IPv6 network sizes are represented as `u128` values.
+///
+/// # Comparisons
+///
+/// Network sizes are compared by _value_, not by type.
+///
+/// ```
+/// use ipnetwork::NetworkSize;
+///
+/// let ns1 = NetworkSize::V4(100);
+/// let ns2 = NetworkSize::V6(100);
+///
+/// assert_eq!(ns1, ns2);
+/// ```
 #[derive(Debug, Clone, Copy)]
 pub enum NetworkSize {
     V4(u32),
     V6(u128),
 }
-use NetworkSize::*;
 
-impl From<u128> for NetworkSize {
-    fn from(value: u128) -> Self {
-        V6(value)
+impl NetworkSize {
+    /// Returns the size of the network as a `u128`
+    fn as_u128(&self) -> u128 {
+        match *self {
+            V4(a) => a as u128,
+            V6(a) => a,
+        }
     }
 }
 
@@ -26,29 +45,32 @@ impl From<u32> for NetworkSize {
     }
 }
 
-impl TryInto<u32> for NetworkSize {
+impl From<u128> for NetworkSize {
+    fn from(value: u128) -> Self {
+        V6(value)
+    }
+}
+
+impl TryFrom<NetworkSize> for u32 {
     type Error = NetworkSizeError;
-    fn try_into(self) -> Result<u32, Self::Error> {
-        match self {
+    fn try_from(value: NetworkSize) -> Result<Self, Self::Error> {
+        match value {
             V4(a) => Ok(a),
             V6(_) => Err(NetworkSizeError::NetworkIsTooLarge),
         }
     }
 }
 
-impl Into<u128> for NetworkSize {
-    fn into(self) -> u128 {
-        match self {
-            V4(a) => a as u128,
-            V6(a) => a,
-        }
+impl From<NetworkSize> for u128 {
+    fn from(val: NetworkSize) -> Self {
+        val.as_u128()
     }
 }
 
 impl PartialEq for NetworkSize {
     fn eq(&self, other: &Self) -> bool {
-        let a: u128 = (*self).into();
-        let b: u128 = (*other).into();
+        let a = self.as_u128();
+        let b = other.as_u128();
         a == b
     }
 }
@@ -57,15 +79,15 @@ impl Eq for NetworkSize {}
 
 impl Hash for NetworkSize {
     fn hash<H: Hasher>(&self, state: &mut H) {
-        let a: u128 = (*self).into();
+        let a = self.as_u128();
         a.hash(state);
     }
 }
 
 impl Ord for NetworkSize {
     fn cmp(&self, other: &Self) -> Ordering {
-        let a: u128 = (*self).into();
-        let b: u128 = (*other).into();
+        let a = self.as_u128();
+        let b = other.as_u128();
         a.cmp(&b)
     }
 }
@@ -78,7 +100,7 @@ impl PartialOrd for NetworkSize {
 
 impl Display for NetworkSize {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", Into::<u128>::into(*self))
+        write!(f, "{}", self.as_u128())
     }
 }
 
@@ -160,5 +182,26 @@ mod tests {
         let ns1 = V4(u32::MAX);
         let ns2 = V6(ns1.into());
         assert_eq!(ns1.to_string(), ns2.to_string());
+    }
+
+    // Verify that [`std::hash::Hash`] and [`std::cmp::PartialEq`] are consistent
+    #[test]
+    fn test_hash() {
+        let a = NetworkSize::V4(100);
+        let b = NetworkSize::V6(100);
+
+        // Calculate the hash of the two values
+        let mut hasher = std::hash::DefaultHasher::default();
+        a.hash(&mut hasher);
+        let hash_a = hasher.finish();
+
+        let mut hasher = std::hash::DefaultHasher::default();
+        b.hash(&mut hasher);
+        let hash_b = hasher.finish();
+
+        // a == b
+        assert_eq!(a, b);
+        // implies hash(a) == hash(b)
+        assert_eq!(hash_a, hash_b);
     }
 }
