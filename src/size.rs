@@ -1,16 +1,18 @@
-use std::{cmp::Ordering, fmt::Display};
+use std::{
+    cmp::Ordering,
+    fmt::Display,
+    hash::{Hash, Hasher},
+};
 
 use crate::error::NetworkSizeError;
 
 /// Represents a generic network size. For IPv4, the max size is a u32 and for IPv6, it is a u128
-#[derive(Debug, Clone, Copy, Hash)]
+#[derive(Debug, Clone, Copy)]
 pub enum NetworkSize {
     V4(u32),
     V6(u128),
 }
 use NetworkSize::*;
-
-// Conversions
 
 impl From<u128> for NetworkSize {
     fn from(value: u128) -> Self {
@@ -43,8 +45,6 @@ impl Into<u128> for NetworkSize {
     }
 }
 
-// Equality/comparisons
-
 impl PartialEq for NetworkSize {
     fn eq(&self, other: &Self) -> bool {
         let a: u128 = (*self).into();
@@ -53,11 +53,20 @@ impl PartialEq for NetworkSize {
     }
 }
 
+impl Eq for NetworkSize {}
+
+impl Hash for NetworkSize {
+    fn hash<H: Hasher>(&self, state: &mut H) {
+        let a: u128 = (*self).into();
+        a.hash(state);
+    }
+}
+
 impl Ord for NetworkSize {
     fn cmp(&self, other: &Self) -> Ordering {
         let a: u128 = (*self).into();
         let b: u128 = (*other).into();
-        return a.cmp(&b);
+        a.cmp(&b)
     }
 }
 
@@ -67,17 +76,11 @@ impl PartialOrd for NetworkSize {
     }
 }
 
-impl Eq for NetworkSize {}
-
-// Display
-
 impl Display for NetworkSize {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}", Into::<u128>::into(*self))
     }
 }
-
-// Tests
 
 #[cfg(test)]
 mod tests {
