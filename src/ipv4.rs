@@ -147,7 +147,7 @@ impl Ipv4Network {
         other.contains(self.ip())
             || other.contains(self.broadcast())
             || self.contains(other.ip())
-            || (self.contains(other.broadcast()))
+            || self.contains(other.broadcast())
     }
 
     /// Returns the mask for this `Ipv4Network`.
