@@ -76,6 +76,23 @@ impl Ipv4Network {
 
     /// Constructs without checking prefix a new `Ipv4Network` from any `Ipv4Addr,
     /// and a prefix denoting the network size.
+    ///
+    /// # Safety
+    ///
+    /// The caller must ensure that the prefix is less than or equal to 32.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use std::net::Ipv4Addr;
+    /// use ipnetwork::Ipv4Network;
+    ///
+    /// let prefix = 24;
+    /// let addr = Ipv4Addr::new(192, 168, 1, 1);
+    ///
+    /// debug_assert!(prefix <= 32);
+    /// let network = unsafe { Ipv4Network::new_unchecked(addr, prefix) };
+    /// ```
     pub const unsafe fn new_unchecked(addr: Ipv4Addr, prefix: u8) -> Ipv4Network {
         Ipv4Network { addr, prefix }
     }
@@ -128,8 +145,9 @@ impl Ipv4Network {
     /// Checks if the given `Ipv4Network` is partly contained in other.
     pub fn overlaps(self, other: Ipv4Network) -> bool {
         other.contains(self.ip())
-            || (other.contains(self.broadcast())
-                || (self.contains(other.ip()) || (self.contains(other.broadcast()))))
+            || other.contains(self.broadcast())
+            || self.contains(other.ip())
+            || (self.contains(other.broadcast()))
     }
 
     /// Returns the mask for this `Ipv4Network`.
@@ -147,9 +165,11 @@ impl Ipv4Network {
     /// assert_eq!(net.mask(), Ipv4Addr::new(255, 255, 0, 0));
     /// ```
     pub fn mask(&self) -> Ipv4Addr {
-        let mask = !(0xffff_ffff_u64 >> u64::from(self.prefix)) as u32;
+        debug_assert!(self.prefix <= 32);
+
+        let mask = u32::MAX << (IPV4_BITS - self.prefix);
         Ipv4Addr::from(mask)
-    }    
+    }
 
     /// Returns the address of the network denoted by this `Ipv4Network`.
     /// This means the lowest possible IPv4 address inside of the network.
@@ -201,6 +221,8 @@ impl Ipv4Network {
     /// ```
     #[inline]
     pub fn contains(&self, ip: Ipv4Addr) -> bool {
+        debug_assert!(self.prefix <= IPV4_BITS);
+
         let mask = !(0xffff_ffff_u64 >> self.prefix) as u32;
         let net = u32::from(self.addr) & mask;
         (u32::from(ip) & mask) == net
@@ -221,8 +243,9 @@ impl Ipv4Network {
     /// assert_eq!(tinynet.size(), 1);
     /// ```
     pub fn size(self) -> u32 {
-        1 << (u32::from(IPV4_BITS - self.prefix))
-    }    
+        debug_assert!(self.prefix <= 32);
+        1 << (IPV4_BITS - self.prefix)
+    }
 
     /// Returns the `n`:th address within this network.
     /// The adresses are indexed from 0 and `n` must be smaller than the size of the network.
@@ -274,8 +297,7 @@ impl FromStr for Ipv4Network {
     type Err = IpNetworkError;
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         let (addr_str, prefix_str) = cidr_parts(s)?;
-        let addr = Ipv4Addr::from_str(addr_str)
-            .map_err(|_| IpNetworkError::InvalidAddr(addr_str.to_string()))?;
+        let addr = Ipv4Addr::from_str(addr_str)?;
         let prefix = match prefix_str {
             Some(v) => {
                 if let Ok(netmask) = Ipv4Addr::from_str(v) {
@@ -458,6 +480,7 @@ mod test {
     }
 
     #[test]
+    #[allow(dropping_copy_types)]
     fn copy_compatibility_v4() {
         let net = Ipv4Network::new(Ipv4Addr::new(127, 0, 0, 1), 16).unwrap();
         mem::drop(net);
