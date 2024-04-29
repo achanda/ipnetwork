@@ -26,3 +26,5 @@ jobs:
       run: cargo test --verbose --all-features
     - name: Build docs
       run: cargo doc --verbose
+    - name: Run clippy
+      run: cargo clippy --verbose --all-features
