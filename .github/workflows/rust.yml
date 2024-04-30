@@ -12,9 +12,10 @@ jobs:
       matrix:
         rust: [stable, beta, nightly]
     steps:
-    - uses: hecrj/setup-rust-action@v1
+    - uses: dtolnay/rust-toolchain@stable
       with:
         rust-version: ${{ matrix.rust }}
+        components: clippy, rustfmt
     - uses: actions/checkout@master
       with:
         ref: ${{ github.ref }}
@@ -26,3 +27,5 @@ jobs:
       run: cargo test --verbose --all-features
     - name: Build docs
       run: cargo doc --verbose
+    - name: Run clippy
+      run: cargo clippy --verbose --all-features
