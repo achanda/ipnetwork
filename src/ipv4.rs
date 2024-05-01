@@ -540,7 +540,7 @@ mod test {
     fn iterator_v4_huge() {
         let cidr: Ipv4Network = "0/0".parse().unwrap();
         let mut iter = cidr.iter();
-        for i in 0..(u32::max_value() as u64 + 1) {
+        for i in 0..(u32::MAX as u64 + 1) {
             assert_eq!(i as u32, u32::from(iter.next().unwrap()));
         }
         assert_eq!(None, iter.next());
