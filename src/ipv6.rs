@@ -129,7 +129,7 @@ impl Ipv6Network {
     /// This can return up to 2^128 addresses, which will take a _long_ time to iterate over.
     pub fn iter(&self) -> Ipv6NetworkIterator {
         let dec = u128::from(self.addr);
-        let max = u128::max_value();
+        let max = u128::MAX;
         let prefix = self.prefix;
 
         let mask = max.checked_shl(u32::from(IPV6_BITS - prefix)).unwrap_or(0);
