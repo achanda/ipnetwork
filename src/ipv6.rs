@@ -90,7 +90,7 @@ impl Ipv6Network {
     ///
     /// # Safety
     ///
-    /// The caller must ensure that the prefix is less than or equal to 32.
+    /// The caller must ensure that the prefix is less than or equal to 128.
     ///
     /// # Examples
     ///
