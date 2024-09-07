@@ -166,7 +166,9 @@ impl Ipv4Network {
     /// ```
     pub fn mask(&self) -> Ipv4Addr {
         debug_assert!(self.prefix <= 32);
-
+        if self.prefix == 0 {
+            return Ipv4Addr::new(0, 0, 0, 0);
+        }
         let mask = u32::MAX << (IPV4_BITS - self.prefix);
         Ipv4Addr::from(mask)
     }
@@ -249,7 +251,7 @@ impl Ipv4Network {
         }
         1 << (IPV4_BITS - self.prefix)
     }
-    
+
     /// Returns the `n`:th address within this network.
     /// The adresses are indexed from 0 and `n` must be smaller than the size of the network.
     ///
