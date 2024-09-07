@@ -244,9 +244,12 @@ impl Ipv4Network {
     /// ```
     pub fn size(self) -> u32 {
         debug_assert!(self.prefix <= 32);
+        if self.prefix == 0 {
+            return u32::MAX;
+        }
         1 << (IPV4_BITS - self.prefix)
     }
-
+    
     /// Returns the `n`:th address within this network.
     /// The adresses are indexed from 0 and `n` must be smaller than the size of the network.
     ///
