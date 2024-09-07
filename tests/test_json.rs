@@ -82,4 +82,12 @@ mod tests {
             panic!("{}", s);
         }
     }
+
+
+    #[test]
+    fn test_ipnetwork_size_with_prefix_0() {
+        let network: Ipv4Network = "0.0.0.0/0".parse().unwrap();
+        let size = network.size();
+        assert_eq!(size, u32::MAX);
+    }
 }

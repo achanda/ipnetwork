@@ -166,7 +166,9 @@ impl Ipv4Network {
     /// ```
     pub fn mask(&self) -> Ipv4Addr {
         debug_assert!(self.prefix <= 32);
-
+        if self.prefix == 0 {
+            return Ipv4Addr::new(0, 0, 0, 0);
+        }
         let mask = u32::MAX << (IPV4_BITS - self.prefix);
         Ipv4Addr::from(mask)
     }
@@ -244,6 +246,9 @@ impl Ipv4Network {
     /// ```
     pub fn size(self) -> u32 {
         debug_assert!(self.prefix <= 32);
+        if self.prefix == 0 {
+            return u32::MAX;
+        }
         1 << (IPV4_BITS - self.prefix)
     }
 
