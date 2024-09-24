@@ -24,7 +24,10 @@ travis-ci = { repository = "achanda/ipnetwork" }
 maintenance = { status = "passively-maintained" }
 
 [features]
-default = ["serde"]
+# Keep optional dependencies out of the default features.
+# Since most people add a dependency without `default-features = false` they involuntarily
+# pull in unused dependencies.
+default = []
 
 [[bench]]
 name = "parse_bench"
