@@ -100,8 +100,8 @@ impl Ipv6Network {
     /// const ADDR: Ipv6Addr = Ipv6Addr::new(0x2001, 0xdb8, 0, 0, 0, 0, 0, 0);
     ///
     /// // Okay!
-    /// const NETWORK: Option<Ipv6Network> = Ipv6Network::new_checked(ADDR, PREFIX);
-    /// assert_eq!(NETWORK.unwrap().prefix(), PREFIX);
+    /// const NETWORK: Ipv6Network = Ipv6Network::new_checked(ADDR, PREFIX).unwrap();
+    /// assert_eq!(NETWORK.prefix(), PREFIX);
     /// ```
     ///
     /// ```should_panic

@@ -89,8 +89,8 @@ impl Ipv4Network {
     /// const ADDR: Ipv4Addr = Ipv4Addr::new(192, 168, 1, 1);
     ///
     /// // Okay!
-    /// const NETWORK: Option<Ipv4Network> = Ipv4Network::new_checked(ADDR, PREFIX);
-    /// assert_eq!(NETWORK.unwrap().prefix(), PREFIX);
+    /// const NETWORK: Ipv4Network = Ipv4Network::new_checked(ADDR, PREFIX).unwrap();
+    /// assert_eq!(NETWORK.prefix(), PREFIX);
     /// ```
     ///
     /// ```should_panic
