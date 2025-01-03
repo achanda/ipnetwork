@@ -100,10 +100,11 @@ impl Ipv6Network {
     /// const ADDR: Ipv6Addr = Ipv6Addr::new(0x2001, 0xdb8, 0, 0, 0, 0, 0, 0);
     ///
     /// // Okay!
-    /// const NETWORK: Ipv6Network = Ipv6Network::new_checked(ADDR, PREFIX).unwrap();
+    /// const NETWORK: Option<Ipv6Network> = Ipv6Network::new_checked(ADDR, PREFIX);
+    /// assert_eq!(NETWORK.unwrap().prefix(), PREFIX);
     /// ```
     ///
-    /// ```
+    /// ```should_panic
     /// use std::net::Ipv6Addr;
     /// use ipnetwork::Ipv6Network;
     ///
@@ -111,8 +112,9 @@ impl Ipv6Network {
     /// const PREFIX: u8 = 128 + 1;
     /// const ADDR: Ipv6Addr = Ipv6Addr::new(0x2001, 0xdb8, 0, 0, 0, 0, 0, 0);
     ///
-    /// // Unwrap to get a compile-time error!
-    /// assert!(Ipv6Network::new_checked(ADDR, PREFIX).is_none());
+    /// // This fails!
+    /// const NETWORK: Option<Ipv6Network> = Ipv6Network::new_checked(ADDR, PREFIX);
+    /// assert_eq!(NETWORK.unwrap().prefix(), PREFIX);
     /// ```
     pub const fn new_checked(addr: Ipv6Addr, prefix: u8) -> Option<Ipv6Network> {
         if prefix > IPV6_BITS {

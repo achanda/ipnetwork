@@ -89,10 +89,11 @@ impl Ipv4Network {
     /// const ADDR: Ipv4Addr = Ipv4Addr::new(192, 168, 1, 1);
     ///
     /// // Okay!
-    /// const NETWORK: Ipv4Network = Ipv4Network::new_checked(ADDR, PREFIX).unwrap();
+    /// const NETWORK: Option<Ipv4Network> = Ipv4Network::new_checked(ADDR, PREFIX);
+    /// assert_eq!(NETWORK.unwrap().prefix(), PREFIX);
     /// ```
     ///
-    /// ```
+    /// ```should_panic
     /// use std::net::Ipv4Addr;
     /// use ipnetwork::Ipv4Network;
     ///
@@ -100,8 +101,9 @@ impl Ipv4Network {
     /// const PREFIX: u8 = 32 + 1;
     /// const ADDR: Ipv4Addr = Ipv4Addr::new(192, 168, 1, 1);
     ///
-    /// // Unwrap to get a compile-time error!
-    /// assert!(Ipv4Network::new_checked(ADDR, PREFIX).is_none());
+    /// // This fails!
+    /// const NETWORK: Option<Ipv4Network> = Ipv4Network::new_checked(ADDR, PREFIX);
+    /// assert_eq!(NETWORK.unwrap().prefix(), PREFIX);
     /// ```
     pub const fn new_checked(addr: Ipv4Addr, prefix: u8) -> Option<Ipv4Network> {
         if prefix > IPV4_BITS {
