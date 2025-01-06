@@ -67,19 +67,17 @@ impl Ipv4Network {
     ///
     /// If the prefix is larger than 32 this will return an `IpNetworkError::InvalidPrefix`.
     pub const fn new(addr: Ipv4Addr, prefix: u8) -> Result<Ipv4Network, IpNetworkError> {
-        if prefix > IPV4_BITS {
-            Err(IpNetworkError::InvalidPrefix)
-        } else {
-            Ok(Ipv4Network { addr, prefix })
+        match Ipv4Network::new_checked(addr, prefix) {
+            Some(a) => Ok(a),
+            None => Err(IpNetworkError::InvalidPrefix),
         }
     }
 
-    /// Constructs without checking prefix a new `Ipv4Network` from any `Ipv4Addr,
-    /// and a prefix denoting the network size.
+    /// Constructs a new `Ipv4Network` from any `Ipv4Addr`, and a prefix denoting the network size.
     ///
-    /// # Safety
-    ///
-    /// The caller must ensure that the prefix is less than or equal to 32.
+    /// If the prefix is larger than 32 this will return `None`. This is useful in const contexts,
+    /// where [`Option::unwrap`] may be called to trigger a compile-time error in case the prefix
+    /// is an unexpected value.
     ///
     /// # Examples
     ///
@@ -87,14 +85,32 @@ impl Ipv4Network {
     /// use std::net::Ipv4Addr;
     /// use ipnetwork::Ipv4Network;
     ///
-    /// let prefix = 24;
-    /// let addr = Ipv4Addr::new(192, 168, 1, 1);
+    /// const PREFIX: u8 = 24;
+    /// const ADDR: Ipv4Addr = Ipv4Addr::new(192, 168, 1, 1);
     ///
-    /// debug_assert!(prefix <= 32);
-    /// let network = unsafe { Ipv4Network::new_unchecked(addr, prefix) };
+    /// // Okay!
+    /// const NETWORK: Ipv4Network = Ipv4Network::new_checked(ADDR, PREFIX).unwrap();
+    /// assert_eq!(NETWORK.prefix(), PREFIX);
     /// ```
-    pub const unsafe fn new_unchecked(addr: Ipv4Addr, prefix: u8) -> Ipv4Network {
-        Ipv4Network { addr, prefix }
+    ///
+    /// ```should_panic
+    /// use std::net::Ipv4Addr;
+    /// use ipnetwork::Ipv4Network;
+    ///
+    /// // Prefix is greater than 32.
+    /// const PREFIX: u8 = 32 + 1;
+    /// const ADDR: Ipv4Addr = Ipv4Addr::new(192, 168, 1, 1);
+    ///
+    /// // This fails!
+    /// const NETWORK: Option<Ipv4Network> = Ipv4Network::new_checked(ADDR, PREFIX);
+    /// assert_eq!(NETWORK.unwrap().prefix(), PREFIX);
+    /// ```
+    pub const fn new_checked(addr: Ipv4Addr, prefix: u8) -> Option<Ipv4Network> {
+        if prefix > IPV4_BITS {
+            None
+        } else {
+            Some(Ipv4Network { addr, prefix })
+        }
     }
 
     /// Constructs a new `Ipv4Network` from a network address and a network mask.
@@ -396,11 +412,15 @@ mod test {
     }
 
     #[test]
-    fn create_unchecked_v4() {
-        let cidr = unsafe { Ipv4Network::new_unchecked(Ipv4Addr::new(77, 88, 21, 11), 24) };
+    fn create_checked_v4() {
+        let cidr = Ipv4Network::new_checked(Ipv4Addr::new(77, 88, 21, 11), 24).unwrap();
         assert_eq!(cidr.prefix(), 24);
-        let cidr = unsafe { Ipv4Network::new_unchecked(Ipv4Addr::new(0, 0, 0, 0), 33) };
-        assert_eq!(cidr.prefix(), 33);
+    }
+
+    #[test]
+    #[should_panic]
+    fn try_create_invalid_checked_v4() {
+        Ipv4Network::new_checked(Ipv4Addr::new(0, 0, 0, 0), 33).unwrap();
     }
 
     #[test]

@@ -78,19 +78,17 @@ impl Ipv6Network {
     ///
     /// If the prefix is larger than 128 this will return an `IpNetworkError::InvalidPrefix`.
     pub const fn new(addr: Ipv6Addr, prefix: u8) -> Result<Ipv6Network, IpNetworkError> {
-        if prefix > IPV6_BITS {
-            Err(IpNetworkError::InvalidPrefix)
-        } else {
-            Ok(Ipv6Network { addr, prefix })
+        match Ipv6Network::new_checked(addr, prefix) {
+            Some(a) => Ok(a),
+            None => Err(IpNetworkError::InvalidPrefix),
         }
     }
 
-    /// Constructs without checking prefix a new `Ipv6Network` from any `Ipv6Addr,
-    /// and a prefix denoting the network size.
+    /// Constructs a new `Ipv6Network` from any `Ipv6Addr`, and a prefix denoting the network size.
     ///
-    /// # Safety
-    ///
-    /// The caller must ensure that the prefix is less than or equal to 128.
+    /// If the prefix is larger than 128 this will return `None`. This is useful in const contexts,
+    /// where [`Option::unwrap`] may be called to trigger a compile-time error in case the prefix
+    /// is an unexpected value.
     ///
     /// # Examples
     ///
@@ -98,14 +96,32 @@ impl Ipv6Network {
     /// use std::net::Ipv6Addr;
     /// use ipnetwork::Ipv6Network;
     ///
-    /// let prefix = 64;
-    /// let addr = Ipv6Addr::new(0x2001, 0xdb8, 0, 0, 0, 0, 0, 0);
+    /// const PREFIX: u8 = 64;
+    /// const ADDR: Ipv6Addr = Ipv6Addr::new(0x2001, 0xdb8, 0, 0, 0, 0, 0, 0);
     ///
-    /// debug_assert!(prefix <= 128);
-    /// let net = unsafe { Ipv6Network::new_unchecked(addr, prefix) };
+    /// // Okay!
+    /// const NETWORK: Ipv6Network = Ipv6Network::new_checked(ADDR, PREFIX).unwrap();
+    /// assert_eq!(NETWORK.prefix(), PREFIX);
     /// ```
-    pub const unsafe fn new_unchecked(addr: Ipv6Addr, prefix: u8) -> Ipv6Network {
-        Ipv6Network { addr, prefix }
+    ///
+    /// ```should_panic
+    /// use std::net::Ipv6Addr;
+    /// use ipnetwork::Ipv6Network;
+    ///
+    /// // Prefix is greater than 128.
+    /// const PREFIX: u8 = 128 + 1;
+    /// const ADDR: Ipv6Addr = Ipv6Addr::new(0x2001, 0xdb8, 0, 0, 0, 0, 0, 0);
+    ///
+    /// // This fails!
+    /// const NETWORK: Option<Ipv6Network> = Ipv6Network::new_checked(ADDR, PREFIX);
+    /// assert_eq!(NETWORK.unwrap().prefix(), PREFIX);
+    /// ```
+    pub const fn new_checked(addr: Ipv6Addr, prefix: u8) -> Option<Ipv6Network> {
+        if prefix > IPV6_BITS {
+            None
+        } else {
+            Some(Ipv6Network { addr, prefix })
+        }
     }
 
     /// Constructs a new `Ipv6Network` from a network address and a network mask.
@@ -427,12 +443,15 @@ mod test {
     }
 
     #[test]
-    fn create_unchecked_v6() {
-        let cidr = unsafe { Ipv6Network::new_unchecked(Ipv6Addr::new(0, 0, 0, 0, 0, 0, 0, 1), 24) };
+    fn create_checked_v6() {
+        let cidr = Ipv6Network::new_checked(Ipv6Addr::new(0, 0, 0, 0, 0, 0, 0, 1), 24).unwrap();
         assert_eq!(cidr.prefix(), 24);
-        let cidr =
-            unsafe { Ipv6Network::new_unchecked(Ipv6Addr::new(0, 0, 0, 0, 0, 0, 0, 1), 129) };
-        assert_eq!(cidr.prefix(), 129);
+    }
+
+    #[test]
+    #[should_panic]
+    fn try_create_invalid_checked_v6() {
+        Ipv6Network::new_checked(Ipv6Addr::new(0, 0, 0, 0, 0, 0, 0, 1), 129).unwrap();
     }
 
     #[test]
