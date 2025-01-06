@@ -1,4 +1,3 @@
-.gitignore
 Cargo.lock
 target
 .vscode
