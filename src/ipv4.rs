@@ -180,13 +180,13 @@ impl Ipv4Network {
     /// let net: Ipv4Network = "127.0.0.0/16".parse().unwrap();
     /// assert_eq!(net.mask(), Ipv4Addr::new(255, 255, 0, 0));
     /// ```
-    pub fn mask(&self) -> Ipv4Addr {
+    pub const fn mask(&self) -> Ipv4Addr {
         debug_assert!(self.prefix <= 32);
         if self.prefix == 0 {
             return Ipv4Addr::new(0, 0, 0, 0);
         }
         let mask = u32::MAX << (IPV4_BITS - self.prefix);
-        Ipv4Addr::from(mask)
+        Ipv4Addr::from_bits(mask)
     }
 
     /// Returns the address of the network denoted by this `Ipv4Network`.
