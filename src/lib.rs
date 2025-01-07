@@ -226,7 +226,7 @@ impl IpNetwork {
     /// let v6_net: IpNetwork = "ff01::0/32".parse().unwrap();
     /// assert_eq!(v6_net.mask(), Ipv6Addr::new(0xffff, 0xffff, 0, 0, 0, 0, 0, 0));
     /// ```
-    pub fn mask(&self) -> IpAddr {
+    pub const fn mask(&self) -> IpAddr {
         match *self {
             IpNetwork::V4(ref a) => IpAddr::V4(a.mask()),
             IpNetwork::V6(ref a) => IpAddr::V6(a.mask()),
