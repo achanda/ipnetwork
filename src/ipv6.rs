@@ -203,6 +203,9 @@ impl Ipv6Network {
     pub fn mask(&self) -> Ipv6Addr {
         debug_assert!(self.prefix <= IPV6_BITS);
 
+        if self.prefix == 0 {
+            return Ipv6Addr::new(0, 0, 0, 0, 0, 0, 0, 0);
+        }
         let mask = u128::MAX << (IPV6_BITS - self.prefix);
         Ipv6Addr::from(mask)
     }
@@ -279,6 +282,10 @@ impl Ipv6Network {
     /// ```
     pub fn size(&self) -> u128 {
         debug_assert!(self.prefix <= IPV6_BITS);
+
+        if self.prefix == 0 {
+            return u128::MAX;
+        }
         1 << (IPV6_BITS - self.prefix)
     }
 
@@ -756,5 +763,18 @@ mod test {
             Ipv6Addr::from_str("ff01::1:2").unwrap()
         );
         assert_eq!(net.nth(net.size()), None);
+    }
+
+    #[test]
+    fn test_mask_with_prefix_0() {
+        let network: Ipv6Network = "0::/0".parse().unwrap();
+        let mask = network.mask();
+        assert_eq!(mask, Ipv6Addr::new(0, 0, 0, 0, 0, 0, 0, 0));
+    }
+
+    #[test]
+    fn test_size_with_prefix_0() {
+        let network: Ipv6Network = "0::/0".parse().unwrap();
+        assert_eq!(network.size(), u128::MAX);
     }
 }
