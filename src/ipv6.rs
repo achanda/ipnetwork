@@ -160,7 +160,7 @@ impl Ipv6Network {
         }
     }
 
-    pub fn ip(&self) -> Ipv6Addr {
+    pub const fn ip(&self) -> Ipv6Addr {
         self.addr
     }
 

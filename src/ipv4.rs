@@ -140,7 +140,7 @@ impl Ipv4Network {
         }
     }
 
-    pub fn ip(self) -> Ipv4Addr {
+    pub const fn ip(self) -> Ipv4Addr {
         self.addr
     }
 
