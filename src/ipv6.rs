@@ -240,10 +240,10 @@ impl Ipv6Network {
     /// let net: Ipv6Network = "2001:db8::/96".parse().unwrap();
     /// assert_eq!(net.broadcast(), Ipv6Addr::new(0x2001, 0xdb8, 0, 0, 0, 0, 0xffff, 0xffff));
     /// ```
-    pub fn broadcast(&self) -> Ipv6Addr {
-        let mask = u128::from(self.mask());
-        let broadcast = u128::from(self.addr) | !mask;
-        Ipv6Addr::from(broadcast)
+    pub const fn broadcast(&self) -> Ipv6Addr {
+        let mask = self.mask().to_bits();
+        let broadcast = self.addr.to_bits() | !mask;
+        Ipv6Addr::from_bits(broadcast)
     }
 
     /// Checks if a given `Ipv6Addr` is in this `Ipv6Network`

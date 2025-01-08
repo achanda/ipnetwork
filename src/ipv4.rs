@@ -219,10 +219,10 @@ impl Ipv4Network {
     /// let net: Ipv4Network = "10.9.0.32/16".parse().unwrap();
     /// assert_eq!(net.broadcast(), Ipv4Addr::new(10, 9, 255, 255));
     /// ```
-    pub fn broadcast(&self) -> Ipv4Addr {
-        let mask = u32::from(self.mask());
-        let broadcast = u32::from(self.addr) | !mask;
-        Ipv4Addr::from(broadcast)
+    pub const fn broadcast(&self) -> Ipv4Addr {
+        let mask = self.mask().to_bits();
+        let broadcast = self.addr.to_bits() | !mask;
+        Ipv4Addr::from_bits(broadcast)
     }
 
     /// Checks if a given `Ipv4Addr` is in this `Ipv4Network`
