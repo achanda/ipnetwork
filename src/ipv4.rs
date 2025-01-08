@@ -201,10 +201,10 @@ impl Ipv4Network {
     /// let net: Ipv4Network = "10.1.9.32/16".parse().unwrap();
     /// assert_eq!(net.network(), Ipv4Addr::new(10, 1, 0, 0));
     /// ```
-    pub fn network(&self) -> Ipv4Addr {
-        let mask = u32::from(self.mask());
-        let ip = u32::from(self.addr) & mask;
-        Ipv4Addr::from(ip)
+    pub const fn network(&self) -> Ipv4Addr {
+        let mask = self.mask().to_bits();
+        let ip = self.addr.to_bits() & mask;
+        Ipv4Addr::from_bits(ip)
     }
 
     /// Returns the broadcasting address of this `Ipv4Network`.
