@@ -433,6 +433,17 @@ pub fn ip_mask_to_prefix(mask: IpAddr) -> Result<u8, IpNetworkError> {
     }
 }
 
+/// Converts a `IpAddr` network mask into a prefix.
+///
+/// If the mask is invalid this will return `None`. This is useful in const contexts where
+/// [`Option::unwrap`] may be called to trigger a compile-time error if the prefix is invalid.
+pub const fn ip_mask_to_prefix_checked(mask: IpAddr) -> Option<u8> {
+    match mask {
+        IpAddr::V4(mask) => ipv4_mask_to_prefix_checked(mask),
+        IpAddr::V6(mask) => ipv6_mask_to_prefix_checked(mask),
+    }
+}
+
 #[cfg(test)]
 mod test {
     #[test]
