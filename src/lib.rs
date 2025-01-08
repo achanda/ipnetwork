@@ -181,7 +181,7 @@ impl IpNetwork {
     /// let net: IpNetwork = "2001:db8::/96".parse().unwrap();
     /// assert_eq!(net.network(), Ipv6Addr::new(0x2001, 0xdb8, 0, 0, 0, 0, 0, 0));
     /// ```
-    pub fn network(&self) -> IpAddr {
+    pub const fn network(&self) -> IpAddr {
         match *self {
             IpNetwork::V4(ref a) => IpAddr::V4(a.network()),
             IpNetwork::V6(ref a) => IpAddr::V6(a.network()),
