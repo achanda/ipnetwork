@@ -160,7 +160,7 @@ impl IpNetwork {
     /// assert_eq!(IpNetwork::V6("ff01::0".parse().unwrap()).prefix(), 128u8);
     /// assert_eq!(IpNetwork::V6("ff01::0/32".parse().unwrap()).prefix(), 32u8);
     /// ```
-    pub fn prefix(&self) -> u8 {
+    pub const fn prefix(&self) -> u8 {
         match *self {
             IpNetwork::V4(ref a) => a.prefix(),
             IpNetwork::V6(ref a) => a.prefix(),

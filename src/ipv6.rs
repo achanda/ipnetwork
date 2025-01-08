@@ -164,7 +164,7 @@ impl Ipv6Network {
         self.addr
     }
 
-    pub fn prefix(&self) -> u8 {
+    pub const fn prefix(&self) -> u8 {
         self.prefix
     }
 
