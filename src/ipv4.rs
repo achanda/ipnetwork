@@ -150,7 +150,7 @@ impl Ipv4Network {
 
     /// Checks if the given `Ipv4Network` is a subnet of the other.
     pub fn is_subnet_of(self, other: Ipv4Network) -> bool {
-        other.ip() <= self.ip() && other.broadcast() >= self.broadcast()
+        other.network() <= self.network() && other.broadcast() >= self.broadcast()
     }
 
     /// Checks if the given `Ipv4Network` is a supernet of the other.
