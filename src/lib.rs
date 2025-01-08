@@ -16,9 +16,9 @@ mod ipv6;
 mod parse;
 mod size;
 
-pub use crate::error::{NetworkSizeError, IpNetworkError};
+pub use crate::error::{IpNetworkError, NetworkSizeError};
 pub use crate::ipv4::Ipv4NetworkIterator;
-pub use crate::ipv4::{ipv4_mask_to_prefix, Ipv4Network};
+pub use crate::ipv4::{ipv4_mask_to_prefix, ipv4_mask_to_prefix_checked, Ipv4Network};
 pub use crate::ipv6::Ipv6NetworkIterator;
 pub use crate::ipv6::{ipv6_mask_to_prefix, Ipv6Network};
 pub use crate::size::NetworkSize;

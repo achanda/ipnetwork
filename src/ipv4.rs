@@ -382,13 +382,24 @@ impl IntoIterator for &'_ Ipv4Network {
 ///
 /// If the mask is invalid this will return an `IpNetworkError::InvalidPrefix`.
 pub fn ipv4_mask_to_prefix(mask: Ipv4Addr) -> Result<u8, IpNetworkError> {
-    let mask = u32::from(mask);
+    match ipv4_mask_to_prefix_checked(mask) {
+        Some(prefix) => Ok(prefix),
+        None => Err(IpNetworkError::InvalidPrefix),
+    }
+}
+
+/// Converts a `Ipv4Addr` network mask into a prefix.
+///
+/// If the mask is invalid this will return `None`. This is useful in const contexts where
+/// [`Option::unwrap`] may be called to trigger a compile-time error if the prefix is invalid.
+pub const fn ipv4_mask_to_prefix_checked(mask: Ipv4Addr) -> Option<u8> {
+    let mask = mask.to_bits();
 
     let prefix = (!mask).leading_zeros() as u8;
-    if (u64::from(mask) << prefix) & 0xffff_ffff != 0 {
-        Err(IpNetworkError::InvalidPrefix)
+    if ((mask as u64) << prefix) & 0xffff_ffff != 0 {
+        None
     } else {
-        Ok(prefix)
+        Some(prefix)
     }
 }
 
