@@ -200,14 +200,14 @@ impl Ipv6Network {
     /// let net: Ipv6Network = "ff01::0/32".parse().unwrap();
     /// assert_eq!(net.mask(), Ipv6Addr::new(0xffff, 0xffff, 0, 0, 0, 0, 0, 0));
     /// ```
-    pub fn mask(&self) -> Ipv6Addr {
+    pub const fn mask(&self) -> Ipv6Addr {
         debug_assert!(self.prefix <= IPV6_BITS);
 
         if self.prefix == 0 {
             return Ipv6Addr::new(0, 0, 0, 0, 0, 0, 0, 0);
         }
         let mask = u128::MAX << (IPV6_BITS - self.prefix);
-        Ipv6Addr::from(mask)
+        Ipv6Addr::from_bits(mask)
     }
 
     /// Returns the address of the network denoted by this `Ipv6Network`.
