@@ -141,7 +141,7 @@ impl IpNetwork {
     }
 
     /// Returns the IP part of a given `IpNetwork`
-    pub fn ip(&self) -> IpAddr {
+    pub const fn ip(&self) -> IpAddr {
         match *self {
             IpNetwork::V4(ref a) => IpAddr::V4(a.ip()),
             IpNetwork::V6(ref a) => IpAddr::V6(a.ip()),
