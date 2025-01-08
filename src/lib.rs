@@ -200,7 +200,7 @@ impl IpNetwork {
     /// let net: Ipv4Network = "10.9.0.32/16".parse().unwrap();
     /// assert_eq!(net.broadcast(), Ipv4Addr::new(10, 9, 255, 255));
     /// ```
-    pub fn broadcast(&self) -> IpAddr {
+    pub const fn broadcast(&self) -> IpAddr {
         match *self {
             IpNetwork::V4(ref a) => IpAddr::V4(a.broadcast()),
             IpNetwork::V6(ref a) => IpAddr::V6(a.broadcast()),
