@@ -222,10 +222,10 @@ impl Ipv6Network {
     /// let net: Ipv6Network = "2001:db8::/96".parse().unwrap();
     /// assert_eq!(net.network(), Ipv6Addr::new(0x2001, 0xdb8, 0, 0, 0, 0, 0, 0));
     /// ```
-    pub fn network(&self) -> Ipv6Addr {
-        let mask = u128::from(self.mask());
-        let network = u128::from(self.addr) & mask;
-        Ipv6Addr::from(network)
+    pub const fn network(&self) -> Ipv6Addr {
+        let mask = self.mask().to_bits();
+        let network = self.addr.to_bits() & mask;
+        Ipv6Addr::from_bits(network)
     }
 
     /// Returns the broadcast address of this `Ipv6Network`.
@@ -259,10 +259,10 @@ impl Ipv6Network {
     /// assert!(!net.contains(Ipv6Addr::new(0xffff, 0, 0, 0, 0, 0, 0, 0x1)));
     /// ```
     #[inline]
-    pub fn contains(&self, ip: Ipv6Addr) -> bool {
-        let ip = u128::from(ip);
-        let net = u128::from(self.network());
-        let mask = u128::from(self.mask());
+    pub const fn contains(&self, ip: Ipv6Addr) -> bool {
+        let ip = ip.to_bits();
+        let net = self.network().to_bits();
+        let mask = self.mask().to_bits();
         (ip & mask) == net
     }
 

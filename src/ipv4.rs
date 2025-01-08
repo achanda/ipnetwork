@@ -238,12 +238,12 @@ impl Ipv4Network {
     /// assert!(!net.contains(Ipv4Addr::new(127, 0, 1, 70)));
     /// ```
     #[inline]
-    pub fn contains(&self, ip: Ipv4Addr) -> bool {
+    pub const fn contains(&self, ip: Ipv4Addr) -> bool {
         debug_assert!(self.prefix <= IPV4_BITS);
 
         let mask = !(0xffff_ffff_u64 >> self.prefix) as u32;
-        let net = u32::from(self.addr) & mask;
-        (u32::from(ip) & mask) == net
+        let net = self.addr.to_bits() & mask;
+        (ip.to_bits() & mask) == net
     }
 
     /// Returns number of possible host addresses in this `Ipv4Network`.
