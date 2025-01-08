@@ -245,7 +245,7 @@ impl IpNetwork {
     /// assert_eq!(v4.is_ipv4(), true);
     /// assert_eq!(v4.is_ipv6(), false);
     ///```
-    pub fn is_ipv4(&self) -> bool {
+    pub const fn is_ipv4(&self) -> bool {
         match *self {
             IpNetwork::V4(_) => true,
             IpNetwork::V6(_) => false,
@@ -264,7 +264,7 @@ impl IpNetwork {
     /// assert_eq!(v6.is_ipv6(), true);
     /// assert_eq!(v6.is_ipv4(), false);
     ///```
-    pub fn is_ipv6(&self) -> bool {
+    pub const fn is_ipv6(&self) -> bool {
         match *self {
             IpNetwork::V4(_) => false,
             IpNetwork::V6(_) => true,
