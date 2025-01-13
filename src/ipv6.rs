@@ -136,6 +136,20 @@ impl Ipv6Network {
         Ok(net)
     }
 
+    /// Constructs a new `Ipv6Network` from a network address and a network mask.
+    ///
+    /// If the netmask is not valid this will return a `None`.
+    pub const fn with_netmask_checked(netaddr: Ipv6Addr, netmask: Ipv6Addr) -> Option<Self> {
+        let Some(prefix) = ipv6_mask_to_prefix_checked(netmask) else {
+            return None;
+        };
+        let net = Self {
+            addr: netaddr,
+            prefix,
+        };
+        Some(net)
+    }
+
     /// Returns an iterator over `Ipv6Network`. Each call to `next` will return the next
     /// `Ipv6Addr` in the given network. `None` will be returned when there are no more
     /// addresses.
