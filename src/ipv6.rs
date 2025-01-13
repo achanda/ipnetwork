@@ -391,12 +391,25 @@ impl fmt::Display for Ipv6Network {
 /// Converts a `Ipv6Addr` network mask into a prefix.
 /// If the mask is invalid this will return an `IpNetworkError::InvalidPrefix`.
 pub fn ipv6_mask_to_prefix(mask: Ipv6Addr) -> Result<u8, IpNetworkError> {
+    match ipv6_mask_to_prefix_checked(mask) {
+        Some(prefix) => Ok(prefix),
+        None => Err(IpNetworkError::InvalidPrefix),
+    }
+}
+
+/// Converts a `Ipv6Addr` network mask into a prefix.
+///
+/// If the mask is invalid this will return `None`. This is useful in const contexts where
+/// [`Option::unwrap`] may be called to trigger a compile-time error if the prefix is invalid.
+pub const fn ipv6_mask_to_prefix_checked(mask: Ipv6Addr) -> Option<u8> {
     let mask = mask.segments();
-    let mut mask_iter = mask.iter();
 
     // Count the number of set bits from the start of the address
     let mut prefix = 0;
-    for &segment in &mut mask_iter {
+    let mut i = 0;
+    while i < mask.len() {
+        let segment = mask[i];
+        i += 1;
         if segment == 0xffff {
             prefix += IPV6_SEGMENT_BITS;
         } else if segment == 0 {
@@ -406,7 +419,7 @@ pub fn ipv6_mask_to_prefix(mask: Ipv6Addr) -> Result<u8, IpNetworkError> {
             let prefix_bits = (!segment).leading_zeros() as u8;
             // Check that the remainder of the bits are all unset
             if segment << prefix_bits != 0 {
-                return Err(IpNetworkError::InvalidPrefix);
+                return None;
             }
             prefix += prefix_bits;
             break;
@@ -414,13 +427,15 @@ pub fn ipv6_mask_to_prefix(mask: Ipv6Addr) -> Result<u8, IpNetworkError> {
     }
 
     // Now check all the remaining bits are unset
-    for &segment in mask_iter {
+    while i < mask.len() {
+        let segment = mask[i];
+        i += 1;
         if segment != 0 {
-            return Err(IpNetworkError::InvalidPrefix);
+            return None;
         }
     }
 
-    Ok(prefix)
+    Some(prefix)
 }
 
 #[cfg(test)]

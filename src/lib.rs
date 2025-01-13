@@ -16,11 +16,11 @@ mod ipv6;
 mod parse;
 mod size;
 
-pub use crate::error::{NetworkSizeError, IpNetworkError};
+pub use crate::error::{IpNetworkError, NetworkSizeError};
 pub use crate::ipv4::Ipv4NetworkIterator;
-pub use crate::ipv4::{ipv4_mask_to_prefix, Ipv4Network};
+pub use crate::ipv4::{ipv4_mask_to_prefix, ipv4_mask_to_prefix_checked, Ipv4Network};
 pub use crate::ipv6::Ipv6NetworkIterator;
-pub use crate::ipv6::{ipv6_mask_to_prefix, Ipv6Network};
+pub use crate::ipv6::{ipv6_mask_to_prefix, ipv6_mask_to_prefix_checked, Ipv6Network};
 pub use crate::size::NetworkSize;
 
 /// Represents a generic network range. This type can have two variants:
@@ -430,6 +430,17 @@ pub fn ip_mask_to_prefix(mask: IpAddr) -> Result<u8, IpNetworkError> {
     match mask {
         IpAddr::V4(mask) => ipv4_mask_to_prefix(mask),
         IpAddr::V6(mask) => ipv6_mask_to_prefix(mask),
+    }
+}
+
+/// Converts a `IpAddr` network mask into a prefix.
+///
+/// If the mask is invalid this will return `None`. This is useful in const contexts where
+/// [`Option::unwrap`] may be called to trigger a compile-time error if the prefix is invalid.
+pub const fn ip_mask_to_prefix_checked(mask: IpAddr) -> Option<u8> {
+    match mask {
+        IpAddr::V4(mask) => ipv4_mask_to_prefix_checked(mask),
+        IpAddr::V6(mask) => ipv6_mask_to_prefix_checked(mask),
     }
 }
 
