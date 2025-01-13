@@ -140,6 +140,30 @@ impl IpNetwork {
         Self::new(netaddr, prefix)
     }
 
+    /// Constructs a new `IpNetwork` from a network address and a network mask.
+    ///
+    /// If the netmask is not valid this will return an `None`.
+    pub const fn with_netmask_checked(netaddr: IpAddr, netmask: IpAddr) -> Option<Self> {
+        let Some(prefix) = ip_mask_to_prefix_checked(netmask) else {
+            return None;
+        };
+
+        match netaddr {
+            IpAddr::V4(address) => {
+                let Some(network) = Ipv4Network::new_checked(address, prefix) else {
+                    return None;
+                };
+                Some(IpNetwork::V4(network))
+            }
+            IpAddr::V6(address) => {
+                let Some(network) = Ipv6Network::new_checked(address, prefix) else {
+                    return None;
+                };
+                Some(IpNetwork::V6(network))
+            }
+        }
+    }
+
     /// Returns the IP part of a given `IpNetwork`
     pub const fn ip(&self) -> IpAddr {
         match *self {
