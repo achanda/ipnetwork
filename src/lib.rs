@@ -414,6 +414,12 @@ impl Iterator for IpNetworkIterator {
             IpNetworkIteratorInner::V6(iter) => iter.next().map(IpAddr::V6),
         }
     }
+    fn size_hint(&self) -> (usize, Option<usize>) {
+        match &self.inner {
+            IpNetworkIteratorInner::V4(iter) => iter.size_hint(),
+            IpNetworkIteratorInner::V6(iter) => iter.size_hint(),
+        }
+    }
 }
 
 impl IntoIterator for &'_ IpNetwork {

@@ -372,6 +372,15 @@ impl Iterator for Ipv6NetworkIterator {
         };
         Some(next.into())
     }
+
+    fn size_hint(&self) -> (usize, Option<usize>) {
+        if let Some(n) = self.next {
+            let elms = (self.end - n + 1) as usize;
+            (elms, Some(elms))
+        } else {
+            (0, None)
+        }
+    }
 }
 
 impl IntoIterator for &'_ Ipv6Network {
@@ -610,6 +619,18 @@ mod test {
         assert_eq!(Ipv6Addr::new(0, 0, 0, 0, 0, 0, 0, 0), iter.next().unwrap());
         assert_eq!(Ipv6Addr::new(0, 0, 0, 0, 0, 0, 0, 1), iter.next().unwrap());
         assert_eq!(Ipv6Addr::new(0, 0, 0, 0, 0, 0, 0, 2), iter.next().unwrap());
+    }
+
+    #[test]
+    fn iterator_v6_size_hint() {
+        let cidr: Ipv6Network = "2001:db8::/128".parse().unwrap();
+        let mut iter = cidr.iter();
+        assert_eq!((1, Some(1)), iter.size_hint());
+        assert_eq!(
+            Ipv6Addr::new(0x2001, 0xdb8, 0, 0, 0, 0, 0, 0),
+            iter.next().unwrap()
+        );
+        assert_eq!((0, None), iter.size_hint());
     }
 
     #[test]

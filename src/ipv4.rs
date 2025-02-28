@@ -368,6 +368,15 @@ impl Iterator for Ipv4NetworkIterator {
         };
         Some(next.into())
     }
+
+    fn size_hint(&self) -> (usize, Option<usize>) {
+        if let Some(n) = self.next {
+            let elms = (self.end - n + 1) as usize;
+            (elms, Some(elms))
+        } else {
+            (0, None)
+        }
+    }
 }
 
 impl IntoIterator for &'_ Ipv4Network {
@@ -580,6 +589,25 @@ mod test {
             assert_eq!(i as u32, u32::from(iter.next().unwrap()));
         }
         assert_eq!(None, iter.next());
+    }
+
+    #[test]
+    fn iterator_v4_size_hint() {
+        let cidr: Ipv4Network = "192.168.0.0/24".parse().unwrap();
+        let mut iter = cidr.iter();
+        assert_eq!((256, Some(256)), iter.size_hint());
+        iter.next();
+        assert_eq!((255, Some(255)), iter.size_hint());
+
+        let cidr: Ipv4Network = "192.168.0.0/32".parse().unwrap();
+        let mut iter = cidr.iter();
+        assert_eq!((1, Some(1)), iter.size_hint());
+        iter.next();
+        assert_eq!((0, None), iter.size_hint());
+
+        let cidr: Ipv4Network = "192.168.0.0/0".parse().unwrap();
+        let iter = cidr.iter();
+        assert_eq!((4294967295, Some(4294967295)), iter.size_hint());
     }
 
     #[test]
