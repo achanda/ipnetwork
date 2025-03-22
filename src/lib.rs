@@ -8,7 +8,12 @@
     unused_import_braces
 )]
 
-use std::{convert::TryFrom, fmt, net::IpAddr, str::FromStr};
+use std::{
+    convert::TryFrom,
+    fmt,
+    net::{IpAddr, Ipv4Addr, Ipv6Addr},
+    str::FromStr,
+};
 
 mod error;
 mod ipv4;
@@ -377,11 +382,23 @@ impl From<Ipv6Network> for IpNetwork {
     }
 }
 
+impl From<Ipv4Addr> for IpNetwork {
+    fn from(addr: Ipv4Addr) -> IpNetwork {
+        IpNetwork::V4(Ipv4Network::from(addr))
+    }
+}
+
+impl From<Ipv6Addr> for IpNetwork {
+    fn from(addr: Ipv6Addr) -> IpNetwork {
+        IpNetwork::V6(Ipv6Network::from(addr))
+    }
+}
+
 impl From<IpAddr> for IpNetwork {
     fn from(addr: IpAddr) -> IpNetwork {
         match addr {
-            IpAddr::V4(a) => IpNetwork::V4(Ipv4Network::from(a)),
-            IpAddr::V6(a) => IpNetwork::V6(Ipv6Network::from(a)),
+            IpAddr::V4(a) => IpNetwork::from(a),
+            IpAddr::V6(a) => IpNetwork::from(a),
         }
     }
 }
