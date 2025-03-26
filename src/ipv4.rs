@@ -128,6 +128,20 @@ impl Ipv4Network {
         Ok(net)
     }
 
+    /// Constructs a new `Ipv4Network` from a network address and a network mask.
+    ///
+    /// If the netmask is not valid this will return a `None`.
+    pub const fn with_netmask_checked(netaddr: Ipv4Addr, netmask: Ipv4Addr) -> Option<Ipv4Network> {
+        let Some(prefix) = ipv4_mask_to_prefix_checked(netmask) else {
+            return None;
+        };
+        let net = Self {
+            addr: netaddr,
+            prefix,
+        };
+        Some(net)
+    }
+
     /// Returns an iterator over `Ipv4Network`. Each call to `next` will return the next
     /// `Ipv4Addr` in the given network. `None` will be returned when there are no more
     /// addresses.
