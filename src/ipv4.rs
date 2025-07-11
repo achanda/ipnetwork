@@ -34,31 +34,20 @@ impl serde::Serialize for Ipv4Network {
 
 #[cfg(feature = "schemars")]
 impl schemars::JsonSchema for Ipv4Network {
-    fn schema_name() -> String {
-        "Ipv4Network".to_string()
+    fn schema_name() -> std::borrow::Cow<'static, str> {
+        std::borrow::Cow::Borrowed("Ipv4Network")
     }
 
-    fn json_schema(_: &mut schemars::gen::SchemaGenerator) -> schemars::schema::Schema {
-        schemars::schema::SchemaObject {
-            instance_type: Some(schemars::schema::InstanceType::String.into()),
-            string: Some(Box::new(schemars::schema::StringValidation {
-                pattern: Some(
-                    concat!(
-                        r#"^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}"#,
-                        r#"(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)"#,
-                        r#"\/(3[0-2]|[0-2]?[0-9])$"#,
-                    )
-                    .to_string(),
-                ),
-                ..Default::default()
-            })),
-            extensions: [("x-rust-type".to_string(), "ipnetwork::Ipv4Network".into())]
-                .iter()
-                .cloned()
-                .collect(),
-            ..Default::default()
-        }
-        .into()
+    fn json_schema(_: &mut schemars::SchemaGenerator) -> schemars::Schema {
+        schemars::json_schema!({
+            "type": "string",
+            "pattern": concat!(
+                r#"^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}"#,
+                r#"(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)"#,
+                r#"\/(3[0-2]|[0-2]?[0-9])$"#,
+            ),
+            "x-rust-type": "ipnetwork::Ipv4Network"
+        })
     }
 }
 

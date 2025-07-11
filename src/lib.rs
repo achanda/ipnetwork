@@ -59,69 +59,24 @@ impl serde::Serialize for IpNetwork {
 
 #[cfg(feature = "schemars")]
 impl schemars::JsonSchema for IpNetwork {
-    fn schema_name() -> String {
-        "IpNetwork".to_string()
+    fn schema_name() -> std::borrow::Cow<'static, str> {
+        std::borrow::Cow::Borrowed("IpNetwork")
     }
 
-    fn json_schema(gen: &mut schemars::gen::SchemaGenerator) -> schemars::schema::Schema {
-        schemars::schema::SchemaObject {
-            metadata: Some(
-                schemars::schema::Metadata {
-                    ..Default::default()
+    fn json_schema(generator: &mut schemars::SchemaGenerator) -> schemars::Schema {
+        schemars::json_schema!({
+            "oneOf": [
+                {
+                    "title": "v4",
+                    "allOf": [generator.subschema_for::<Ipv4Network>()]
+                },
+                {
+                    "title": "v6", 
+                    "allOf": [generator.subschema_for::<Ipv6Network>()]
                 }
-                .into(),
-            ),
-            subschemas: Some(
-                schemars::schema::SubschemaValidation {
-                    one_of: Some(vec![
-                        schemars::schema::SchemaObject {
-                            metadata: Some(
-                                schemars::schema::Metadata {
-                                    title: Some("v4".to_string()),
-                                    ..Default::default()
-                                }
-                                .into(),
-                            ),
-                            subschemas: Some(
-                                schemars::schema::SubschemaValidation {
-                                    all_of: Some(vec![gen.subschema_for::<Ipv4Network>()]),
-                                    ..Default::default()
-                                }
-                                .into(),
-                            ),
-                            ..Default::default()
-                        }
-                        .into(),
-                        schemars::schema::SchemaObject {
-                            metadata: Some(
-                                schemars::schema::Metadata {
-                                    title: Some("v6".to_string()),
-                                    ..Default::default()
-                                }
-                                .into(),
-                            ),
-                            subschemas: Some(
-                                schemars::schema::SubschemaValidation {
-                                    all_of: Some(vec![gen.subschema_for::<Ipv6Network>()]),
-                                    ..Default::default()
-                                }
-                                .into(),
-                            ),
-                            ..Default::default()
-                        }
-                        .into(),
-                    ]),
-                    ..Default::default()
-                }
-                .into(),
-            ),
-            extensions: [("x-rust-type".to_string(), "ipnetwork::IpNetwork".into())]
-                .iter()
-                .cloned()
-                .collect(),
-            ..Default::default()
-        }
-        .into()
+            ],
+            "x-rust-type": "ipnetwork::IpNetwork"
+        })
     }
 }
 
