@@ -158,5 +158,16 @@ mod tests {
         assert_eq!(one_of.len(), 2);
         assert_eq!(one_of[0]["title"], "v4");
         assert_eq!(one_of[1]["title"], "v6");
+        
+        // Verify that the schemas follow the schemars 1.0 migration guide patterns
+        // The Schema should be a wrapper around serde_json::Value
+        assert!(ipv4_json.is_object());
+        assert!(ipv6_json.is_object());
+        assert!(ip_json.is_object());
+        
+        // Print schemas for manual verification (useful for debugging)
+        println!("IPv4 Schema: {}", serde_json::to_string_pretty(&ipv4_json).unwrap());
+        println!("IPv6 Schema: {}", serde_json::to_string_pretty(&ipv6_json).unwrap());
+        println!("IpNetwork Schema: {}", serde_json::to_string_pretty(&ip_json).unwrap());
     }
 }
