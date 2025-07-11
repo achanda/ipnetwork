@@ -35,41 +35,31 @@ impl serde::Serialize for Ipv6Network {
 
 #[cfg(feature = "schemars")]
 impl schemars::JsonSchema for Ipv6Network {
-    fn schema_name() -> String {
-        "Ipv6Network".to_string()
+    fn schema_name() -> std::borrow::Cow<'static, str> {
+        std::borrow::Cow::Borrowed("Ipv6Network")
     }
 
-    fn json_schema(_: &mut schemars::gen::SchemaGenerator) -> schemars::schema::Schema {
-        schemars::schema::SchemaObject {
-            instance_type: Some(schemars::schema::InstanceType::String.into()),
-            string: Some(Box::new(schemars::schema::StringValidation {
-                pattern: Some(
-                    concat!(
-                        r#"^("#,
-                        r#"([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}"#,
-                        r#"|([0-9a-fA-F]{1,4}:){1,7}:"#,
-                        r#"|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}"#,
-                        r#"|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}"#,
-                        r#"|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}"#,
-                        r#"|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}"#,
-                        r#"|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}"#,
-                        r#"|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})"#,
-                        r#"|:((:[0-9a-fA-F]{1,4}){1,7}|:)"#,
-                        r#"|fe80:(:[0-9a-fA-F]{0,4}){0,4}%[0-9a-zA-Z]{1,}"#,
-                        r#"|::(ffff(:0{1,4}){0,1}:){0,1}((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])"#,
-                        r#"|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])"#,
-                        r#"")[/](12[0-8]|1[0-1][0-9]|[0-9]?[0-9])$"#,
-                    ).to_string(),
-                ),
-                ..Default::default()
-            })),
-            extensions: [("x-rust-type".to_string(), "ipnetwork::Ipv6Network".into())]
-                .iter()
-                .cloned()
-                .collect(),
-            ..Default::default()
-        }
-        .into()
+    fn json_schema(_: &mut schemars::SchemaGenerator) -> schemars::Schema {
+        schemars::json_schema!({
+            "type": "string",
+            "pattern": concat!(
+                r#"^("#,
+                r#"([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}"#,
+                r#"|([0-9a-fA-F]{1,4}:){1,7}:"#,
+                r#"|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}"#,
+                r#"|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}"#,
+                r#"|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}"#,
+                r#"|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}"#,
+                r#"|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}"#,
+                r#"|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})"#,
+                r#"|:((:[0-9a-fA-F]{1,4}){1,7}|:)"#,
+                r#"|fe80:(:[0-9a-fA-F]{0,4}){0,4}%[0-9a-zA-Z]{1,}"#,
+                r#"|::(ffff(:0{1,4}){0,1}:){0,1}((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])"#,
+                r#"|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])"#,
+                r#"")[/](12[0-8]|1[0-1][0-9]|[0-9]?[0-9])$"#,
+            ),
+            "x-rust-type": "ipnetwork::Ipv6Network"
+        })
     }
 }
 
