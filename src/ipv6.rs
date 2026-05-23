@@ -5,6 +5,15 @@ use std::{convert::TryFrom, fmt, net::Ipv6Addr, str::FromStr};
 const IPV6_BITS: u8 = 128;
 const IPV6_SEGMENT_BITS: u8 = 16;
 
+const fn ipv6_mask_bits(prefix: u8) -> u128 {
+    debug_assert!(prefix <= IPV6_BITS);
+    if prefix == 0 {
+        0
+    } else {
+        u128::MAX << (IPV6_BITS - prefix)
+    }
+}
+
 /// Represents a network range where the IP addresses are of v6
 #[derive(Debug, Clone, Copy, Hash, PartialEq, Eq, PartialOrd, Ord)]
 pub struct Ipv6Network {
@@ -134,15 +143,10 @@ impl Ipv6Network {
     ///
     /// This can return up to 2^128 addresses, which will take a _long_ time to iterate over.
     pub fn iter(&self) -> Ipv6NetworkIterator {
-        let dec = u128::from(self.addr);
-        let max = u128::MAX;
-        let prefix = self.prefix;
-
-        let mask = max.checked_shl(u32::from(IPV6_BITS - prefix)).unwrap_or(0);
-        let start: u128 = dec & mask;
-
-        let mask = max.checked_shr(u32::from(prefix)).unwrap_or(0);
-        let end: u128 = dec | mask;
+        let mask = ipv6_mask_bits(self.prefix);
+        let addr = self.addr.to_bits();
+        let start = addr & mask;
+        let end = start | !mask;
 
         Ipv6NetworkIterator {
             next: Some(start),
@@ -191,13 +195,7 @@ impl Ipv6Network {
     /// assert_eq!(net.mask(), Ipv6Addr::new(0xffff, 0xffff, 0, 0, 0, 0, 0, 0));
     /// ```
     pub const fn mask(&self) -> Ipv6Addr {
-        debug_assert!(self.prefix <= IPV6_BITS);
-
-        if self.prefix == 0 {
-            return Ipv6Addr::new(0, 0, 0, 0, 0, 0, 0, 0);
-        }
-        let mask = u128::MAX << (IPV6_BITS - self.prefix);
-        Ipv6Addr::from_bits(mask)
+        Ipv6Addr::from_bits(ipv6_mask_bits(self.prefix))
     }
 
     /// Returns the address of the network denoted by this `Ipv6Network`.
@@ -213,7 +211,7 @@ impl Ipv6Network {
     /// assert_eq!(net.network(), Ipv6Addr::new(0x2001, 0xdb8, 0, 0, 0, 0, 0, 0));
     /// ```
     pub const fn network(&self) -> Ipv6Addr {
-        let mask = self.mask().to_bits();
+        let mask = ipv6_mask_bits(self.prefix);
         let network = self.addr.to_bits() & mask;
         Ipv6Addr::from_bits(network)
     }
@@ -231,7 +229,7 @@ impl Ipv6Network {
     /// assert_eq!(net.broadcast(), Ipv6Addr::new(0x2001, 0xdb8, 0, 0, 0, 0, 0xffff, 0xffff));
     /// ```
     pub const fn broadcast(&self) -> Ipv6Addr {
-        let mask = self.mask().to_bits();
+        let mask = ipv6_mask_bits(self.prefix);
         let broadcast = self.addr.to_bits() | !mask;
         Ipv6Addr::from_bits(broadcast)
     }
@@ -250,10 +248,9 @@ impl Ipv6Network {
     /// ```
     #[inline]
     pub const fn contains(&self, ip: Ipv6Addr) -> bool {
-        let ip = ip.to_bits();
-        let net = self.network().to_bits();
-        let mask = self.mask().to_bits();
-        (ip & mask) == net
+        let mask = ipv6_mask_bits(self.prefix);
+        let net = self.addr.to_bits() & mask;
+        (ip.to_bits() & mask) == net
     }
 
     /// Returns number of possible host addresses in this `Ipv6Network`.
@@ -296,7 +293,7 @@ impl Ipv6Network {
     /// ```
     pub fn nth(self, n: u128) -> Option<Ipv6Addr> {
         if n < self.size() {
-            let net = u128::from(self.network());
+            let net = self.addr.to_bits() & ipv6_mask_bits(self.prefix);
             Some(Ipv6Addr::from(net + n))
         } else {
             None
@@ -322,7 +319,10 @@ impl FromStr for Ipv6Network {
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         let (addr_str, prefix_str) = cidr_parts(s)?;
         let addr = Ipv6Addr::from_str(addr_str)?;
-        let prefix = parse_prefix(prefix_str.unwrap_or(&IPV6_BITS.to_string()), IPV6_BITS)?;
+        let prefix = match prefix_str {
+            Some(prefix) => parse_prefix(prefix, IPV6_BITS)?,
+            None => IPV6_BITS,
+        };
         Ipv6Network::new(addr, prefix)
     }
 }

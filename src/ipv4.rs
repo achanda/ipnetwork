@@ -4,6 +4,15 @@ use std::{convert::TryFrom, fmt, net::Ipv4Addr, str::FromStr};
 
 const IPV4_BITS: u8 = 32;
 
+const fn ipv4_mask_bits(prefix: u8) -> u32 {
+    debug_assert!(prefix <= IPV4_BITS);
+    if prefix == 0 {
+        0
+    } else {
+        u32::MAX << (IPV4_BITS - prefix)
+    }
+}
+
 /// Represents a network range where the IP addresses are of v4
 #[derive(Debug, Clone, Copy, Hash, PartialEq, Eq, PartialOrd, Ord)]
 pub struct Ipv4Network {
@@ -121,7 +130,8 @@ impl Ipv4Network {
     /// `Ipv4Addr` in the given network. `None` will be returned when there are no more
     /// addresses.
     pub fn iter(self) -> Ipv4NetworkIterator {
-        let start = u32::from(self.network());
+        let mask = ipv4_mask_bits(self.prefix);
+        let start = self.addr.to_bits() & mask;
         let end = start + (self.size() - 1);
         Ipv4NetworkIterator {
             next: Some(start),
@@ -170,12 +180,7 @@ impl Ipv4Network {
     /// assert_eq!(net.mask(), Ipv4Addr::new(255, 255, 0, 0));
     /// ```
     pub const fn mask(&self) -> Ipv4Addr {
-        debug_assert!(self.prefix <= 32);
-        if self.prefix == 0 {
-            return Ipv4Addr::new(0, 0, 0, 0);
-        }
-        let mask = u32::MAX << (IPV4_BITS - self.prefix);
-        Ipv4Addr::from_bits(mask)
+        Ipv4Addr::from_bits(ipv4_mask_bits(self.prefix))
     }
 
     /// Returns the address of the network denoted by this `Ipv4Network`.
@@ -191,7 +196,7 @@ impl Ipv4Network {
     /// assert_eq!(net.network(), Ipv4Addr::new(10, 1, 0, 0));
     /// ```
     pub const fn network(&self) -> Ipv4Addr {
-        let mask = self.mask().to_bits();
+        let mask = ipv4_mask_bits(self.prefix);
         let ip = self.addr.to_bits() & mask;
         Ipv4Addr::from_bits(ip)
     }
@@ -209,7 +214,7 @@ impl Ipv4Network {
     /// assert_eq!(net.broadcast(), Ipv4Addr::new(10, 9, 255, 255));
     /// ```
     pub const fn broadcast(&self) -> Ipv4Addr {
-        let mask = self.mask().to_bits();
+        let mask = ipv4_mask_bits(self.prefix);
         let broadcast = self.addr.to_bits() | !mask;
         Ipv4Addr::from_bits(broadcast)
     }
@@ -230,7 +235,7 @@ impl Ipv4Network {
     pub const fn contains(&self, ip: Ipv4Addr) -> bool {
         debug_assert!(self.prefix <= IPV4_BITS);
 
-        let mask = !(0xffff_ffff_u64 >> self.prefix) as u32;
+        let mask = ipv4_mask_bits(self.prefix);
         let net = self.addr.to_bits() & mask;
         (ip.to_bits() & mask) == net
     }
@@ -276,7 +281,7 @@ impl Ipv4Network {
     /// ```
     pub fn nth(self, n: u32) -> Option<Ipv4Addr> {
         if n < self.size() {
-            let net = u32::from(self.network());
+            let net = self.addr.to_bits() & ipv4_mask_bits(self.prefix);
             Some(Ipv4Addr::from(net + n))
         } else {
             None
