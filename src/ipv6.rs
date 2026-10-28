@@ -137,7 +137,7 @@ impl Ipv6Network {
 
     /// Returns an iterator over `Ipv6Network`. Each call to `next` will return the next
     /// `Ipv6Addr` in the given network. `None` will be returned when there are no more
-    /// addresses.
+    /// addresses. Use `rev()` to iterate in descending order.
     ///
     /// # Warning
     ///
@@ -370,6 +370,19 @@ impl Iterator for Ipv6NetworkIterator {
         } else {
             (0, None)
         }
+    }
+}
+
+impl DoubleEndedIterator for Ipv6NetworkIterator {
+    fn next_back(&mut self) -> Option<Ipv6Addr> {
+        let next = self.next?;
+        let end = self.end;
+        if next == end {
+            self.next = None;
+        } else {
+            self.end -= 1;
+        }
+        Some(end.into())
     }
 }
 

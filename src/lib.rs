@@ -281,6 +281,15 @@ impl IpNetwork {
     /// Returns an iterator over the addresses contained in the network.
     ///
     /// This lists all the addresses in the network range, in ascending order.
+    /// Use `rev()` to iterate in descending order:
+    ///
+    /// ```
+    /// use ipnetwork::IpNetwork;
+    /// use std::net::IpAddr;
+    ///
+    /// let net: IpNetwork = "192.0.2.0/30".parse().unwrap();
+    /// assert_eq!(net.iter().rev().next(), Some("192.0.2.3".parse::<IpAddr>().unwrap()));
+    /// ```
     pub fn iter(&self) -> IpNetworkIterator {
         let inner = match self {
             IpNetwork::V4(ip) => IpNetworkIteratorInner::V4(ip.iter()),
@@ -390,6 +399,15 @@ impl Iterator for IpNetworkIterator {
         match &self.inner {
             IpNetworkIteratorInner::V4(iter) => iter.size_hint(),
             IpNetworkIteratorInner::V6(iter) => iter.size_hint(),
+        }
+    }
+}
+
+impl DoubleEndedIterator for IpNetworkIterator {
+    fn next_back(&mut self) -> Option<IpAddr> {
+        match &mut self.inner {
+            IpNetworkIteratorInner::V4(iter) => iter.next_back().map(IpAddr::V4),
+            IpNetworkIteratorInner::V6(iter) => iter.next_back().map(IpAddr::V6),
         }
     }
 }

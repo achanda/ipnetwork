@@ -128,7 +128,7 @@ impl Ipv4Network {
 
     /// Returns an iterator over `Ipv4Network`. Each call to `next` will return the next
     /// `Ipv4Addr` in the given network. `None` will be returned when there are no more
-    /// addresses.
+    /// addresses. Use `rev()` to iterate in descending order.
     pub fn iter(self) -> Ipv4NetworkIterator {
         let mask = ipv4_mask_bits(self.prefix);
         let start = self.addr.to_bits() & mask;
@@ -370,6 +370,19 @@ impl Iterator for Ipv4NetworkIterator {
         } else {
             (0, None)
         }
+    }
+}
+
+impl DoubleEndedIterator for Ipv4NetworkIterator {
+    fn next_back(&mut self) -> Option<Ipv4Addr> {
+        let next = self.next?;
+        let end = self.end;
+        if next == end {
+            self.next = None;
+        } else {
+            self.end -= 1;
+        }
+        Some(end.into())
     }
 }
 
